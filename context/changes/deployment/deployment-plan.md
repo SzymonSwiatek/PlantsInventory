@@ -243,7 +243,7 @@ Run after Phases 3–5. This proves the deploy and the secret wiring.
 
 ## Phase 7 — GitHub Actions auto-deploy  `[user]` gates + `[agent-safe]` code
 
-**Status:** ◐ in progress — workflow committed + pushed; first CI auto-deploy run verifying
+**Status:** ☑ done — first CI run green (`ci` → `deploy`); CI-deployed version `a195a3cd` live at 100%
 
 Wires auto-deploy on merge to `main`. Done **after** a verified manual deploy so
 CI ships along a known-good path.
@@ -286,12 +286,13 @@ CI ships along a known-good path.
   > The Worker secrets from Phase 4 survive CI deploys — `wrangler deploy` does
   > not wipe them, so the CI-deployed Worker keeps its Supabase wiring.
 
-- [ ] Commit + push to `main`; confirm the Actions run executes `ci` → `deploy`,
-      and `npx wrangler deployments list` shows the new CI-originated deployment.
-- First CI deploy to watch: `wrangler`'s experimental binding provisioning must
-  re-attach the existing `SESSION` KV namespace. The "Edit Cloudflare Workers"
-  token includes Workers KV Storage edit, so this should just work — but check
-  the `deploy` job log on the first run.
+- [x] Commit + push to `main` — run `26312042788` executed `ci` (51s) →
+      `deploy` (53s), both green. `wrangler deployments list` shows the
+      CI-originated version `a195a3cd` (source "Unknown (deployment)" — the
+      API-token deploy) live at 100%.
+- First CI deploy went clean: `wrangler`'s experimental binding provisioning
+  re-attached the existing `SESSION` KV namespace without issue (the "Edit
+  Cloudflare Workers" token includes Workers KV Storage edit).
 
 **Edge support:**
 - *Token rejected (`Authentication error 10000`):* the token template was wrong
@@ -377,8 +378,9 @@ Deployment executed 2026-05-22.
   "Confirm email" is ON.
 - Verification: homepage `200`, `/dashboard` → `302` `/auth/signin`, full
   signup → confirm → sign-in succeeded on production with no edge errors.
-- CI auto-deploy on merge to `main`: `deploy` job added to
-  `.github/workflows/ci.yml` (`needs: ci`, push-only); GitHub secrets
-  `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` set.
+- CI auto-deploy on merge to `main`: `deploy` job in
+  `.github/workflows/ci.yml` (`needs: ci`, push-only) — verified green on run
+  `26312042788`; GitHub secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`
+  set.
 - Deferred: reminder `scheduled()` cron, custom domain, Supabase migrations,
   production SMTP, auth callback / `exchangeCodeForSession` route.
