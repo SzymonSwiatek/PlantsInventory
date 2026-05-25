@@ -32,3 +32,8 @@ pnpm-debug.log*
 
 # scaffold artifacts
 CLAUDE.md.scaffold
+
+# Skills
+.claude/**/10x-*
+.github/**/10x-*
+.agents/**/10x-*
