@@ -289,36 +289,36 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Build passes: `npm run build`
-- [x] 2.3 Astro type sync passes: `npx astro sync`
-- [x] 2.4 `grep -r "signInWithPassword\|signUp(" src/` returns no hits
+- [x] 2.1 Lint passes: `npm run lint` — 111b5c3
+- [x] 2.2 Build passes: `npm run build` — 111b5c3
+- [x] 2.3 Astro type sync passes: `npx astro sync` — 111b5c3
+- [x] 2.4 `grep -r "signInWithPassword\|signUp(" src/` returns no hits — 111b5c3
 
 #### Manual
 
-- [x] 2.5 `curl POST /api/auth/signin` returns 302 to `/auth/check-email?email=<encoded>`
-- [x] 2.6 Inbucket shows a new magic-link email for the submitted address
-- [x] 2.7 New-user (never-seen email) link contains a real `token_hash` and reaching it lands on `/dashboard` (confirmation template fired, not default `{{ .ConfirmationURL }}`)
-- [x] 2.8 Following the link returns 302 to `/dashboard` with `Set-Cookie: sb-*` headers
-- [x] 2.9 Second use of the link returns 302 to `/auth/signin?error=...` (expired/used copy)
-- [x] 2.10 `?next=//evil.com` is rejected and falls back to `/dashboard`
+- [x] 2.5 `curl POST /api/auth/signin` returns 302 to `/auth/check-email?email=<encoded>` — 111b5c3
+- [x] 2.6 Inbucket shows a new magic-link email for the submitted address — 111b5c3
+- [x] 2.7 New-user (never-seen email) link contains a real `token_hash` and reaching it lands on `/dashboard` (confirmation template fired, not default `{{ .ConfirmationURL }}`) — 111b5c3
+- [x] 2.8 Following the link returns 302 to `/dashboard` with `Set-Cookie: sb-*` headers — 111b5c3
+- [x] 2.9 Second use of the link returns 302 to `/auth/signin?error=...` (expired/used copy) — 111b5c3
+- [x] 2.10 `?next=//evil.com` is rejected and falls back to `/dashboard` — 111b5c3
 
 ### Phase 3: UI cleanup and single entry surface
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Build passes: `npm run build`
-- [ ] 3.3 Astro type sync passes: `npx astro sync`
-- [ ] 3.4 No `PasswordToggle`/`SignUpForm`/`MIN_PASSWORD_LENGTH`/`password` references remain in `src/{components,pages}/auth*`
-- [ ] 3.5 `SignUpForm.tsx` and `PasswordToggle.tsx` deleted
-- [ ] 3.6 `confirm-email.astro` renamed to `check-email.astro`
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Build passes: `npm run build`
+- [x] 3.3 Astro type sync passes: `npx astro sync`
+- [x] 3.4 No `PasswordToggle`/`SignUpForm`/`MIN_PASSWORD_LENGTH`/`password` references remain in `src/{components,pages}/auth*`
+- [x] 3.5 `SignUpForm.tsx` and `PasswordToggle.tsx` deleted
+- [x] 3.6 `confirm-email.astro` renamed to `check-email.astro`
 
 #### Manual
 
-- [ ] 3.7 `/auth/signin` shows only an email field + "Send sign-in link" + helper line
-- [ ] 3.8 Submitting an email lands on `/auth/check-email?email=<value>` with address echoed
-- [ ] 3.9 Clicking the Inbucket link lands on `/dashboard` with user email visible
-- [ ] 3.10 Sign out from `/dashboard` returns to `/`; revisiting `/dashboard` redirects to `/auth/signin`
-- [ ] 3.11 `/auth/signup` redirects (308) to `/auth/signin`
-- [ ] 3.12 Reusing a magic link shows the "expired or already used" error in the `ServerError` banner
+- [x] 3.7 `/auth/signin` shows only an email field + "Send sign-in link" + helper line
+- [x] 3.8 Submitting an email lands on `/auth/check-email?email=<value>` with address echoed
+- [x] 3.9 Clicking the Inbucket link lands on `/dashboard` with user email visible
+- [x] 3.10 Sign out from `/dashboard` returns to `/`; revisiting `/dashboard` redirects to `/auth/signin`
+- [x] 3.11 `/auth/signup` redirects (308) to `/auth/signin`
+- [x] 3.12 Reusing a magic link shows the "expired or already used" error in the `ServerError` banner
