@@ -18,7 +18,7 @@ Supabase config has three blockers:
 
 - `supabase/config.toml:158` sets `site_url = "http://127.0.0.1:3000"`, but Astro dev runs on `4321` — magic-link URLs would point at a dead server in local dev.
 - `supabase/config.toml:160` lists `additional_redirect_urls = ["https://127.0.0.1:3000"]` — the `https` is a typo; the URL is also unused.
-- No `[auth.email.template.magic_link]` is defined, so Supabase falls back to the default template which exposes `{{ .ConfirmationURL }}` but not `{{ .TokenHash }}`. Our chosen verification path needs `{{ .TokenHash }}`.
+- No `[auth.email.template.magic_link]` is defined, so Supabase falls back to the default template which exposes `{{ .ConfirmationURL }}` but not `{{ .TokenHash }}`. Our chosen verification path needs `{{ .TokenHash }}`. The same is true of `[auth.email.template.confirmation]` (the "Confirm signup" email): for a brand-new email, `signInWithOtp({ should_create_user: true })` can send the signup-confirmation template rather than the magic-link one, so it must emit `{{ .TokenHash }}` too — otherwise the core "new email creates an account on first link-click" path lands on `/auth/confirm` without a `token_hash`. Locally `enable_confirmations = false` (`supabase/config.toml`) auto-confirms new users, but hosted Supabase defaults "Confirm email" ON, so both templates must be customized to make the flow robust across environments.
 
 Inbucket is enabled (`supabase/config.toml:104`, port `54324`) so local email delivery is already solved. No production SMTP is configured (`[auth.email.smtp]` is commented out); per Round 2 Q4 this is deferred to S-04.
 
@@ -79,9 +79,9 @@ Land the custom magic-link email template, wire it into `supabase/config.toml`, 
 
 **File**: `supabase/templates/magic_link.html` (new)
 
-**Intent**: Provide a minimal HTML email body whose CTA links to our own `/auth/confirm` endpoint with `token_hash`, `type=email`, and `next=/dashboard`. Plain styling — branding is out of scope for the foundation.
+**Intent**: Provide a minimal HTML email body whose CTA links to our own `/auth/confirm` endpoint with `token_hash`, `type=email`, and `next=/dashboard`. Plain styling — branding is out of scope for the foundation. This same file is referenced by **both** the `magic_link` and `confirmation` templates (see §2), so the new-user signup-confirmation email and the existing-user magic-link email both land on `/auth/confirm` with a usable `token_hash`.
 
-**Contract**: Must use Supabase's Go-template placeholders `{{ .SiteURL }}` and `{{ .TokenHash }}`. The final link, after substitution, must be `${SITE_URL}/auth/confirm?token_hash=<hex>&type=email&next=/dashboard`. Subject line is configured in `config.toml`, not the body.
+**Contract**: Must use Supabase's Go-template placeholders `{{ .SiteURL }}` and `{{ .TokenHash }}`. The final link, after substitution, must be `${SITE_URL}/auth/confirm?token_hash=<hex>&type=email&next=/dashboard`. `type=email` is the generic `EmailOtpType` that `verifyOtp` accepts for both magic-link and signup confirmations, so a single template body works for both. Subject line is configured in `config.toml`, not the body.
 
 #### 2. Supabase auth config
 
@@ -89,7 +89,7 @@ Land the custom magic-link email template, wire it into `supabase/config.toml`, 
 
 **Intent**: Reference the custom template, point `site_url` at the actual Astro dev port, and clean up the redirect URL list. Leave every other auth-section setting alone.
 
-**Contract**: Add a `[auth.email.template.magic_link]` block with `subject = "Sign in to 10xPlantsInventory"` and `content_path = "./supabase/templates/magic_link.html"`. Change `site_url` to `http://localhost:4321`. Replace `additional_redirect_urls = ["https://127.0.0.1:3000"]` with the list `["http://localhost:4321", "http://127.0.0.1:4321"]` — the production URL is added in a follow-up commit on the remote Supabase project (documented in Migration Notes; not in committed config because the prod URL is not yet final). `enable_signup`, `enable_confirmations`, `otp_expiry`, and the rate-limit block are unchanged.
+**Contract**: Add a `[auth.email.template.magic_link]` block with `subject = "Sign in to 10xPlantsInventory"` and `content_path = "./supabase/templates/magic_link.html"`. Also add a `[auth.email.template.confirmation]` block with the same `content_path = "./supabase/templates/magic_link.html"` (and a `subject = "Confirm your email for 10xPlantsInventory"`) so the new-user create-on-first-link path emits `{{ .TokenHash }}` too — see Current State Analysis. Change `site_url` to `http://localhost:4321`. Replace `additional_redirect_urls = ["https://127.0.0.1:3000"]` with the list `["http://localhost:4321", "http://127.0.0.1:4321"]` — the production URL is added in a follow-up commit on the remote Supabase project (documented in Migration Notes; not in committed config because the prod URL is not yet final). `enable_signup`, `enable_confirmations`, `otp_expiry`, and the rate-limit block are unchanged.
 
 ### Success Criteria:
 
@@ -98,7 +98,7 @@ Land the custom magic-link email template, wire it into `supabase/config.toml`, 
 - Lint passes: `npm run lint`
 - `supabase/templates/magic_link.html` exists and is non-empty
 - `supabase/config.toml` parses cleanly under `npx supabase status` (or `npx supabase start` if a fresh local DB is acceptable)
-- A grep of `supabase/config.toml` shows `[auth.email.template.magic_link]` present and the old `https://127.0.0.1:3000` typo absent
+- A grep of `supabase/config.toml` shows both `[auth.email.template.magic_link]` and `[auth.email.template.confirmation]` present and the old `https://127.0.0.1:3000` typo absent
 
 #### Manual Verification:
 
@@ -123,7 +123,7 @@ Rewrite `/api/auth/signin` to request a magic link instead of validating a passw
 
 **Intent**: Replace `signInWithPassword` with `signInWithOtp`. Read `email` from the form; trim and lowercase it; call `signInWithOtp({ email, options: { emailRedirectTo: ${SITE_URL}/auth/confirm } })`. On error, redirect to `/auth/signin?error=<encoded>`; on success, redirect to `/auth/check-email?email=<encoded>` so the next page can echo the address. Preserve the existing null-check on `createClient(...)`.
 
-**Contract**: POST handler signature is unchanged (`APIRoute` exporting `POST`). No `password` field is read. `should_create_user` is left at its default (`true`). `emailRedirectTo` must use the request origin (e.g., `new URL(context.request.url).origin`) so it works in both dev (`localhost:4321`) and prod (Workers domain) without re-reading `SUPABASE_URL`. The `SITE_URL` env from `astro:env/server` is NOT introduced — origin-from-request keeps the route self-contained.
+**Contract**: POST handler signature is unchanged (`APIRoute` exporting `POST`). No `password` field is read. `should_create_user` is left at its default (`true`). `emailRedirectTo` is set to `${origin}/auth/confirm` (e.g., `new URL(context.request.url).origin`) so the redirect target is present in the allow-list for the current environment without re-reading `SUPABASE_URL`. **Note**: this does NOT determine the link host in the email — the custom template hard-codes `{{ .SiteURL }}/auth/confirm`, so the actual link host comes from Supabase's `site_url` (dev: `config.toml` → `localhost:4321`; prod: Dashboard → Site URL). `emailRedirectTo` only governs allow-list validation; getting cross-env links right means setting `site_url`/Dashboard Site URL correctly (see Migration Notes), not the request origin. The `SITE_URL` env from `astro:env/server` is NOT introduced — origin-from-request keeps the route self-contained.
 
 #### 2. New magic-link verification endpoint
 
@@ -153,6 +153,7 @@ Rewrite `/api/auth/signin` to request a magic link instead of validating a passw
 #### Manual Verification:
 
 - `curl -i -X POST http://localhost:4321/api/auth/signin -d "email=test@example.com"` returns 302 to `/auth/check-email?email=test%40example.com`
+- **New-user path**: use a never-before-seen address (e.g. `newuser+$(date +%s)@example.com`) to exercise `should_create_user`. The Inbucket inbox at `http://localhost:54324` shows an email for it whose link contains a real `token_hash=<hex>` (not `{{ .TokenHash }}`) and `next=/dashboard` — confirming the `confirmation` template fired, not Supabase's default `{{ .ConfirmationURL }}`. Following that link must reach `/dashboard` (proves the create-on-first-link path verifies cleanly).
 - The Inbucket inbox at `http://localhost:54324` shows a new email for `test@example.com` whose link contains `token_hash=` and `next=/dashboard`
 - Following the link with curl (`curl -i -L "<link>"`) returns 302 to `/dashboard` and the final response includes `Set-Cookie` headers for `sb-*` access/refresh tokens
 - Visiting that link a second time returns 302 to `/auth/signin?error=...` with the "expired or already used" copy URL-encoded in the query string
@@ -192,7 +193,7 @@ Strip every trace of passwords from the React form and Astro pages, rename `conf
 
 **Intent**: After renaming, rewrite the body to a single state: "We sent a sign-in link to <email>. Click it from this device to finish signing in." Read `email` from `Astro.url.searchParams` and render it (no echo if missing — fall back to "your email"). Drop the `import.meta.env.DEV` branching entirely.
 
-**Contract**: New route is `/auth/check-email`. The signin endpoint redirects here with `?email=<encoded>`. No links to old `/auth/confirm-email` exist (confirmed via grep — only the page itself referenced it).
+**Contract**: New route is `/auth/check-email`. The signin endpoint redirects here with `?email=<encoded>`. The only other reference to the old `/auth/confirm-email` path was `src/pages/api/auth/signup.ts:19` (`context.redirect("/auth/confirm-email")`), which Phase 2 deletes — so by the time this rename lands there is no dangling reference.
 
 #### 4. Redirect stub for the deleted signup page
 
@@ -251,7 +252,7 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 ## Migration Notes
 
 - **Existing password-only users (if any in the remote Supabase project)**: Supabase Auth treats `signInWithOtp` as a parallel sign-in method — existing user records are picked up by email match. No data migration required. Any previously stored passwords become inert (the only sign-in path no longer reads them).
-- **Production Supabase project**: After merging F-01, the remote Supabase project still needs (a) the custom magic-link template uploaded via Supabase Dashboard → Auth → Email Templates → Magic Link, copy-pasting from `supabase/templates/magic_link.html`, and (b) the production Workers URL added to `Authentication → URL Configuration → Redirect URLs`. Until both are done, magic links in production will either point at localhost or get rejected by Supabase's redirect-URL allow-list.
+- **Production Supabase project**: After merging F-01, the remote Supabase project still needs (a) the custom template body uploaded via Supabase Dashboard → Auth → Email Templates to **both** the **Magic Link** and the **Confirm signup** templates, copy-pasting from `supabase/templates/magic_link.html` — the hosted default has "Confirm email" ON, so a first-time email gets the Confirm-signup template, and if it still uses `{{ .ConfirmationURL }}` the new-user path lands on `/auth/confirm` with no `token_hash`; and (b) the production Workers URL added to `Authentication → URL Configuration → Redirect URLs`, with the **Site URL** set to that same origin (the email link host is driven by `{{ .SiteURL }}`, not by `emailRedirectTo`). Until all three are done, production sign-in either points at localhost, gets rejected by the redirect-URL allow-list, or breaks for new users. (Alternatively, disabling "Confirm email" in the Dashboard makes the Magic Link template suffice, mirroring local `enable_confirmations = false` — but customizing both templates is the more robust default.)
 - **Production email delivery**: The remote project will ship using Supabase's built-in sender, which is rate-limited to a few emails per hour and explicitly marked "for development only". This is acceptable for solo MVP testing and explicitly NOT acceptable for any external user. The real SMTP provider lands with S-04 (watering reminders), which needs it for digest delivery; that slice will fold F-01's `[auth.email.smtp]` config in at the same time.
 
 ## References
@@ -277,7 +278,7 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 - [ ] 1.1 Lint passes: `npm run lint`
 - [ ] 1.2 `supabase/templates/magic_link.html` exists and is non-empty
 - [ ] 1.3 `supabase/config.toml` parses cleanly under `npx supabase status`
-- [ ] 1.4 `[auth.email.template.magic_link]` present in config; `https://127.0.0.1:3000` typo removed
+- [ ] 1.4 `[auth.email.template.magic_link]` and `[auth.email.template.confirmation]` present in config; `https://127.0.0.1:3000` typo removed
 
 #### Manual
 
@@ -297,9 +298,10 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 
 - [ ] 2.5 `curl POST /api/auth/signin` returns 302 to `/auth/check-email?email=<encoded>`
 - [ ] 2.6 Inbucket shows a new magic-link email for the submitted address
-- [ ] 2.7 Following the link returns 302 to `/dashboard` with `Set-Cookie: sb-*` headers
-- [ ] 2.8 Second use of the link returns 302 to `/auth/signin?error=...` (expired/used copy)
-- [ ] 2.9 `?next=//evil.com` is rejected and falls back to `/dashboard`
+- [ ] 2.7 New-user (never-seen email) link contains a real `token_hash` and reaching it lands on `/dashboard` (confirmation template fired, not default `{{ .ConfirmationURL }}`)
+- [ ] 2.8 Following the link returns 302 to `/dashboard` with `Set-Cookie: sb-*` headers
+- [ ] 2.9 Second use of the link returns 302 to `/auth/signin?error=...` (expired/used copy)
+- [ ] 2.10 `?next=//evil.com` is rejected and falls back to `/dashboard`
 
 ### Phase 3: UI cleanup and single entry surface
 
@@ -309,13 +311,14 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 - [ ] 3.2 Build passes: `npm run build`
 - [ ] 3.3 Astro type sync passes: `npx astro sync`
 - [ ] 3.4 No `PasswordToggle`/`SignUpForm`/`MIN_PASSWORD_LENGTH`/`password` references remain in `src/{components,pages}/auth*`
-- [ ] 3.5 `SignUpForm.tsx` and `PasswordToggle.tsx` deleted; `confirm-email.astro` renamed to `check-email.astro`
+- [ ] 3.5 `SignUpForm.tsx` and `PasswordToggle.tsx` deleted
+- [ ] 3.6 `confirm-email.astro` renamed to `check-email.astro`
 
 #### Manual
 
-- [ ] 3.6 `/auth/signin` shows only an email field + "Send sign-in link" + helper line
-- [ ] 3.7 Submitting an email lands on `/auth/check-email?email=<value>` with address echoed
-- [ ] 3.8 Clicking the Inbucket link lands on `/dashboard` with user email visible
-- [ ] 3.9 Sign out from `/dashboard` returns to `/`; revisiting `/dashboard` redirects to `/auth/signin`
-- [ ] 3.10 `/auth/signup` redirects (308) to `/auth/signin`
-- [ ] 3.11 Reusing a magic link shows the "expired or already used" error in the `ServerError` banner
+- [ ] 3.7 `/auth/signin` shows only an email field + "Send sign-in link" + helper line
+- [ ] 3.8 Submitting an email lands on `/auth/check-email?email=<value>` with address echoed
+- [ ] 3.9 Clicking the Inbucket link lands on `/dashboard` with user email visible
+- [ ] 3.10 Sign out from `/dashboard` returns to `/`; revisiting `/dashboard` redirects to `/auth/signin`
+- [ ] 3.11 `/auth/signup` redirects (308) to `/auth/signin`
+- [ ] 3.12 Reusing a magic link shows the "expired or already used" error in the `ServerError` banner
