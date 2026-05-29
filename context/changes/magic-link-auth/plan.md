@@ -307,18 +307,18 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Build passes: `npm run build`
-- [x] 3.3 Astro type sync passes: `npx astro sync`
-- [x] 3.4 No `PasswordToggle`/`SignUpForm`/`MIN_PASSWORD_LENGTH`/`password` references remain in `src/{components,pages}/auth*`
-- [x] 3.5 `SignUpForm.tsx` and `PasswordToggle.tsx` deleted
-- [x] 3.6 `confirm-email.astro` renamed to `check-email.astro`
+- [x] 3.1 Lint passes: `npm run lint` — d628edb
+- [x] 3.2 Build passes: `npm run build` — d628edb
+- [x] 3.3 Astro type sync passes: `npx astro sync` — d628edb
+- [x] 3.4 No `PasswordToggle`/`SignUpForm`/`MIN_PASSWORD_LENGTH`/`password` references remain in `src/{components,pages}/auth*` — d628edb
+- [x] 3.5 `SignUpForm.tsx` and `PasswordToggle.tsx` deleted — d628edb
+- [x] 3.6 `confirm-email.astro` renamed to `check-email.astro` — d628edb
 
 #### Manual
 
-- [x] 3.7 `/auth/signin` shows only an email field + "Send sign-in link" + helper line
-- [x] 3.8 Submitting an email lands on `/auth/check-email?email=<value>` with address echoed
-- [x] 3.9 Clicking the Inbucket link lands on `/dashboard` with user email visible
-- [x] 3.10 Sign out from `/dashboard` returns to `/`; revisiting `/dashboard` redirects to `/auth/signin`
-- [x] 3.11 `/auth/signup` redirects (308) to `/auth/signin`
-- [x] 3.12 Reusing a magic link shows the "expired or already used" error in the `ServerError` banner
+- [x] 3.7 `/auth/signin` shows only an email field + "Send sign-in link" + helper line — d628edb
+- [x] 3.8 Submitting an email lands on `/auth/check-email?email=<value>` with address echoed — d628edb
+- [x] 3.9 Clicking the Inbucket link lands on `/dashboard` with user email visible — d628edb
+- [x] 3.10 Sign out from `/dashboard` returns to `/`; revisiting `/dashboard` redirects to `/auth/signin` — d628edb
+- [x] 3.11 `/auth/signup` redirects (308) to `/auth/signin` — d628edb
+- [x] 3.12 Reusing a magic link shows the "expired or already used" error in the `ServerError` banner — d628edb
