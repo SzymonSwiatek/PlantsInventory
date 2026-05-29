@@ -3,18 +3,19 @@ import { createClient } from "@/lib/supabase";
 
 export const POST: APIRoute = async (context) => {
   const form = await context.request.formData();
-  const email = form.get("email") as string;
-  const password = form.get("password") as string;
+  const email = ((form.get("email") as string | null) ?? "").trim().toLowerCase();
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
     return context.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
   }
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  const emailRedirectTo = `${new URL(context.request.url).origin}/auth/confirm`;
+  const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo } });
 
   if (error) {
     return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
   }
 
-  return context.redirect("/");
+  return context.redirect(`/auth/check-email?email=${encodeURIComponent(email)}`);
 };

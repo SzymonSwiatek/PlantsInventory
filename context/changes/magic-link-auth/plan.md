@@ -275,33 +275,33 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 `supabase/templates/magic_link.html` exists and is non-empty
-- [x] 1.3 `supabase/config.toml` parses cleanly under `npx supabase status`
-- [x] 1.4 `[auth.email.template.magic_link]` and `[auth.email.template.confirmation]` present in config; `https://127.0.0.1:3000` typo removed
+- [x] 1.1 Lint passes: `npm run lint` — 930d0c2
+- [x] 1.2 `supabase/templates/magic_link.html` exists and is non-empty — 930d0c2
+- [x] 1.3 `supabase/config.toml` parses cleanly under `npx supabase status` — 930d0c2
+- [x] 1.4 `[auth.email.template.magic_link]` and `[auth.email.template.confirmation]` present in config; `https://127.0.0.1:3000` typo removed — 930d0c2
 
 #### Manual
 
-- [x] 1.5 Supabase Studio "Send magic link" produces an Inbucket email
-- [x] 1.6 Email link matches `http://localhost:4321/auth/confirm?token_hash=<value>&type=email&next=/dashboard`
+- [x] 1.5 Supabase Studio "Send magic link" produces an Inbucket email — 930d0c2
+- [x] 1.6 Email link matches `http://localhost:4321/auth/confirm?token_hash=<value>&type=email&next=/dashboard` — 930d0c2
 
 ### Phase 2: Server-side auth flow
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Build passes: `npm run build`
-- [ ] 2.3 Astro type sync passes: `npx astro sync`
-- [ ] 2.4 `grep -r "signInWithPassword\|signUp(" src/` returns no hits
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Build passes: `npm run build`
+- [x] 2.3 Astro type sync passes: `npx astro sync`
+- [x] 2.4 `grep -r "signInWithPassword\|signUp(" src/` returns no hits
 
 #### Manual
 
-- [ ] 2.5 `curl POST /api/auth/signin` returns 302 to `/auth/check-email?email=<encoded>`
-- [ ] 2.6 Inbucket shows a new magic-link email for the submitted address
-- [ ] 2.7 New-user (never-seen email) link contains a real `token_hash` and reaching it lands on `/dashboard` (confirmation template fired, not default `{{ .ConfirmationURL }}`)
-- [ ] 2.8 Following the link returns 302 to `/dashboard` with `Set-Cookie: sb-*` headers
-- [ ] 2.9 Second use of the link returns 302 to `/auth/signin?error=...` (expired/used copy)
-- [ ] 2.10 `?next=//evil.com` is rejected and falls back to `/dashboard`
+- [x] 2.5 `curl POST /api/auth/signin` returns 302 to `/auth/check-email?email=<encoded>`
+- [x] 2.6 Inbucket shows a new magic-link email for the submitted address
+- [x] 2.7 New-user (never-seen email) link contains a real `token_hash` and reaching it lands on `/dashboard` (confirmation template fired, not default `{{ .ConfirmationURL }}`)
+- [x] 2.8 Following the link returns 302 to `/dashboard` with `Set-Cookie: sb-*` headers
+- [x] 2.9 Second use of the link returns 302 to `/auth/signin?error=...` (expired/used copy)
+- [x] 2.10 `?next=//evil.com` is rejected and falls back to `/dashboard`
 
 ### Phase 3: UI cleanup and single entry surface
 
