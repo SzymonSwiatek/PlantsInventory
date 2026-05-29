@@ -275,15 +275,15 @@ The repo has no test runner configured (per `CLAUDE.md`), so verification is ent
 
 #### Automated
 
-- [ ] 1.1 Lint passes: `npm run lint`
-- [ ] 1.2 `supabase/templates/magic_link.html` exists and is non-empty
-- [ ] 1.3 `supabase/config.toml` parses cleanly under `npx supabase status`
-- [ ] 1.4 `[auth.email.template.magic_link]` and `[auth.email.template.confirmation]` present in config; `https://127.0.0.1:3000` typo removed
+- [x] 1.1 Lint passes: `npm run lint`
+- [x] 1.2 `supabase/templates/magic_link.html` exists and is non-empty
+- [x] 1.3 `supabase/config.toml` parses cleanly under `npx supabase status`
+- [x] 1.4 `[auth.email.template.magic_link]` and `[auth.email.template.confirmation]` present in config; `https://127.0.0.1:3000` typo removed
 
 #### Manual
 
-- [ ] 1.5 Supabase Studio "Send magic link" produces an Inbucket email
-- [ ] 1.6 Email link matches `http://localhost:4321/auth/confirm?token_hash=<value>&type=email&next=/dashboard`
+- [x] 1.5 Supabase Studio "Send magic link" produces an Inbucket email
+- [x] 1.6 Email link matches `http://localhost:4321/auth/confirm?token_hash=<value>&type=email&next=/dashboard`
 
 ### Phase 2: Server-side auth flow
 
