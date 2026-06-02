@@ -10,7 +10,7 @@ const EXPIRED_LINK = "This sign-in link is expired or already used. Enter your e
  * magic-link endpoint becomes an open redirector.
  */
 function safeNext(next: string | null): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes(":")) {
+  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes(":") || next.includes("\\")) {
     return "/dashboard";
   }
   return next;
