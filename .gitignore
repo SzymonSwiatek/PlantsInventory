@@ -37,3 +37,6 @@ CLAUDE.md.scaffold
 .claude/**/10x-*
 .github/**/10x-*
 .agents/**/10x-*
+.claude/prompts/*
+.github/prompts/*
+.agents/prompts/*
