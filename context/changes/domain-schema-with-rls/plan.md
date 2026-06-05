@@ -8,7 +8,7 @@ Land the durable Postgres data foundation for 10xPlantsInventory: the `locations
 
 The codebase is the auth scaffold only. Relevant facts discovered:
 
-- **No schema exists.** `supabase/migrations/` does not exist; `src/types.ts` is empty. This is genuinely from-scratch DDL — no existing tables, columns, or RLS to reconcile.
+- **No schema exists.** `supabase/migrations/` does not exist; `src/types.ts` does not exist yet either (it is created in Phase 3, per the CLAUDE.md "shared types in `src/types.ts`" convention). This is genuinely from-scratch DDL — no existing tables, columns, or RLS to reconcile.
 - **Supabase is configured for local dev.** `supabase/config.toml` has `[storage] enabled = true` (with a commented-out private-bucket template), `[db] major_version = 17`, `[db.migrations] enabled = true`, and `[db.seed] enabled = true` (`./seed.sql`). The SSR client (`src/lib/supabase.ts`) builds an `@supabase/ssr` cookie-session client from the user's JWT, so `auth.uid()` resolves to the signed-in user inside RLS — the policies will work against the real request session.
 - **Photos must go directly to Supabase Storage, not through the Worker.** `context/foundation/infrastructure.md:91` flags the Cloudflare free-tier 10 ms CPU limit: decoding a ~10 MB image in the Worker trips it. So `plants` stores a Storage object path and the bucket carries its own RLS — the Worker never holds image bytes.
 - **CI does not run migrations.** `.github/workflows/ci.yml` runs `npx astro sync`, `npm run lint`, `npm run build` (and ignores `context/**` + `**/*.md`). There is **no test runner** and no `supabase db reset` step in CI. Migration-apply and RLS deny-checks are therefore **local** gates in this change.
@@ -39,6 +39,7 @@ After this plan:
 - **No AI-vision call.** The `ai_suggestion` JSON column and `species`/`description` fields are *defined* here; populating them is S-01.
 - **No denormalization triggers.** `last_watered_at` / `next_water_due_at` are app-maintained by the slices, not kept in sync by a DB trigger (see Critical Implementation Details).
 - **No seed data** beyond what's needed for the manual deny-check (kept out of the committed `seed.sql` unless trivially useful).
+- **No Storage orphan cleanup.** DB `CASCADE` removes `plants` rows but **not** the Storage objects at their `photo_path` (there is no DB→Storage cascade). Deleting the corresponding objects is owned by the slices that perform deletes — **S-03** (plant delete) and **S-02** (location delete, which cascades plants) — not by this schema foundation.
 
 ## Implementation Approach
 
@@ -53,8 +54,8 @@ Three phases, each one migration or one wiring step, ordered so the schema and i
 - **RLS must be enabled in the same migration that creates each table.** Never split "create table" and "enable RLS + policies" across migrations — between them the table is readable by anyone with the anon/authenticated key. Enable RLS and add all policies in the same file, immediately after the table.
 - **Policies use `to authenticated` and `(select auth.uid())`.** Scoping `to authenticated` skips evaluation for `anon` (deny-by-default for logged-out). Wrapping `auth.uid()` in a scalar subquery — `(select auth.uid())` — lets Postgres cache it as an initplan instead of re-evaluating per row; this is the documented Supabase performance pattern and matters for the today-list/cron scans.
 - **Denormalized care-state is app-maintained, not trigger-maintained.** `last_watered_at` / `next_water_due_at` on `plants` are written by the slices (S-01 on create, S-04 on mark-watered), not by a DB trigger. This keeps DB logic transparent and avoids coupling the interval math into the schema. The plan defines the columns + indexes only; the sequencing contract (a care action updates both the event log *and* the plant's next-due) is owned by S-04.
-- **Same-user FK integrity needs a trigger, not just RLS.** A plant's `location_id` FK only checks existence, so a user could attach their own plant to another user's location id. A `BEFORE INSERT OR UPDATE` trigger asserting the referenced location's `user_id` equals the row's `user_id` closes this; RLS alone does not.
-- **Exclude the generated types file from lint/format.** `src/db/database.types.ts` is generated and large; add it to the ESLint ignore list (and Prettier ignore) so `eslint .` and `prettier` don't churn or choke on it.
+- **Same-user FK integrity needs a trigger, not just RLS.** A child row's owning FK only checks existence, so a user could attach their own row to another user's parent id. This applies to **both** owning FKs in the schema: `plants.location_id` (a plant pointing at another user's location) and `care_events.plant_id` (a care event pointing at another user's plant — the insert `with check` still passes because `user_id` defaults to `auth.uid()`). Each needs a `BEFORE INSERT OR UPDATE` trigger asserting the referenced parent's `user_id` equals the row's `user_id`; RLS alone does not close either.
+- **Commit the generated types file, but exclude it from lint/format — without `.gitignore`-ing it.** `src/db/database.types.ts` is generated and large, so it should be skipped by `eslint .` / `prettier`. But it **must be committed**: CI (`.github/workflows/ci.yml`) runs `npm run build` *without* generating types, and `src/lib/supabase.ts` imports `Database` from it — `.gitignore`-ing the file would drop it from the commit and break the CI build. This repo's ESLint ignores are derived from `.gitignore` (`includeIgnoreFile(gitignorePath)` in `eslint.config.js`, where `.gitignore` already has a `# generated types` section pointing at `.astro/`), so the exclusion must instead be a **new flat-config `{ ignores: ["src/db/database.types.ts"] }` object** in `eslint.config.js`, plus a **new `.prettierignore`** (none exists yet) listing the path. Do **not** add it to `.gitignore`.
 
 ---
 
@@ -78,13 +79,13 @@ One migration that creates the `care_event_kind` enum and the three tables with 
 
 - **Table `locations`**: `id uuid pk default gen_random_uuid()`; `user_id uuid not null references auth.users(id) on delete cascade default auth.uid()`; `name text not null` with a `char_length(btrim(name)) between 1 and 100` check; `created_at`, `updated_at` `timestamptz not null default now()`. Index on `(user_id)`.
 
-- **Table `plants`**: `id`, `user_id` (same shape + CASCADE + `default auth.uid()`); `location_id uuid not null references locations(id) on delete cascade`; `name text not null`; care-profile columns (all nullable, AI-fillable / user-editable): `species text`, `description text`, `note text`, `sunlight text` (free text — not an enum, so it never constrains AI output); `photo_path text` (Storage object path, see Phase 2 convention); `ai_suggestion jsonb` (immutable snapshot of the original AI suggestion for the FR-015 "original suggestion" view and the acceptance metric); reminder columns: `watering_interval_days integer` (`check > 0`), `last_watered_at timestamptz`, `next_water_due_at timestamptz`, `water_snooze_until timestamptz`, `winterization_cutoff date` (NULL = "none"), `winterized_at timestamptz`; `created_at`, `updated_at`. Indexes: `(user_id)`, `(location_id)`, and a partial `(user_id, next_water_due_at)` where `next_water_due_at is not null` (today-list + cron scan).
+- **Table `plants`**: `id`, `user_id` (same shape + CASCADE + `default auth.uid()`); `location_id uuid not null references locations(id) on delete cascade`; `name text not null`; care-profile columns (all nullable, AI-fillable / user-editable): `species text`, `description text`, `note text`, `sunlight text` (free text — not an enum, so it never constrains AI output); `photo_path text` (Storage object path, see Phase 2 convention); `ai_suggestion jsonb` (snapshot of the original AI suggestion for the FR-015 "original suggestion" view and the acceptance metric; **treated as write-once by convention** — set on create by S-01 and never overwritten by edits. This immutability is an app convention enforced by the slices, not the DB: the `update` policy still permits writing the column, so no slice should include `ai_suggestion` in a plant-edit update); reminder columns: `watering_interval_days integer` (`check > 0`), `last_watered_at timestamptz`, `next_water_due_at timestamptz`, `water_snooze_until timestamptz`, `winterization_cutoff date` (NULL = "none"), `winterized_at timestamptz`; `created_at`, `updated_at`. Indexes: `(user_id)`, `(location_id)`, and a partial `(user_id, next_water_due_at)` where `next_water_due_at is not null` (today-list + cron scan).
 
 - **Table `care_events`**: `id`; `user_id` (CASCADE + `default auth.uid()`); `plant_id uuid not null references plants(id) on delete cascade`; `kind care_event_kind not null`; `done_at timestamptz not null default now()`; `created_at timestamptz not null default now()`. Index `(plant_id, kind, done_at desc)`.
 
 - **`updated_at` trigger**: one `set_updated_at()` function + `BEFORE UPDATE` triggers on `locations` and `plants`.
 
-- **Same-user FK guard**: a `BEFORE INSERT OR UPDATE` trigger on `plants` raising an exception unless `(select user_id from locations where id = new.location_id) = new.user_id`. (See Critical Implementation Details for why RLS alone is insufficient.)
+- **Same-user FK guards** (two, same pattern): a `BEFORE INSERT OR UPDATE` trigger on `plants` raising an exception unless `(select user_id from locations where id = new.location_id) = new.user_id`, **and** a parallel `BEFORE INSERT OR UPDATE` trigger on `care_events` raising unless `(select user_id from plants where id = new.plant_id) = new.user_id`. (See Critical Implementation Details for why RLS alone is insufficient on either FK.)
 
 - **RLS**: `alter table … enable row level security` on all three tables, then **four separate policies per table** (`select`, `insert`, `update`, `delete`), each `to authenticated`. The ownership predicate pattern (the load-bearing contract every policy and downstream slice depends on):
 
@@ -115,7 +116,7 @@ One migration that creates the `care_event_kind` enum and the three tables with 
 #### Manual Verification:
 
 - [ ] Two-session deny check: signed in as user A, attempts to `select`/`update`/`delete` user B's `locations`, `plants`, and `care_events` return zero rows / affect zero rows (interim isolation gate; automated pgTAP deferred)
-- [ ] Same-user FK guard: inserting a plant whose `location_id` belongs to a different user is rejected
+- [ ] Same-user FK guards: inserting a plant whose `location_id` belongs to a different user is rejected; inserting a care_event whose `plant_id` belongs to a different user is rejected
 - [ ] CASCADE: deleting a location removes its plants and their care_events; deleting a user (via `auth.users`) removes all their rows
 
 **Implementation Note**: After Phase 1 automated checks pass, pause for human confirmation of the manual deny check before Phase 2.
@@ -189,7 +190,7 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 **Intent**: Produce the source-of-truth types from the live local schema.
 
-**Contract**: Output of `supabase gen types typescript --local > src/db/database.types.ts` (requires `supabase start`). Exports the `Database` type. Add this path to the ESLint ignore list and Prettier ignore so `eslint .` / `prettier` skip it.
+**Contract**: Output of `supabase gen types typescript --local > src/db/database.types.ts` (requires `supabase start`). Exports the `Database` type. **Commit this file** (CI builds without regenerating). Exclude it from lint/format via a new `{ ignores: ["src/db/database.types.ts"] }` flat-config object in `eslint.config.js` and a new `.prettierignore` containing the path — **not** via `.gitignore` (see Critical Implementation Details: `.gitignore`-ing it would un-commit the file and break the CI `npm run build`).
 
 #### 2. Typed Supabase client
 
@@ -201,7 +202,7 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 #### 3. Domain DTOs
 
-**File**: `src/types.ts`
+**File**: `src/types.ts` (new — does not exist yet)
 
 **Intent**: Give the slices stable, named entity and write-shape aliases instead of reaching into generated types.
 
@@ -236,12 +237,27 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 ### Manual Testing Steps:
 
+**Setup — two test users + a SQL impersonation harness.** `auth.uid()` reads `request.jwt.claims->>'sub'`; a raw `psql` session has no JWT (so `auth.uid()` is NULL) and the app has no domain UI yet, so the deny check is run by *impersonating* each user inside a transaction rather than through the app.
+
 1. `supabase db reset` — confirm all migrations apply with no error.
-2. Open two SQL sessions with different `auth.uid()` JWT claims (or two signed-in app sessions). Seed one row per table as user A.
-3. As user B, attempt `select`/`update`/`delete` on user A's `locations`, `plants`, `care_events` — expect zero rows / zero affected.
-4. As user A, attempt to insert a plant referencing user B's `location_id` — expect the same-user guard trigger to reject it.
-5. Delete user A's location — confirm its plants and their care_events are gone (CASCADE).
-6. As user A, upload an object under A's uid folder (success) and under B's uid folder (denied).
+2. Create two users and capture their UUIDs (local Studio → Authentication → Add user, or the auth admin API). Call them `A_UID` and `B_UID`.
+3. Impersonate user A and seed one row per table (run in a single `psql` transaction so the GUCs apply to the seeding statements):
+
+   ```sql
+   begin;
+   set local role authenticated;
+   set local request.jwt.claims = '{"sub":"<A_UID>","role":"authenticated"}';
+   -- user_id defaults to auth.uid(); insert a location, then a plant in it, then a care_event on that plant
+   insert into locations (name) values ('A home') returning id;        -- note the location id
+   insert into plants (location_id, name) values ('<loc id>', 'A fern') returning id;  -- note the plant id
+   insert into care_events (plant_id, kind) values ('<plant id>', 'water');
+   commit;
+   ```
+
+4. **Cross-user deny check** — open a new transaction impersonating user B (`set local request.jwt.claims = '{"sub":"<B_UID>",…}'`) and attempt `select`/`update`/`delete` on user A's `locations`, `plants`, `care_events`. Expect **zero rows returned** and **zero rows affected** on every operation.
+5. **Same-user FK guards** — still as user A, attempt (a) `insert into plants (location_id, …)` referencing user B's `location_id`, and (b) `insert into care_events (plant_id, …)` referencing user B's `plant_id`. Both must be **rejected by the guard trigger** (the referenced parent is invisible under RLS, so the subquery returns NULL ≠ `auth.uid()`).
+6. **CASCADE** — delete user A's location and confirm its plants and their care_events are gone; deleting `A_UID` from `auth.users` removes all of A's rows.
+7. **Storage deny check** — using an *authenticated* client/session (not raw SQL — `storage.objects` RLS needs a real signed request), as user A upload an object under `A_UID/…` (succeeds) and attempt upload/read under `B_UID/…` (denied). The local Studio Storage UI signed in as each user, or a small script using the anon key + each user's session, exercises this.
 
 ## Performance Considerations
 
@@ -278,7 +294,7 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 #### Manual
 
 - [ ] 1.5 Two-session deny check passes on all three tables
-- [ ] 1.6 Same-user FK guard rejects cross-user `location_id`
+- [ ] 1.6 Same-user FK guards reject cross-user `location_id` (plants) and cross-user `plant_id` (care_events)
 - [ ] 1.7 CASCADE verified (location→plants→care_events; user→all)
 
 ### Phase 2: Plant-photos Storage bucket + storage RLS
