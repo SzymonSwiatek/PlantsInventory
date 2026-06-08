@@ -314,11 +314,11 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 #### Automated
 
-- [x] 3.1 Types generate without error
-- [x] 3.2 Generated types file excluded from lint/format
-- [x] 3.3 Typed client + DTOs compile (`npx astro sync && npm run lint && npm run build`)
+- [x] 3.1 Types generate without error — d9cbc58
+- [x] 3.2 Generated types file excluded from lint/format — d9cbc58
+- [x] 3.3 Typed client + DTOs compile (`npx astro sync && npm run lint && npm run build`) — d9cbc58
 
 #### Manual
 
-- [x] 3.4 Generated types include three tables, the enum, and `ai_suggestion`
-- [x] 3.5 Scratch typed query infers `Plant[]`
+- [x] 3.4 Generated types include three tables, the enum, and `ai_suggestion` — d9cbc58
+- [x] 3.5 Scratch typed query infers `Plant[]` — d9cbc58
