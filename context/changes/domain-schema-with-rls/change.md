@@ -1,9 +1,9 @@
 ---
 change_id: domain-schema-with-rls
 title: Land locations, plants, and care-events schema with per-user RLS
-status: plan_reviewed
+status: implementing
 created: 2026-06-04
-updated: 2026-06-05
+updated: 2026-06-08
 archived_at: null
 ---
 

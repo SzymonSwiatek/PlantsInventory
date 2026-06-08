@@ -286,16 +286,16 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly locally (`supabase db reset`)
-- [ ] 1.2 RLS on for all three tables (`pg_tables.rowsecurity = true`)
-- [ ] 1.3 Each table has ≥4 policies (`pg_policies`)
-- [ ] 1.4 Repo still builds (`npx astro sync && npm run lint && npm run build`)
+- [x] 1.1 Migration applies cleanly locally (`supabase db reset`)
+- [x] 1.2 RLS on for all three tables (`pg_tables.rowsecurity = true`)
+- [x] 1.3 Each table has ≥4 policies (`pg_policies`)
+- [x] 1.4 Repo still builds (`npx astro sync && npm run lint && npm run build`)
 
 #### Manual
 
-- [ ] 1.5 Two-session deny check passes on all three tables
-- [ ] 1.6 Same-user FK guards reject cross-user `location_id` (plants) and cross-user `plant_id` (care_events)
-- [ ] 1.7 CASCADE verified (location→plants→care_events; user→all)
+- [x] 1.5 Two-session deny check passes on all three tables
+- [x] 1.6 Same-user FK guards reject cross-user `location_id` (plants) and cross-user `plant_id` (care_events)
+- [x] 1.7 CASCADE verified (location→plants→care_events; user→all)
 
 ### Phase 2: Plant-photos Storage bucket + storage RLS
 
