@@ -301,24 +301,24 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 #### Automated
 
-- [x] 2.1 Storage migration applies (`supabase db reset`)
-- [x] 2.2 Bucket exists and is private (`storage.buckets.public = false`)
-- [x] 2.3 Four `plant_photos_*` policies present on `storage.objects`
+- [x] 2.1 Storage migration applies (`supabase db reset`) — d1d2b85
+- [x] 2.2 Bucket exists and is private (`storage.buckets.public = false`) — d1d2b85
+- [x] 2.3 Four `plant_photos_*` policies present on `storage.objects` — d1d2b85
 
 #### Manual
 
-- [x] 2.4 Own-folder upload succeeds; other-user folder denied
-- [x] 2.5 Private bucket; size + mime limits enforced
+- [x] 2.4 Own-folder upload succeeds; other-user folder denied — d1d2b85
+- [x] 2.5 Private bucket; size + mime limits enforced — d1d2b85
 
 ### Phase 3: Generated DB types + DTO surface
 
 #### Automated
 
-- [ ] 3.1 Types generate without error
-- [ ] 3.2 Generated types file excluded from lint/format
-- [ ] 3.3 Typed client + DTOs compile (`npx astro sync && npm run lint && npm run build`)
+- [x] 3.1 Types generate without error
+- [x] 3.2 Generated types file excluded from lint/format
+- [x] 3.3 Typed client + DTOs compile (`npx astro sync && npm run lint && npm run build`)
 
 #### Manual
 
-- [ ] 3.4 Generated types include three tables, the enum, and `ai_suggestion`
-- [ ] 3.5 Scratch typed query infers `Plant[]`
+- [x] 3.4 Generated types include three tables, the enum, and `ai_suggestion`
+- [x] 3.5 Scratch typed query infers `Plant[]`

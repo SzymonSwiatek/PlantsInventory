@@ -70,6 +70,10 @@ const astroConfig = tseslint.config({
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  // Generated Supabase types: committed (CI builds without regenerating) but excluded from
+  // lint/format. Kept out of .gitignore — ignoring it there would drop it from the commit and
+  // break the CI `npm run build`, which imports `Database` from it.
+  { ignores: ["src/db/database.types.ts"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
