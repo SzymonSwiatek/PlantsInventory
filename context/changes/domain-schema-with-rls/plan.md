@@ -286,29 +286,29 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly locally (`supabase db reset`)
-- [x] 1.2 RLS on for all three tables (`pg_tables.rowsecurity = true`)
-- [x] 1.3 Each table has ≥4 policies (`pg_policies`)
-- [x] 1.4 Repo still builds (`npx astro sync && npm run lint && npm run build`)
+- [x] 1.1 Migration applies cleanly locally (`supabase db reset`) — ee2f94b
+- [x] 1.2 RLS on for all three tables (`pg_tables.rowsecurity = true`) — ee2f94b
+- [x] 1.3 Each table has ≥4 policies (`pg_policies`) — ee2f94b
+- [x] 1.4 Repo still builds (`npx astro sync && npm run lint && npm run build`) — ee2f94b
 
 #### Manual
 
-- [x] 1.5 Two-session deny check passes on all three tables
-- [x] 1.6 Same-user FK guards reject cross-user `location_id` (plants) and cross-user `plant_id` (care_events)
-- [x] 1.7 CASCADE verified (location→plants→care_events; user→all)
+- [x] 1.5 Two-session deny check passes on all three tables — ee2f94b
+- [x] 1.6 Same-user FK guards reject cross-user `location_id` (plants) and cross-user `plant_id` (care_events) — ee2f94b
+- [x] 1.7 CASCADE verified (location→plants→care_events; user→all) — ee2f94b
 
 ### Phase 2: Plant-photos Storage bucket + storage RLS
 
 #### Automated
 
-- [ ] 2.1 Storage migration applies (`supabase db reset`)
-- [ ] 2.2 Bucket exists and is private (`storage.buckets.public = false`)
-- [ ] 2.3 Four `plant_photos_*` policies present on `storage.objects`
+- [x] 2.1 Storage migration applies (`supabase db reset`)
+- [x] 2.2 Bucket exists and is private (`storage.buckets.public = false`)
+- [x] 2.3 Four `plant_photos_*` policies present on `storage.objects`
 
 #### Manual
 
-- [ ] 2.4 Own-folder upload succeeds; other-user folder denied
-- [ ] 2.5 Private bucket; size + mime limits enforced
+- [x] 2.4 Own-folder upload succeeds; other-user folder denied
+- [x] 2.5 Private bucket; size + mime limits enforced
 
 ### Phase 3: Generated DB types + DTO surface
 
