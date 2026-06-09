@@ -1,0 +1,102 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import { signedPhotoUrl } from "@/lib/storage";
+import type { Location, Plant } from "@/types";
+
+const id = Astro.params.id;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+type PlantCard = Pick<Plant, "id" | "name" | "photo_path"> & { photoUrl: string | null };
+
+// RLS-scoped: a foreign or unknown id simply returns no row → render the 404 state.
+let location: Pick<Location, "id" | "name"> | null = null;
+let plants: PlantCard[] = [];
+
+if (id && supabase) {
+  const { data } = await supabase.from("locations").select("id, name").eq("id", id).maybeSingle();
+  location = data;
+
+  if (location) {
+    const { data: rows } = await supabase
+      .from("plants")
+      .select("id, name, photo_path")
+      .eq("location_id", id)
+      .order("created_at", { ascending: false });
+    plants = await Promise.all(
+      (rows ?? []).map(async (p) => ({
+        ...p,
+        photoUrl: p.photo_path ? await signedPhotoUrl(supabase, p.photo_path) : null,
+      })),
+    );
+  }
+}
+
+if (!location) {
+  Astro.response.status = 404;
+}
+---
+
+<Layout title={location?.name ?? "Location not found"}>
+  <div class="bg-cosmic min-h-screen p-4 text-white">
+    {
+      location ? (
+        <div class="mx-auto w-full max-w-2xl py-10">
+          <header class="mb-8 flex items-center justify-between gap-4">
+            <div>
+              <a href="/dashboard" class="text-sm text-blue-100/50 transition-colors hover:text-blue-100/80">
+                ← All locations
+              </a>
+              <h1 class="mt-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+                {location.name}
+              </h1>
+            </div>
+            <a
+              href={`/locations/${id}/plants/new`}
+              class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium transition-colors hover:bg-white/20"
+            >
+              Add plant
+            </a>
+          </header>
+
+          {plants.length > 0 ? (
+            <ul class="space-y-3">
+              {plants.map((plant) => (
+                <li class="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
+                  {plant.photoUrl ? (
+                    <img src={plant.photoUrl} alt={plant.name} class="h-16 w-16 shrink-0 rounded-lg object-cover" />
+                  ) : (
+                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-white/5 text-blue-100/30">
+                      🌱
+                    </div>
+                  )}
+                  <div class="min-w-0">
+                    <p class="truncate font-medium">{plant.name}</p>
+                    <p class="text-sm text-blue-100/50">Not scheduled yet</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div class="rounded-2xl border border-dashed border-white/15 bg-white/5 p-8 text-center text-sm text-blue-100/60">
+              No plants here yet. Tap “Add plant” to catalog your first one from a photo.
+            </div>
+          )}
+        </div>
+      ) : (
+        <div class="flex min-h-screen items-center justify-center">
+          <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-center backdrop-blur-xl">
+            <h1 class="mb-2 text-xl font-bold">Location not found</h1>
+            <p class="mb-6 text-sm text-blue-100/60">It may have been removed, or it isn’t yours.</p>
+            <a
+              href="/dashboard"
+              class="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
+            >
+              Back to locations
+            </a>
+          </div>
+        </div>
+      )
+    }
+  </div>
+</Layout>

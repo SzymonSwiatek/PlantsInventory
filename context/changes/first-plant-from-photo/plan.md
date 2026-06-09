@@ -384,30 +384,30 @@ None. No schema change — F-02 already shipped every column this slice writes (
 
 #### Automated
 
-- [x] 1.1 Build succeeds with the new env field (`npm run build`)
-- [x] 1.2 Lint + typecheck pass (`npm run lint`)
-- [x] 1.3 `astro sync` succeeds (`npx astro sync`)
-- [x] 1.4 The seven shadcn primitive files exist under `src/components/ui/`
-- [x] 1.5 `src/lib/api.ts` and `src/lib/storage.ts` exist and typecheck
+- [x] 1.1 Build succeeds with the new env field (`npm run build`) — 188652e
+- [x] 1.2 Lint + typecheck pass (`npm run lint`) — 188652e
+- [x] 1.3 `astro sync` succeeds (`npx astro sync`) — 188652e
+- [x] 1.4 The seven shadcn primitive files exist under `src/components/ui/` — 188652e
+- [x] 1.5 `src/lib/api.ts` and `src/lib/storage.ts` exist and typecheck — 188652e
 
 #### Manual
 
-- [x] 1.6 App still starts/renders unconfigured without throwing (Banner path intact)
-- [x] 1.7 `/locations` while logged out redirects to `/auth/signin`
+- [x] 1.6 App still starts/renders unconfigured without throwing (Banner path intact) — 188652e
+- [x] 1.7 `/locations` while logged out redirects to `/auth/signin` — 188652e
 
 ### Phase 2: Locations shell (create + list pages)
 
 #### Automated
 
-- [ ] 2.1 Build + lint + typecheck pass
-- [ ] 2.2 `src/pages/api/locations.ts` and `src/pages/locations/[id].astro` exist
+- [x] 2.1 Build + lint + typecheck pass
+- [x] 2.2 `src/pages/api/locations.ts` and `src/pages/locations/[id].astro` exist
 
 #### Manual
 
-- [ ] 2.3 Signed-in user creates a location and sees it listed
-- [ ] 2.4 Empty/over-long name shows an error, not a 500
-- [ ] 2.5 Opening a location shows an empty plant list + "Add plant" CTA
-- [ ] 2.6 A second user cannot open the first user's location
+- [x] 2.3 Signed-in user creates a location and sees it listed
+- [x] 2.4 Empty/over-long name shows an error, not a 500
+- [x] 2.5 Opening a location shows an empty plant list + "Add plant" CTA
+- [x] 2.6 A second user cannot open the first user's location
 
 ### Phase 3: AI suggestion seam (observed alone)
 
