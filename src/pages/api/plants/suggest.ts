@@ -1,0 +1,66 @@
+import type { APIRoute } from "astro";
+import { AI_API_KEY } from "astro:env/server";
+import { json, requireUser } from "@/lib/api";
+import { requestSuggestion } from "@/lib/ai/suggest";
+
+/**
+ * First JSON endpoint of the slice: receive a browser-downscaled base64 image,
+ * return a normalized `AiSuggestion`, and degrade UNIFORMLY when AI is
+ * unavailable. The client treats a missing key, a timeout, and a provider
+ * error identically (`{ status: "ai_unavailable" }`, HTTP 200) so the manual
+ * fallback path is the same regardless of why AI did not answer.
+ *
+ * `/api/*` is outside the middleware guard — this endpoint self-guards.
+ */
+
+const AI_TIMEOUT_MS = 12_000;
+
+export const POST: APIRoute = async (context) => {
+  const user = requireUser(context);
+  if (user instanceof Response) {
+    return user;
+  }
+
+  // Missing key → degrade to manual (PRD guardrail: catalog survives AI outage).
+  if (!AI_API_KEY) {
+    return json({ status: "ai_unavailable" });
+  }
+
+  let body: unknown;
+  try {
+    body = await context.request.json();
+  } catch {
+    return json({ status: "error", error: "invalid_json" }, 400);
+  }
+
+  const imageBase64 = readString(body, "imageBase64");
+  const mimeType = readString(body, "mimeType");
+  if (!imageBase64 || !mimeType) {
+    return json({ status: "error", error: "missing_image" }, 400);
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, AI_TIMEOUT_MS);
+  try {
+    const suggestion = await requestSuggestion(AI_API_KEY, imageBase64, mimeType, controller.signal);
+    return json({ status: "ok", suggestion });
+  } catch (err) {
+    // Timeout, transport failure, non-2xx, or unparseable body all collapse here.
+    // Logged for prod observability — the client only ever sees `ai_unavailable`.
+    // eslint-disable-next-line no-console
+    console.error("[plants/suggest] AI suggestion failed:", err);
+    return json({ status: "ai_unavailable" });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+function readString(body: unknown, key: string): string | null {
+  if (typeof body === "object" && body !== null && key in body) {
+    const value = (body as Record<string, unknown>)[key];
+    return typeof value === "string" && value.length > 0 ? value : null;
+  }
+  return null;
+}

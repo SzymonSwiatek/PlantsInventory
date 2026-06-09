@@ -399,29 +399,29 @@ None. No schema change — F-02 already shipped every column this slice writes (
 
 #### Automated
 
-- [x] 2.1 Build + lint + typecheck pass
-- [x] 2.2 `src/pages/api/locations.ts` and `src/pages/locations/[id].astro` exist
+- [x] 2.1 Build + lint + typecheck pass — fc16639
+- [x] 2.2 `src/pages/api/locations.ts` and `src/pages/locations/[id].astro` exist — fc16639
 
 #### Manual
 
-- [x] 2.3 Signed-in user creates a location and sees it listed
-- [x] 2.4 Empty/over-long name shows an error, not a 500
-- [x] 2.5 Opening a location shows an empty plant list + "Add plant" CTA
-- [x] 2.6 A second user cannot open the first user's location
+- [x] 2.3 Signed-in user creates a location and sees it listed — fc16639
+- [x] 2.4 Empty/over-long name shows an error, not a 500 — fc16639
+- [x] 2.5 Opening a location shows an empty plant list + "Add plant" CTA — fc16639
+- [x] 2.6 A second user cannot open the first user's location — fc16639
 
 ### Phase 3: AI suggestion seam (observed alone)
 
 #### Automated
 
-- [ ] 3.1 Build + lint + typecheck pass
-- [ ] 3.2 `src/lib/image.ts`, `src/lib/ai/suggest.ts`, `src/pages/api/plants/suggest.ts` exist
-- [ ] 3.3 `normalizeSuggestion` is pure and handles missing/extra fields without throwing
+- [x] 3.1 Build + lint + typecheck pass
+- [x] 3.2 `src/lib/image.ts`, `src/lib/ai/suggest.ts`, `src/pages/api/plants/suggest.ts` exist
+- [x] 3.3 `normalizeSuggestion` is pure and handles missing/extra fields without throwing
 
 #### Manual
 
-- [ ] 3.4 Key set: POSTing a sample image returns a plausible normalized `AiSuggestion` within ~10 s
-- [ ] 3.5 Key unset: endpoint returns `ai_unavailable` (no throw)
-- [ ] 3.6 Slow/aborted call returns `ai_unavailable` within ~12 s; Worker CPU stays low
+- [x] 3.4 Key set: POSTing a sample image returns a plausible normalized `AiSuggestion` within ~10 s
+- [x] 3.5 Key unset: endpoint returns `ai_unavailable` (no throw)
+- [x] 3.6 Slow/aborted call returns `ai_unavailable` within ~12 s; Worker CPU stays low
 
 ### Phase 4: Photo upload seam (observed alone)
 
