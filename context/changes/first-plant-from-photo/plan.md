@@ -413,29 +413,29 @@ None. No schema change — F-02 already shipped every column this slice writes (
 
 #### Automated
 
-- [x] 3.1 Build + lint + typecheck pass
-- [x] 3.2 `src/lib/image.ts`, `src/lib/ai/suggest.ts`, `src/pages/api/plants/suggest.ts` exist
-- [x] 3.3 `normalizeSuggestion` is pure and handles missing/extra fields without throwing
+- [x] 3.1 Build + lint + typecheck pass — d699847
+- [x] 3.2 `src/lib/image.ts`, `src/lib/ai/suggest.ts`, `src/pages/api/plants/suggest.ts` exist — d699847
+- [x] 3.3 `normalizeSuggestion` is pure and handles missing/extra fields without throwing — d699847
 
 #### Manual
 
-- [x] 3.4 Key set: POSTing a sample image returns a plausible normalized `AiSuggestion` within ~10 s
-- [x] 3.5 Key unset: endpoint returns `ai_unavailable` (no throw)
-- [x] 3.6 Slow/aborted call returns `ai_unavailable` within ~12 s; Worker CPU stays low
+- [x] 3.4 Key set: POSTing a sample image returns a plausible normalized `AiSuggestion` within ~10 s — d699847
+- [x] 3.5 Key unset: endpoint returns `ai_unavailable` (no throw) — d699847
+- [x] 3.6 Slow/aborted call returns `ai_unavailable` within ~12 s; Worker CPU stays low — d699847
 
 ### Phase 4: Photo upload seam (observed alone)
 
 #### Automated
 
-- [ ] 4.1 Build + lint + typecheck pass
-- [ ] 4.2 `src/pages/api/plants/upload-url.ts` exists
+- [x] 4.1 Build + lint + typecheck pass
+- [x] 4.2 `src/pages/api/plants/upload-url.ts` exists
 
 #### Manual
 
-- [ ] 4.3 Mint + raw `PUT` lands an object at `<uid>/<plantId>/<file>`
-- [ ] 4.4 A 10 MB file uploads; Worker CPU stays within budget (bytes bypass the Worker)
-- [ ] 4.5 A forged path not under the caller's uid is rejected by Storage RLS
-- [ ] 4.6 Bad `contentType` / foreign `locationId` rejected with 4xx, not 500
+- [x] 4.3 Mint + raw `PUT` lands an object at `<uid>/<plantId>/<file>`
+- [x] 4.4 A 10 MB file uploads; Worker CPU stays within budget (bytes bypass the Worker)
+- [x] 4.5 A forged path not under the caller's uid is rejected by Storage RLS
+- [x] 4.6 Bad `contentType` / foreign `locationId` rejected with 4xx, not 500
 
 ### Phase 5: Add-plant flow — stitch all three seams
 
