@@ -1,0 +1,58 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import AddPlantForm from "@/components/plants/AddPlantForm";
+import type { Location } from "@/types";
+
+const id = Astro.params.id;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+// RLS-scoped: a foreign or unknown location returns no row → render the 404 state.
+let location: Pick<Location, "id" | "name"> | null = null;
+if (id && supabase) {
+  const { data } = await supabase.from("locations").select("id, name").eq("id", id).maybeSingle();
+  location = data;
+}
+
+if (!location) {
+  Astro.response.status = 404;
+}
+---
+
+<Layout title={location ? `Add plant · ${location.name}` : "Location not found"}>
+  <div class="bg-cosmic min-h-screen p-4 text-white">
+    {
+      location ? (
+        <div class="mx-auto w-full max-w-xl py-10">
+          <header class="mb-8">
+            <a
+              href={`/locations/${location.id}`}
+              class="text-sm text-blue-100/50 transition-colors hover:text-blue-100/80"
+            >
+              ← {location.name}
+            </a>
+            <h1 class="mt-2 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+              Add a plant
+            </h1>
+            <p class="mt-1 text-sm text-blue-100/60">Upload a photo and we'll suggest the species and care details.</p>
+          </header>
+
+          <AddPlantForm locationId={location.id} client:load />
+        </div>
+      ) : (
+        <div class="flex min-h-screen items-center justify-center">
+          <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-center backdrop-blur-xl">
+            <h1 class="mb-2 text-xl font-bold">Location not found</h1>
+            <p class="mb-6 text-sm text-blue-100/60">It may have been removed, or it isn’t yours.</p>
+            <a
+              href="/dashboard"
+              class="inline-block rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
+            >
+              Back to locations
+            </a>
+          </div>
+        </div>
+      )
+    }
+  </div>
+</Layout>

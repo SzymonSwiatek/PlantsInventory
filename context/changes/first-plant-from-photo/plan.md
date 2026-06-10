@@ -427,30 +427,30 @@ None. No schema change — F-02 already shipped every column this slice writes (
 
 #### Automated
 
-- [x] 4.1 Build + lint + typecheck pass
-- [x] 4.2 `src/pages/api/plants/upload-url.ts` exists
+- [x] 4.1 Build + lint + typecheck pass — ae2da07
+- [x] 4.2 `src/pages/api/plants/upload-url.ts` exists — ae2da07
 
 #### Manual
 
-- [x] 4.3 Mint + raw `PUT` lands an object at `<uid>/<plantId>/<file>`
-- [x] 4.4 A 10 MB file uploads; Worker CPU stays within budget (bytes bypass the Worker)
-- [x] 4.5 A forged path not under the caller's uid is rejected by Storage RLS
-- [x] 4.6 Bad `contentType` / foreign `locationId` rejected with 4xx, not 500
+- [x] 4.3 Mint + raw `PUT` lands an object at `<uid>/<plantId>/<file>` — ae2da07
+- [x] 4.4 A 10 MB file uploads; Worker CPU stays within budget (bytes bypass the Worker) — ae2da07
+- [x] 4.5 A forged path not under the caller's uid is rejected by Storage RLS — ae2da07
+- [x] 4.6 Bad `contentType` / foreign `locationId` rejected with 4xx, not 500 — ae2da07
 
 ### Phase 5: Add-plant flow — stitch all three seams
 
 #### Automated
 
-- [ ] 5.1 Build + lint + typecheck pass
-- [ ] 5.2 `src/pages/api/plants/index.ts`, `src/pages/locations/[id]/plants/new.astro`, `src/components/plants/AddPlantForm.tsx` exist
-- [ ] 5.3 `react-compiler` lint passes on the island
+- [x] 5.1 Build + lint + typecheck pass
+- [x] 5.2 `src/pages/api/plants/index.ts`, `src/pages/locations/[id]/plants/new.astro`, `src/components/plants/AddPlantForm.tsx` exist
+- [x] 5.3 `react-compiler` lint passes on the island
 
 #### Manual
 
-- [ ] 5.4 Upload → suggestion prefills within ~10 s; edit; save; plant appears in the list with its photo
-- [ ] 5.5 Replace photo before saving → a fresh suggestion replaces the previous one; retake reuses the same `plantId`/folder (no second orphan)
-- [ ] 5.6 Key unset → manual form with photo preserved; manual save works
-- [ ] 5.7 DB check: `ai_suggestion` snapshot on AI path, NULL on manual
-- [ ] 5.8 A second user cannot see the saved plant or its photo
-- [ ] 5.9 Returning-user "open → first plant saved" is comfortably usable (< 60 s)
-- [ ] 5.10 Simulated full-res PUT failure enters `upload_failed`: Save blocked + retry Alert (no dangling `photo_path`)
+- [x] 5.4 Upload → suggestion prefills within ~10 s; edit; save; plant appears in the list with its photo
+- [x] 5.5 Replace photo before saving → a fresh suggestion replaces the previous one; retake reuses the same `plantId`/folder (no second orphan)
+- [x] 5.6 Key unset → manual form with photo preserved; manual save works
+- [x] 5.7 DB check: `ai_suggestion` snapshot on AI path, NULL on manual
+- [x] 5.8 A second user cannot see the saved plant or its photo
+- [x] 5.9 Returning-user "open → first plant saved" is comfortably usable (< 60 s)
+- [x] 5.10 Simulated full-res PUT failure enters `upload_failed`: Save blocked + retry Alert (no dangling `photo_path`)
