@@ -441,16 +441,16 @@ None. No schema change — F-02 already shipped every column this slice writes (
 
 #### Automated
 
-- [x] 5.1 Build + lint + typecheck pass
-- [x] 5.2 `src/pages/api/plants/index.ts`, `src/pages/locations/[id]/plants/new.astro`, `src/components/plants/AddPlantForm.tsx` exist
-- [x] 5.3 `react-compiler` lint passes on the island
+- [x] 5.1 Build + lint + typecheck pass — 9e8f793
+- [x] 5.2 `src/pages/api/plants/index.ts`, `src/pages/locations/[id]/plants/new.astro`, `src/components/plants/AddPlantForm.tsx` exist — 9e8f793
+- [x] 5.3 `react-compiler` lint passes on the island — 9e8f793
 
 #### Manual
 
-- [x] 5.4 Upload → suggestion prefills within ~10 s; edit; save; plant appears in the list with its photo
-- [x] 5.5 Replace photo before saving → a fresh suggestion replaces the previous one; retake reuses the same `plantId`/folder (no second orphan)
-- [x] 5.6 Key unset → manual form with photo preserved; manual save works
-- [x] 5.7 DB check: `ai_suggestion` snapshot on AI path, NULL on manual
-- [x] 5.8 A second user cannot see the saved plant or its photo
-- [x] 5.9 Returning-user "open → first plant saved" is comfortably usable (< 60 s)
-- [x] 5.10 Simulated full-res PUT failure enters `upload_failed`: Save blocked + retry Alert (no dangling `photo_path`)
+- [x] 5.4 Upload → suggestion prefills within ~10 s; edit; save; plant appears in the list with its photo — 9e8f793
+- [x] 5.5 Replace photo before saving → a fresh suggestion replaces the previous one; retake reuses the same `plantId`/folder (no second orphan) — 9e8f793
+- [x] 5.6 Key unset → manual form with photo preserved; manual save works — 9e8f793
+- [x] 5.7 DB check: `ai_suggestion` snapshot on AI path, NULL on manual — 9e8f793
+- [x] 5.8 A second user cannot see the saved plant or its photo — 9e8f793
+- [x] 5.9 Returning-user "open → first plant saved" is comfortably usable (< 60 s) — 9e8f793
+- [x] 5.10 Simulated full-res PUT failure enters `upload_failed`: Save blocked + retry Alert (no dangling `photo_path`) — 9e8f793
