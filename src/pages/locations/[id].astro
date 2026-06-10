@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
-import { signedPhotoUrl } from "@/lib/storage";
+import { signedPhotoUrls } from "@/lib/storage";
 import type { Location, Plant } from "@/types";
 
 const id = Astro.params.id;
@@ -23,12 +23,14 @@ if (id && supabase) {
       .select("id, name, photo_path")
       .eq("location_id", id)
       .order("created_at", { ascending: false });
-    plants = await Promise.all(
-      (rows ?? []).map(async (p) => ({
-        ...p,
-        photoUrl: p.photo_path ? await signedPhotoUrl(supabase, p.photo_path) : null,
-      })),
-    );
+    const safeRows = rows ?? [];
+    // Batch all photo paths into a single signed-URL round-trip (vs. one per row).
+    const paths = safeRows.map((p) => p.photo_path).filter((path): path is string => path !== null);
+    const urls = await signedPhotoUrls(supabase, paths);
+    plants = safeRows.map((p) => ({
+      ...p,
+      photoUrl: p.photo_path ? (urls.get(p.photo_path) ?? null) : null,
+    }));
   }
 }
 

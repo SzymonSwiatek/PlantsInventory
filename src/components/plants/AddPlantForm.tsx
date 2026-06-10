@@ -29,6 +29,9 @@ interface Props {
 
 const ALLOWED_TYPES = "image/png,image/jpeg,image/webp";
 const SUGGEST_TIMEOUT_MS = 15_000;
+// Generous ceiling for a full-res (≤10 MB) upload; a stall past this aborts so
+// the form falls into the "failed" retry path rather than hanging "uploading".
+const UPLOAD_TIMEOUT_MS = 60_000;
 
 type UploadStatus = "idle" | "uploading" | "uploaded" | "failed";
 type AiStatus = "idle" | "suggesting" | "done";
@@ -91,6 +94,12 @@ export default function AddPlantForm({ locationId }: Props) {
   async function runUpload(file: File) {
     setUploadStatus("uploading");
     setPhotoPath(null);
+    // Bound the whole mint→PUT sequence; without this a stalled Storage PUT
+    // never rejects, pinning uploadStatus at "uploading" with no escape.
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      controller.abort();
+    }, UPLOAD_TIMEOUT_MS);
     try {
       const mintRes = await fetch("/api/plants/upload-url", {
         method: "POST",
@@ -102,6 +111,7 @@ export default function AddPlantForm({ locationId }: Props) {
           // Reuse the id on a retake so the same folder is overwritten in place.
           plantId: plantIdRef.current ?? undefined,
         }),
+        signal: controller.signal,
       });
       if (!mintRes.ok) {
         throw new Error(`mint failed: ${mintRes.status.toString()}`);
@@ -116,6 +126,7 @@ export default function AddPlantForm({ locationId }: Props) {
         method: "PUT",
         headers: { "Content-Type": file.type, "x-upsert": "true" },
         body: file,
+        signal: controller.signal,
       });
       if (!putRes.ok) {
         throw new Error(`upload failed: ${putRes.status.toString()}`);
@@ -123,15 +134,21 @@ export default function AddPlantForm({ locationId }: Props) {
       setPhotoPath(mint.path);
       setUploadStatus("uploaded");
     } catch (err) {
+      // Timeout/abort, transport failure, or non-OK status → surface the retry UI.
       // eslint-disable-next-line no-console
       console.error("[AddPlantForm] photo upload failed:", err);
       setUploadStatus("failed");
+    } finally {
+      clearTimeout(timer);
     }
   }
 
   async function runSuggest(file: File) {
     setAiStatus("suggesting");
     setAiUnavailable(false);
+    // Drop any prior photo's snapshot up front so a failed retake can't persist
+    // a snapshot describing a different photo than the one actually stored.
+    setSnapshot(null);
     const controller = new AbortController();
     const timer = setTimeout(() => {
       controller.abort();

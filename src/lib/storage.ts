@@ -21,3 +21,31 @@ export async function signedPhotoUrl(
   }
   return data.signedUrl;
 }
+
+/**
+ * Batch variant of {@link signedPhotoUrl}: mint signed **read** URLs for many
+ * `plant-photos` objects in a single round-trip via the plural
+ * `createSignedUrls`, instead of one `createSignedUrl` call per object. Returns
+ * a Map keyed by input path → URL, or null where minting failed for that item.
+ * Paths absent from the map fall back to a placeholder, same as the singular.
+ */
+export async function signedPhotoUrls(
+  supabase: SupabaseClient,
+  paths: string[],
+  ttlSeconds = 3600,
+): Promise<Map<string, string | null>> {
+  const urls = new Map<string, string | null>();
+  if (paths.length === 0) {
+    return urls;
+  }
+  const { data, error } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, ttlSeconds);
+  if (error) {
+    return urls;
+  }
+  for (const item of data) {
+    if (item.path) {
+      urls.set(item.path, item.error ? null : item.signedUrl);
+    }
+  }
+  return urls;
+}
