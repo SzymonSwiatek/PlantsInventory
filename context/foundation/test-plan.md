@@ -81,7 +81,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | # | Phase name | Goal (one line) | Risks covered | Test types | Status | Change folder |
 |---|---|---|---|---|---|---|
-| 1 | Bootstrap + AI-parse unit suite | Stand up the runner; prove the suggestion normalizer never throws and emits a contract-valid profile across provider shape variants | #5 | unit | not started | — |
+| 1 | Bootstrap + AI-parse unit suite | Stand up the runner; prove the suggestion normalizer never throws and emits a contract-valid profile across provider shape variants | #5 | unit | implementing | context/changes/ai-parse-unit/ |
 | 2 | Isolation & auth-boundary integration | One two-session harness vs local Supabase proves cross-user denial, storage-path scoping, and endpoint auth gating | #2, #3, #4 | integration | not started | — |
 | 3 | AI-outage resilience | Fault-inject the provider; prove the add-plant flow degrades to manual entry with the photo preserved | #1 | integration (fault injection) + thin e2e only if the UI fallback is unreachable from integration | not started | — |
 | 4 | Quality-gates wiring | Add the test step to CI and lock unit + integration as a required gate | cross-cutting | gates | not started | — |
