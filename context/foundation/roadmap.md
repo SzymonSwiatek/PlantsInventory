@@ -32,7 +32,7 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 | ID    | Change ID                | Outcome (user can …)                                                       | Prerequisites      | PRD refs                                                          | Status   | Issue |
 | ----- | ------------------------ | -------------------------------------------------------------------------- | ------------------ | ----------------------------------------------------------------- | -------- | ----- |
 | F-01  | magic-link-auth          | (foundation) magic-link sign-in replaces password scaffold; sign-out works | —                  | FR-001, FR-002, FR-003, Access Control                            | done     | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) |
-| F-02  | domain-schema-with-rls   | (foundation) locations + plants + care-events tables exist with per-user RLS | —                | NFR per-user isolation, NFR 12-month retention, Access Control    | ready    | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
+| F-02  | domain-schema-with-rls   | (foundation) locations + plants + care-events tables exist with per-user RLS | —                | NFR per-user isolation, NFR 12-month retention, Access Control    | done     | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
 | F-03  | cron-scheduled-skeleton  | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds | —          | US-02, FR-018, FR-019                                             | ready    | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
 | S-01  | first-plant-from-photo   | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save | F-01, F-02 | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | proposed | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
 | S-02  | location-management      | rename a location, delete (with non-empty warning), see all locations with plant counts | F-01, F-02 | FR-005, FR-006, FR-007                                            | proposed | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
@@ -89,7 +89,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Should care-events be a single table (kind = water | winterize) or one table per kind? — Owner: user, deferrable to `/10x-plan`. Block: no.
 - **Risk:** RLS gaps are silent — a missed policy leaks data with no error surfaced. Per-table policy tests (or at minimum a deny-by-default check from a second user's session) are mandatory before any slice merges.
-- **Status:** ready
+- **Status:** done
 
 ### F-03: Cron `scheduled()` handler skeleton
 
@@ -209,3 +209,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Done
 
 - **F-01: (foundation) Magic-link sign-in replaces the existing password scaffold; entering an email sends a single-use link; clicking the link creates the account on first use and signs the user in on subsequent uses; sign-out works from any authenticated screen.** — Archived 2026-06-14 → `context/archive/2026-05-29-magic-link-auth/`. Lesson: —.
+- **F-02: (foundation) locations + plants + care-events tables exist with per-user RLS** — Archived 2026-06-14 → `context/archive/2026-06-04-domain-schema-with-rls/`. Lesson: —.
