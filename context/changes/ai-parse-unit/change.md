@@ -1,7 +1,7 @@
 ---
 change_id: ai-parse-unit
 title: Bootstrap test runner + AI-parse normalizer unit suite
-status: implementing
+status: implemented
 created: 2026-06-14
 updated: 2026-06-14
 archived_at: null

@@ -460,12 +460,12 @@ is deferred to rollout Phase 4 (`npm run test:run` is the command that phase wil
 
 #### Automated
 
-- [x] 3.1 §6.1, §6.6, §4, §3 edits present in `test-plan.md`
-- [x] 3.2 Markdown formatting passes: `npx prettier --check` on the edited docs
-- [x] 3.3 No remaining "TBD — see §3 Phase 1" in §6.1
+- [x] 3.1 §6.1, §6.6, §4, §3 edits present in `test-plan.md` — 516954c
+- [x] 3.2 Markdown formatting passes: `npx prettier --check` on the edited docs — 516954c
+- [x] 3.3 No remaining "TBD — see §3 Phase 1" in §6.1 — 516954c
 
 #### Manual
 
-- [x] 3.4 §6.1 pattern is specific enough to add the next unit test unaided
-- [x] 3.5 §6.6 note frames the gap as documented-not-fixed
-- [x] 3.6 §3 status and change folder match reality
+- [x] 3.4 §6.1 pattern is specific enough to add the next unit test unaided — 516954c
+- [x] 3.5 §6.6 note frames the gap as documented-not-fixed — 516954c
+- [x] 3.6 §3 status and change folder match reality — 516954c
