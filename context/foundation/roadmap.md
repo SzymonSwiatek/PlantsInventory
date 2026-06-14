@@ -3,7 +3,7 @@ project: 10xPlantsInventory
 version: 1
 status: draft
 created: 2026-05-25
-updated: 2026-05-25
+updated: 2026-06-14
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -31,7 +31,7 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 
 | ID    | Change ID                | Outcome (user can …)                                                       | Prerequisites      | PRD refs                                                          | Status   | Issue |
 | ----- | ------------------------ | -------------------------------------------------------------------------- | ------------------ | ----------------------------------------------------------------- | -------- | ----- |
-| F-01  | magic-link-auth          | (foundation) magic-link sign-in replaces password scaffold; sign-out works | —                  | FR-001, FR-002, FR-003, Access Control                            | ready    | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) |
+| F-01  | magic-link-auth          | (foundation) magic-link sign-in replaces password scaffold; sign-out works | —                  | FR-001, FR-002, FR-003, Access Control                            | done     | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) |
 | F-02  | domain-schema-with-rls   | (foundation) locations + plants + care-events tables exist with per-user RLS | —                | NFR per-user isolation, NFR 12-month retention, Access Control    | ready    | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
 | F-03  | cron-scheduled-skeleton  | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds | —          | US-02, FR-018, FR-019                                             | ready    | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
 | S-01  | first-plant-from-photo   | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save | F-01, F-02 | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | proposed | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
@@ -75,7 +75,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Conversion (not greenfield) — must drop the password fields, the `SignUpForm.tsx` flow, and the `signInWithPassword` call without breaking the existing middleware path that resolves `context.locals.user` and redirects from `PROTECTED_ROUTES`.
-- **Status:** ready
+- **Status:** done
 
 ### F-02: Domain schema with RLS
 
@@ -208,4 +208,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends an entry here — and flips that item's `Status` to `done` — when a change whose `Change ID` matches the item is archived.)
+- **F-01: (foundation) Magic-link sign-in replaces the existing password scaffold; entering an email sends a single-use link; clicking the link creates the account on first use and signs the user in on subsequent uses; sign-out works from any authenticated screen.** — Archived 2026-06-14 → `context/archive/2026-05-29-magic-link-auth/`. Lesson: —.
