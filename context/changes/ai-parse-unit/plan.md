@@ -431,30 +431,30 @@ is deferred to rollout Phase 4 (`npm run test:run` is the command that phase wil
 
 #### Automated
 
-- [x] 1.1 Vitest installed and `npm run test:run` executes the smoke test and exits 0
-- [x] 1.2 Smoke test confirms the module imports with no `astro:env`/workerd shim
-- [x] 1.3 Linting passes on the new files: `npm run lint`
-- [x] 1.4 Type sync + build still pass: `npx astro sync && npm run build`
+- [x] 1.1 Vitest installed and `npm run test:run` executes the smoke test and exits 0 — 9704bed
+- [x] 1.2 Smoke test confirms the module imports with no `astro:env`/workerd shim — 9704bed
+- [x] 1.3 Linting passes on the new files: `npm run lint` — 9704bed
+- [x] 1.4 Type sync + build still pass: `npx astro sync && npm run build` — 9704bed
 
 #### Manual
 
-- [x] 1.5 `npm test` watch mode starts cleanly and re-runs on change
-- [x] 1.6 No stray test-runner output or config warnings
+- [x] 1.5 `npm test` watch mode starts cleanly and re-runs on change — 9704bed
+- [x] 1.6 No stray test-runner output or config warnings — 9704bed
 
 ### Phase 2: The contract suite
 
 #### Automated
 
-- [ ] 2.1 Full suite passes: `npm run test:run` exits 0
-- [ ] 2.2 Every research §3 fixture class is represented
-- [ ] 2.3 Linting passes on the suite: `npm run lint`
-- [ ] 2.4 Type sync + build still pass: `npx astro sync && npm run build`
+- [x] 2.1 Full suite passes: `npm run test:run` exits 0
+- [x] 2.2 Every research §3 fixture class is represented
+- [x] 2.3 Linting passes on the suite: `npm run lint`
+- [x] 2.4 Type sync + build still pass: `npx astro sync && npm run build`
 
 #### Manual
 
-- [ ] 2.5 Each invariant table row is independently meaningful (no redundant copies)
-- [ ] 2.6 Calendar-invalid test is unambiguously labeled as documenting a known gap
-- [ ] 2.7 (Optional) Stryker shows no meaningful survived mutant in the normalizer
+- [x] 2.5 Each invariant table row is independently meaningful (no redundant copies)
+- [x] 2.6 Calendar-invalid test is unambiguously labeled as documenting a known gap
+- [x] 2.7 (Optional) Stryker shows no meaningful survived mutant in the normalizer — skipped (optional, not a gate)
 
 ### Phase 3: Cookbook + test-plan sync
 
