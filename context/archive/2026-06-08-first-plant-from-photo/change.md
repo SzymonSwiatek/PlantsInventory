@@ -1,10 +1,10 @@
 ---
 change_id: first-plant-from-photo
 title: "First plant from a photo: AI care suggestion, accept/edit, save to a location"
-status: impl_reviewed
+status: archived
 created: 2026-06-08
-updated: 2026-06-10
-archived_at: null
+updated: 2026-06-14
+archived_at: 2026-06-14T08:55:26Z
 ---
 
 ## Notes

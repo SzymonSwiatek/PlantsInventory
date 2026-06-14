@@ -34,7 +34,7 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 | F-01  | magic-link-auth          | (foundation) magic-link sign-in replaces password scaffold; sign-out works | —                  | FR-001, FR-002, FR-003, Access Control                            | done     | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) |
 | F-02  | domain-schema-with-rls   | (foundation) locations + plants + care-events tables exist with per-user RLS | —                | NFR per-user isolation, NFR 12-month retention, Access Control    | done     | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
 | F-03  | cron-scheduled-skeleton  | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds | —          | US-02, FR-018, FR-019                                             | ready    | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
-| S-01  | first-plant-from-photo   | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save | F-01, F-02 | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | proposed | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
+| S-01  | first-plant-from-photo   | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save | F-01, F-02 | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | done     | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
 | S-02  | location-management      | rename a location, delete (with non-empty warning), see all locations with plant counts | F-01, F-02 | FR-005, FR-006, FR-007                                            | proposed | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
 | S-03  | plant-management         | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01 | FR-015, FR-016, FR-017                                            | proposed | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
 | S-04  | watering-reminder-loop   | see today's care list, receive a watering reminder, mark watered (bulk too), snooze | F-03, S-01 | US-02, US-03, FR-018, FR-020, FR-021, FR-022                      | proposed | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) |
@@ -118,7 +118,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - AI vision provider choice (OpenRouter, direct OpenAI/Anthropic, Google, etc.) and per-call cost ceiling — Owner: user, by `/10x-plan` for this slice. Block: no (default to whichever provider has the cheapest viable vision model the day planning starts).
   - Operational definition of "minor edit" for the 75% acceptance metric (PRD Open Question 2) — Owner: user, by PRD finalization. Block: no (instrumentation can record edit-count and field-changes; the threshold is downstream).
 - **Risk:** Carries the north star plus three integration surfaces at once (Supabase Storage signed-upload pattern, AI provider call, magic-link auth boundary). If any one subsystem is wrong, the validation signal is muddied across all of them. Mitigation: ship the photo-storage and AI-call paths behind small endpoints first, observed individually, before stitching them into the UI form.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: Location management
 
@@ -210,3 +210,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 - **F-01: (foundation) Magic-link sign-in replaces the existing password scaffold; entering an email sends a single-use link; clicking the link creates the account on first use and signs the user in on subsequent uses; sign-out works from any authenticated screen.** — Archived 2026-06-14 → `context/archive/2026-05-29-magic-link-auth/`. Lesson: —.
 - **F-02: (foundation) locations + plants + care-events tables exist with per-user RLS** — Archived 2026-06-14 → `context/archive/2026-06-04-domain-schema-with-rls/`. Lesson: —.
+- **S-01: A signed-in user creates their first location, taps "Add plant", uploads a photo, sees an AI-suggested species + care profile within ~10 seconds, accepts or edits any field (or replaces the suggestion entirely), and saves the plant into the chosen location. The plant is immediately visible in the location's plant list. The manual-creation fallback works if the AI is unavailable.** — Archived 2026-06-14 → `context/archive/2026-06-08-first-plant-from-photo/`. Lesson: —.
