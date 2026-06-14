@@ -445,27 +445,27 @@ is deferred to rollout Phase 4 (`npm run test:run` is the command that phase wil
 
 #### Automated
 
-- [x] 2.1 Full suite passes: `npm run test:run` exits 0
-- [x] 2.2 Every research §3 fixture class is represented
-- [x] 2.3 Linting passes on the suite: `npm run lint`
-- [x] 2.4 Type sync + build still pass: `npx astro sync && npm run build`
+- [x] 2.1 Full suite passes: `npm run test:run` exits 0 — 0352200
+- [x] 2.2 Every research §3 fixture class is represented — 0352200
+- [x] 2.3 Linting passes on the suite: `npm run lint` — 0352200
+- [x] 2.4 Type sync + build still pass: `npx astro sync && npm run build` — 0352200
 
 #### Manual
 
-- [x] 2.5 Each invariant table row is independently meaningful (no redundant copies)
-- [x] 2.6 Calendar-invalid test is unambiguously labeled as documenting a known gap
+- [x] 2.5 Each invariant table row is independently meaningful (no redundant copies) — 0352200
+- [x] 2.6 Calendar-invalid test is unambiguously labeled as documenting a known gap — 0352200
 - [x] 2.7 (Optional) Stryker shows no meaningful survived mutant in the normalizer — skipped (optional, not a gate)
 
 ### Phase 3: Cookbook + test-plan sync
 
 #### Automated
 
-- [ ] 3.1 §6.1, §6.6, §4, §3 edits present in `test-plan.md`
-- [ ] 3.2 Markdown formatting passes: `npx prettier --check` on the edited docs
-- [ ] 3.3 No remaining "TBD — see §3 Phase 1" in §6.1
+- [x] 3.1 §6.1, §6.6, §4, §3 edits present in `test-plan.md`
+- [x] 3.2 Markdown formatting passes: `npx prettier --check` on the edited docs
+- [x] 3.3 No remaining "TBD — see §3 Phase 1" in §6.1
 
 #### Manual
 
-- [ ] 3.4 §6.1 pattern is specific enough to add the next unit test unaided
-- [ ] 3.5 §6.6 note frames the gap as documented-not-fixed
-- [ ] 3.6 §3 status and change folder match reality
+- [x] 3.4 §6.1 pattern is specific enough to add the next unit test unaided
+- [x] 3.5 §6.6 note frames the gap as documented-not-fixed
+- [x] 3.6 §3 status and change folder match reality
