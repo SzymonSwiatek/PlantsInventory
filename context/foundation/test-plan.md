@@ -269,7 +269,46 @@ invalid-session behavior before it ships.
 
 ### 6.5 Adding a fault-injection test for an external provider
 
-- TBD — see §3 Phase 3 (slow / erroring AI-provider stub; assert the degraded "create manually" shape and photo preservation, not the success shape).
+Pattern proven by Risk #1 (AI-outage). Use it for any endpoint that wraps an
+external provider behind a degrade-on-failure contract.
+
+- **Two levers, split at the HTTP boundary.** Pick the lever per what you are
+  proving, never both in one test:
+  - **Booted-server, zero stub** for the _end-to-end chain_ a user cares about
+    (e.g. "photo preserved despite the outage"). Drive the real `astro dev` via
+    `startServer()` (`tests/integration/helpers/server.ts`) with the provider key
+    forced OFF, and assert the whole chain. File:
+    `tests/integration/ai-outage.integration.test.ts`.
+  - **In-process `undici` `MockAgent`** (`setGlobalDispatcher`) for the
+    _provider-throw → degrade conversion_ that the missing-key path can't reach
+    (it short-circuits above the try/catch). This runs Docker-free under
+    `npm run test:run`. File: `src/pages/api/plants/suggest.fault.test.ts`.
+- **Force the key OFF in `.dev.vars`, don't just omit it.** `astro dev` also loads
+  `.env` via Vite, so omitting the key lets a developer's real `.env` value fill
+  the gap and the endpoint answers `ok` instead of degrading. `startServer()`
+  writes an explicit empty `AI_API_KEY=` line; the workerd runtime reads
+  `.dev.vars` first, so the empty value shadows `.env`.
+- **Stub the HTTP edge only — never `vi.mock` your own provider module.** Mocking
+  `requestSuggestion` would test only the mock. Intercept the provider host/path
+  (`generativelanguage.googleapis.com` … `gemini-2.5-flash:generateContent`) and
+  drive real throws: `reply(500,…).times(3)` (retryable exhausted),
+  `reply(200, {candidates:[]})` (missing text part), a 200 whose text part is
+  non-JSON (`JSON.parse` throws), and `replyWithError(…)` (transport failure).
+  Each must produce `200 { status: "ai_unavailable" }`. Mock `astro:env/server`
+  (`vi.mock("astro:env/server", () => ({ AI_API_KEY: "test-key" }))`) so the
+  handler passes the key check and reaches the AI call; restore the global
+  dispatcher and `mockAgent.close()` in `afterEach`.
+- **Prove the timeout in two cheap halves — no real 12 s wait, no fake timers
+  across undici.** (a) At the handler, a thrown provider call degrades (above).
+  (b) At the lib, call `requestSuggestion(key, img, mime, signal)` while
+  `MockAgent` holds the reply open (`.delay(…)`), `abort()` the signal mid-flight,
+  and assert it rejects (`src/lib/ai/suggest.fault.test.ts`). Together: "abort
+  propagates to a throw" + "a thrown call degrades" = the timeout works.
+- **Reference files:** `tests/integration/ai-outage.integration.test.ts`,
+  `src/pages/api/plants/suggest.fault.test.ts`,
+  `src/lib/ai/suggest.fault.test.ts`,
+  `tests/integration/helpers/cookies.ts` (sessioned auth cookie for the booted
+  server, emitted by `@supabase/ssr`).
 
 ### 6.6 Per-rollout-phase notes
 

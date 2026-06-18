@@ -35,7 +35,13 @@ export async function startServer(): Promise<ServerHandle> {
   }
 
   const prevDevVars = existsSync(DEV_VARS_PATH) ? readFileSync(DEV_VARS_PATH, "utf8") : null;
-  writeFileSync(DEV_VARS_PATH, `SUPABASE_URL=${supabaseUrl}\nSUPABASE_KEY=${supabaseKey}\n`);
+  // Force the AI key OFF so every `/api/plants/suggest` call degrades to the
+  // `ai_unavailable` branch (Risk #1's zero-stub outage lever). Omitting the key
+  // is NOT enough: `astro dev` also loads `.env` via Vite, and a developer's
+  // `.env` may carry a real `AI_API_KEY` that fills the gap. An explicit empty
+  // value in `.dev.vars` (which the workerd runtime reads first) shadows it, so
+  // `astro:env/server` resolves a falsy key and the endpoint short-circuits.
+  writeFileSync(DEV_VARS_PATH, `SUPABASE_URL=${supabaseUrl}\nSUPABASE_KEY=${supabaseKey}\nAI_API_KEY=\n`);
 
   const baseUrl = `http://localhost:${TEST_PORT}`;
 

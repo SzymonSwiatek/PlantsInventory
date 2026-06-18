@@ -11,10 +11,11 @@ export default defineConfig({
     environment: "node",
     setupFiles: ["./vitest.setup.ts"],
     // Keep the unit gate hermetic: never pick up the Docker-dependent integration
-    // suite. Vitest's default `include` would otherwise match
-    // `tests/integration/**/*.integration.test.ts`. Run those via
-    // `npm run test:integration` (vitest.integration.config.ts).
-    exclude: [...configDefaults.exclude, "tests/integration/**"],
+    // suite (run via `npm run test:integration`), nor the browser-level Playwright
+    // specs under `tests/e2e/**` (run via `npm run test:e2e`) — Playwright's
+    // `test`/`expect` are not Vitest's and crash on collection here. Vitest's
+    // default `include` would otherwise match both trees.
+    exclude: [...configDefaults.exclude, "tests/integration/**", "tests/e2e/**"],
   },
   resolve: {
     alias: {
