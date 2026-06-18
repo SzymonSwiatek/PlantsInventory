@@ -1,10 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 
+import type { Database } from "@/db/database.types";
+
 // Raw Supabase clients for the integration suite, built directly from
 // `@supabase/supabase-js` against the local stack captured by globalSetup into
 // `process.env.SUPABASE_TEST_*`. The app's own factory (`src/lib/supabase.ts`)
 // cannot be reused here — it reads `astro:env/server`, which does not exist in a
-// Node/Vitest process.
+// Node/Vitest process. Typed with the generated `Database` schema so queries and
+// insert/update payloads are statically checked (avoids `any` in strict lint).
 
 /** The token pair a sessioned client carries. */
 export interface TestSession {
@@ -28,12 +31,12 @@ const STATELESS = { auth: { autoRefreshToken: false, persistSession: false } } a
 
 /** Service-role client — bypasses RLS. Seed/teardown only, never assertions. */
 export function serviceRoleClient() {
-  return createClient(required("SUPABASE_TEST_URL"), required("SUPABASE_TEST_SERVICE_ROLE_KEY"), STATELESS);
+  return createClient<Database>(required("SUPABASE_TEST_URL"), required("SUPABASE_TEST_SERVICE_ROLE_KEY"), STATELESS);
 }
 
 /** Anon-key client with no session — RLS treats it as the `anon` role. */
 export function anonClient() {
-  return createClient(required("SUPABASE_TEST_URL"), required("SUPABASE_TEST_ANON_KEY"), STATELESS);
+  return createClient<Database>(required("SUPABASE_TEST_URL"), required("SUPABASE_TEST_ANON_KEY"), STATELESS);
 }
 
 /**
@@ -44,7 +47,7 @@ export function anonClient() {
  * explicitly, since no session is persisted on this client.)
  */
 export function sessionedClient(session: TestSession) {
-  return createClient(required("SUPABASE_TEST_URL"), required("SUPABASE_TEST_ANON_KEY"), {
+  return createClient<Database>(required("SUPABASE_TEST_URL"), required("SUPABASE_TEST_ANON_KEY"), {
     ...STATELESS,
     global: { headers: { Authorization: `Bearer ${session.access_token}` } },
   });

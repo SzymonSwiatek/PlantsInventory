@@ -506,22 +506,22 @@ None — test-only change, no schema or production-code changes.
 
 #### Automated
 
-- [x] 1.1 Unit gate stays hermetic (no Docker): `npm run test:run` passes and does not execute any `tests/integration/**` file
-- [x] 1.2 Lint passes: `npm run lint`
-- [x] 1.3 With local Supabase running, the smoke test passes: `npm run test:integration`
-- [x] 1.4 With local Supabase stopped, `npm run test:integration` fails fast with the "run `npx supabase start`" message
+- [x] 1.1 Unit gate stays hermetic (no Docker): `npm run test:run` passes and does not execute any `tests/integration/**` file — acfeee0
+- [x] 1.2 Lint passes: `npm run lint` — acfeee0
+- [x] 1.3 With local Supabase running, the smoke test passes: `npm run test:integration` — acfeee0
+- [x] 1.4 With local Supabase stopped, `npm run test:integration` fails fast with the "run `npx supabase start`" message — acfeee0
 
 #### Manual
 
-- [x] 1.5 No leftover test users/objects after a smoke run (teardown verified)
-- [x] 1.6 A second consecutive `npm run test:integration` run is green (re-runnable)
+- [x] 1.5 No leftover test users/objects after a smoke run (teardown verified) — acfeee0
+- [x] 1.6 A second consecutive `npm run test:integration` run is green (re-runnable) — acfeee0
 
 ### Phase 2: Risk #2 — cross-user isolation (RLS)
 
 #### Automated
 
-- [ ] 2.1 All matrix + child-scoping + anon + cascade cases pass: `npm run test:integration`
-- [ ] 2.2 Lint passes: `npm run lint`
+- [x] 2.1 All matrix + child-scoping + anon + cascade cases pass: `npm run test:integration`
+- [x] 2.2 Lint passes: `npm run lint`
 
 #### Manual
 
