@@ -91,7 +91,7 @@ describe("normalizeSuggestion", () => {
 
     it.each(fixtures)("never throws and emits the 5-key typed contract for $label", ({ input }) => {
       expect(() => normalizeSuggestion(input)).not.toThrow();
-      assertContractShape(normalizeSuggestion(input));
+      assertContractShape(normalizeSuggestion(input) as unknown as Record<string, unknown>);
     });
 
     const nonObjectRoots: { label: string; input: unknown }[] = [
