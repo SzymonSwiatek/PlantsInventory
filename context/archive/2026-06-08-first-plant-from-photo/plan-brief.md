@@ -17,17 +17,17 @@ From `/dashboard` a user creates a location, opens it, taps "Add plant," uploads
 
 ## Key Decisions Made
 
-| Decision | Choice | Why (1 sentence) | Source |
-| --- | --- | --- | --- |
-| AI provider | Gemini Flash (free tier) | $0 at this scale; browser sends a downscaled copy so the full-res 10 MB stays out of the Worker | Plan |
-| Image delivery | Browser downscale → base64 to AI route; full-res → Storage directly | Gemini needs base64 inline; the 10 ms CPU limit forbids decoding 10 MB in-Worker | Plan |
-| Upload ordering | Pre-mint `plantId` + signed upload URL; insert with explicit id on save | Keeps the `<uid>/<plant_id>/<file>` key convention; cleanly decouples upload from insert | Plan |
-| Photo retake (FR-013) | In scope — replace photo + re-run AI | PRD must-have; a bad photo otherwise locks in a bad suggestion | Plan |
-| AI failure UX | ~15 s client timeout → graceful manual fallback | One predictable path for timeout/error/missing-key; honors the AI-outage guardrail | Plan |
-| Pages | Dedicated: `/dashboard`, `/locations/[id]`, `/locations/[id]/plants/new` | Clean SSR foundation S-02/S-03 extend directly | Plan |
-| Field UI | Text/number inputs + "no winterization" toggle | Faithfully carries the AI's prose; matches the free-text schema; minimal new components | Plan |
-| Testing | Static + manual (no test runner) | Matches repo state + speed goal; Module 3 `/10x-test-plan` owns the test rollout | Plan |
-| Instrumentation | `ai_suggestion IS NOT NULL` proxy (no schema change) | The snapshot column was designed for exactly this; both metrics computable from existing columns | Plan |
+| Decision              | Choice                                                                   | Why (1 sentence)                                                                                 | Source |
+| --------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------ |
+| AI provider           | Gemini Flash (free tier)                                                 | $0 at this scale; browser sends a downscaled copy so the full-res 10 MB stays out of the Worker  | Plan   |
+| Image delivery        | Browser downscale → base64 to AI route; full-res → Storage directly      | Gemini needs base64 inline; the 10 ms CPU limit forbids decoding 10 MB in-Worker                 | Plan   |
+| Upload ordering       | Pre-mint `plantId` + signed upload URL; insert with explicit id on save  | Keeps the `<uid>/<plant_id>/<file>` key convention; cleanly decouples upload from insert         | Plan   |
+| Photo retake (FR-013) | In scope — replace photo + re-run AI                                     | PRD must-have; a bad photo otherwise locks in a bad suggestion                                   | Plan   |
+| AI failure UX         | ~15 s client timeout → graceful manual fallback                          | One predictable path for timeout/error/missing-key; honors the AI-outage guardrail               | Plan   |
+| Pages                 | Dedicated: `/dashboard`, `/locations/[id]`, `/locations/[id]/plants/new` | Clean SSR foundation S-02/S-03 extend directly                                                   | Plan   |
+| Field UI              | Text/number inputs + "no winterization" toggle                           | Faithfully carries the AI's prose; matches the free-text schema; minimal new components          | Plan   |
+| Testing               | Static + manual (no test runner)                                         | Matches repo state + speed goal; Module 3 `/10x-test-plan` owns the test rollout                 | Plan   |
+| Instrumentation       | `ai_suggestion IS NOT NULL` proxy (no schema change)                     | The snapshot column was designed for exactly this; both metrics computable from existing columns | Plan   |
 
 ## Scope
 
@@ -41,13 +41,13 @@ Image handling is the spine: the **full-res photo goes browser → Storage direc
 
 ## Phases at a Glance
 
-| Phase | What it delivers | Key risk |
-| --- | --- | --- |
-| 1. Foundations & config | `AI_API_KEY` env, shadcn primitives, route guard, shared API/storage helpers | Forgetting `optional:true` makes a missing key throw instead of degrading |
-| 2. Locations shell | `/dashboard` create+list, `/locations/[id]` plant list | RLS scoping / cross-user reachability on the new pages |
-| 3. AI suggestion seam | `/api/plants/suggest` + normalizer + downscale util (observed alone) | Gemini model id / structured-output shape; `nodejs_compat` edge behavior |
-| 4. Photo upload seam | `/api/plants/upload-url` + direct browser `PUT` (observed alone) | Exact `uploadToSignedUrl` PUT/token contract; path must start with `auth.uid()` |
-| 5. Stitch | `/plants/new` page + `AddPlantForm` island + `/api/plants` create | Async state machine: parallel upload+suggest, timeout, retake, fallback |
+| Phase                   | What it delivers                                                             | Key risk                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 1. Foundations & config | `AI_API_KEY` env, shadcn primitives, route guard, shared API/storage helpers | Forgetting `optional:true` makes a missing key throw instead of degrading       |
+| 2. Locations shell      | `/dashboard` create+list, `/locations/[id]` plant list                       | RLS scoping / cross-user reachability on the new pages                          |
+| 3. AI suggestion seam   | `/api/plants/suggest` + normalizer + downscale util (observed alone)         | Gemini model id / structured-output shape; `nodejs_compat` edge behavior        |
+| 4. Photo upload seam    | `/api/plants/upload-url` + direct browser `PUT` (observed alone)             | Exact `uploadToSignedUrl` PUT/token contract; path must start with `auth.uid()` |
+| 5. Stitch               | `/plants/new` page + `AddPlantForm` island + `/api/plants` create            | Async state machine: parallel upload+suggest, timeout, retake, fallback         |
 
 **Prerequisites:** F-01 + F-02 landed (verified). A Gemini API key in `.dev.vars`/`.env` for the AI path (absence is a valid degraded path). Exercise on real `wrangler dev` (`workerd`), not just `astro dev`.
 **Estimated effort:** ~3–4 focused sessions across 5 phases (seams 3 & 4 are small; Phase 5 is the bulk).

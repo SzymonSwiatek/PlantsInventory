@@ -1,4 +1,5 @@
 <!-- PLAN-REVIEW-REPORT -->
+
 # Plan Review: Domain Schema with RLS (F-02)
 
 - **Plan**: context/changes/domain-schema-with-rls/plan.md
@@ -9,13 +10,13 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| End-State Alignment | PASS |
-| Lean Execution | PASS |
-| Architectural Fitness | WARNING (F1) |
-| Blind Spots | WARNING (F5, F6) |
-| Plan Completeness | WARNING (F2, F3, F4) |
+| Dimension             | Verdict              |
+| --------------------- | -------------------- |
+| End-State Alignment   | PASS                 |
+| Lean Execution        | PASS                 |
+| Architectural Fitness | WARNING (F1)         |
+| Blind Spots           | WARNING (F5, F6)     |
+| Plan Completeness     | WARNING (F2, F3, F4) |
 
 ## Grounding
 
@@ -43,7 +44,7 @@
 - **Impact**: 🔎 MEDIUM — real tradeoff; pause to reason through it
 - **Dimension**: Plan Completeness
 - **Location**: Testing Strategy → Manual Testing Steps (steps 2–3)
-- **Detail**: Automated success criteria only prove RLS is *enabled* (`rowsecurity=true`) and ≥4 policies *exist* — neither proves predicates are correct (a `using (true)` policy passes both). Isolation correctness rests entirely on the manual two-session deny check, but the procedure ("two SQL sessions with different `auth.uid()` JWT claims") gives no mechanism: raw `psql` has `auth.uid()` = NULL, and there is no domain UI yet to create rows. The brief flags this gate as "easy to skip"; the roadmap names "RLS gaps are silent" as THE foundation risk.
+- **Detail**: Automated success criteria only prove RLS is _enabled_ (`rowsecurity=true`) and ≥4 policies _exist_ — neither proves predicates are correct (a `using (true)` policy passes both). Isolation correctness rests entirely on the manual two-session deny check, but the procedure ("two SQL sessions with different `auth.uid()` JWT claims") gives no mechanism: raw `psql` has `auth.uid()` = NULL, and there is no domain UI yet to create rows. The brief flags this gate as "easy to skip"; the roadmap names "RLS gaps are silent" as THE foundation risk.
 - **Fix**: Add the concrete local impersonation recipe to Manual Testing Steps — create two `auth.users`, then per `psql` session `set local role authenticated; set local request.jwt.claims = '{"sub":"<uuid>","role":"authenticated"}';` before each op, with expected zero-row results documented. Note that the Storage deny check needs an authenticated client/session, not raw SQL.
   - Strength: Turns the skip-prone, load-bearing gate into a copy-paste runbook; satisfies the roadmap's mandatory deny-by-default check.
   - Tradeoff: A few lines of plan text; relies on local Supabase up (already a prerequisite).
@@ -57,7 +58,7 @@
 - **Impact**: 🔎 MEDIUM — real tradeoff; pause to reason through it
 - **Dimension**: Plan Completeness
 - **Location**: Phase 3 §1–2 / Critical Implementation Details (last bullet)
-- **Detail**: The plan says "add it to the ESLint ignore list (and Prettier ignore)." This repo has no ESLint ignore list — `eslint.config.js:72` derives ignores from `.gitignore` via `includeIgnoreFile` (line 2), and `.gitignore` already has a `# generated types` section (→ `.astro/`), so the natural move is to add the new file there. That breaks the build: Phase 3 §2 makes `src/lib/supabase.ts` import `Database` from `@/db/database.types`, and `ci.yml` runs `npm run build` *without* generating types — so the file must be committed. `.gitignore`-ing it drops it from the commit → CI build fails. No `.prettierignore` exists yet.
+- **Detail**: The plan says "add it to the ESLint ignore list (and Prettier ignore)." This repo has no ESLint ignore list — `eslint.config.js:72` derives ignores from `.gitignore` via `includeIgnoreFile` (line 2), and `.gitignore` already has a `# generated types` section (→ `.astro/`), so the natural move is to add the new file there. That breaks the build: Phase 3 §2 makes `src/lib/supabase.ts` import `Database` from `@/db/database.types`, and `ci.yml` runs `npm run build` _without_ generating types — so the file must be committed. `.gitignore`-ing it drops it from the commit → CI build fails. No `.prettierignore` exists yet.
 - **Fix**: State explicitly: (a) commit `src/db/database.types.ts`; (b) exclude from lint via a new flat-config `{ ignores: ["src/db/database.types.ts"] }` object in `eslint.config.js` — NOT via `.gitignore`; (c) create `.prettierignore` with the path.
   - Strength: Blocks the natural-but-wrong `.gitignore` route that fails CI build with a non-obvious "cannot find module" error.
   - Tradeoff: None — pure clarification.

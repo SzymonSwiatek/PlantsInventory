@@ -28,15 +28,15 @@ gap is documented and escalated rather than silently fixed.
 
 ## Key Decisions Made
 
-| Decision | Choice | Why (1 sentence) | Source |
-| --- | --- | --- | --- |
-| Test layer | Unit, `environment: "node"` | The normalizer is pure; integration would add setup cost with no added signal. | Research |
-| Runner | Vitest 3.x | Vite-native, matches the repo-wide `vite ^7.3.2` override. | Research |
-| Watering assertion | Property invariant + pin coercions (`"7"`→7, `7.5`→8) | Catches the DB-breaking regression *and* documents round-to-nearest as the contract. | Plan |
-| Date assertion | Deterministic cases + non-ISO fallback pinned on Node | User chose to cover the fallback branch too, accepting Node-scoped coupling. | Plan |
-| Date determinism | Pin `TZ=UTC` via a setup file | `new Date()` parses non-ISO strings as local time, then shifts to UTC — flaky without a fixed TZ. | Plan |
-| Calendar-invalid date | Characterization test + §6.6 escalation note | Documents the known gap with a regression anchor; fixing it is a Lesson-5 change. | Plan |
-| Empty strings | Assert `""`/`"  "`→null at the normalizer layer | The normalizer is the unit under test; invariant #5 is part of its own contract. | Plan |
+| Decision              | Choice                                                | Why (1 sentence)                                                                                  | Source   |
+| --------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| Test layer            | Unit, `environment: "node"`                           | The normalizer is pure; integration would add setup cost with no added signal.                    | Research |
+| Runner                | Vitest 3.x                                            | Vite-native, matches the repo-wide `vite ^7.3.2` override.                                        | Research |
+| Watering assertion    | Property invariant + pin coercions (`"7"`→7, `7.5`→8) | Catches the DB-breaking regression _and_ documents round-to-nearest as the contract.              | Plan     |
+| Date assertion        | Deterministic cases + non-ISO fallback pinned on Node | User chose to cover the fallback branch too, accepting Node-scoped coupling.                      | Plan     |
+| Date determinism      | Pin `TZ=UTC` via a setup file                         | `new Date()` parses non-ISO strings as local time, then shifts to UTC — flaky without a fixed TZ. | Plan     |
+| Calendar-invalid date | Characterization test + §6.6 escalation note          | Documents the known gap with a regression anchor; fixing it is a Lesson-5 change.                 | Plan     |
+| Empty strings         | Assert `""`/`"  "`→null at the normalizer layer       | The normalizer is the unit under test; invariant #5 is part of its own contract.                  | Plan     |
 
 ## Scope
 
@@ -58,11 +58,11 @@ function's current output.
 
 ## Phases at a Glance
 
-| Phase | What it delivers | Key risk |
-| --- | --- | --- |
-| 1. Bootstrap runner | Vitest installed; config + TZ setup; smoke test import-resolves the module | Alias not resolving at Vitest runtime; accidental need for an env shim |
-| 2. Contract suite | Full oracle-driven `normalizeSuggestion` suite | Mirror-testing the implementation instead of the oracle; flaky TZ-dependent date assertions |
-| 3. Cookbook + sync | §6.1 pattern, §6.6 escalation, §4 version pin, §3 status flip | Cookbook too vague to reuse; gap framed as "fixed" not "documented" |
+| Phase               | What it delivers                                                           | Key risk                                                                                    |
+| ------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1. Bootstrap runner | Vitest installed; config + TZ setup; smoke test import-resolves the module | Alias not resolving at Vitest runtime; accidental need for an env shim                      |
+| 2. Contract suite   | Full oracle-driven `normalizeSuggestion` suite                             | Mirror-testing the implementation instead of the oracle; flaky TZ-dependent date assertions |
+| 3. Cookbook + sync  | §6.1 pattern, §6.6 escalation, §4 version pin, §3 status flip              | Cookbook too vague to reuse; gap framed as "fixed" not "documented"                         |
 
 **Prerequisites:** none beyond the existing toolchain (Node, npm, the `vite ^7.3.2`
 override already in place). No Docker / Supabase needed for this phase.

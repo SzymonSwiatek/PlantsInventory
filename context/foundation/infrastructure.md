@@ -18,14 +18,14 @@ The project is already wired for it — `@astrojs/cloudflare` 13.5.0, a `workerd
 
 ## Platform Comparison
 
-| Platform | CLI-first | Managed/Serverless | Agent-readable docs | Stable deploy API | MCP / Integration | Total |
-|---|---|---|---|---|---|---|
-| **Cloudflare Workers** | Pass | Pass | Pass | Pass | Pass | **10/10** |
-| **Vercel** | Pass | Pass | Pass | Pass | Pass (beta) | **10/10** |
-| **Railway** | Pass | Pass | Pass | Pass | Partial | **9/10** |
-| **Render** | Partial | Pass | Pass | Pass | Pass | **9/10** |
-| **Netlify** | Partial | Pass | Partial | Pass | Pass | **8/10** |
-| **Fly.io** | Pass | Partial | Partial | Pass | Partial | **7/10** |
+| Platform               | CLI-first | Managed/Serverless | Agent-readable docs | Stable deploy API | MCP / Integration | Total     |
+| ---------------------- | --------- | ------------------ | ------------------- | ----------------- | ----------------- | --------- |
+| **Cloudflare Workers** | Pass      | Pass               | Pass                | Pass              | Pass              | **10/10** |
+| **Vercel**             | Pass      | Pass               | Pass                | Pass              | Pass (beta)       | **10/10** |
+| **Railway**            | Pass      | Pass               | Pass                | Pass              | Partial           | **9/10**  |
+| **Render**             | Partial   | Pass               | Pass                | Pass              | Pass              | **9/10**  |
+| **Netlify**            | Partial   | Pass               | Partial             | Pass              | Pass              | **8/10**  |
+| **Fly.io**             | Pass      | Partial            | Partial             | Pass              | Partial           | **7/10**  |
 
 **Cloudflare Workers** — `wrangler` covers the full operational loop (`deploy`, `rollback`, `tail`, `deployments list`); pure serverless with auto TLS/routing/scaling; docs published as markdown with `llms.txt`/`llms-full.txt` ("Markdown for Agents", GA Feb 2026); deterministic `wrangler deploy`; 16+ MCP servers including Workers Bindings and Observability (GA). All five criteria Pass. Hard filters: none triggered (no persistent connections required; the stack runs natively on `workerd`).
 
@@ -43,7 +43,7 @@ The project is already wired for it — `@astrojs/cloudflare` 13.5.0, a `workerd
 
 #### 1. Cloudflare Workers (Recommended)
 
-Won on a perfect criteria score *plus* zero migration cost. The stack ships pre-configured: `astro.config.mjs` uses `adapter: cloudflare()`, `wrangler.jsonc` already sets `compatibility_flags: ["nodejs_compat"]` and `observability.enabled: true`, and `wrangler` 4.90.0 is a devDependency. Free-tier Cron Triggers (1-minute floor) cleanly cover the reminder loop, the agent-readable docs and broad MCP coverage are best-in-class, and the bill is $0 at MVP scale. Single-region preference (interview Q4) costs nothing here — Cloudflare's edge is a free bonus, not a tax.
+Won on a perfect criteria score _plus_ zero migration cost. The stack ships pre-configured: `astro.config.mjs` uses `adapter: cloudflare()`, `wrangler.jsonc` already sets `compatibility_flags: ["nodejs_compat"]` and `observability.enabled: true`, and `wrangler` 4.90.0 is a devDependency. Free-tier Cron Triggers (1-minute floor) cleanly cover the reminder loop, the agent-readable docs and broad MCP coverage are best-in-class, and the bill is $0 at MVP scale. Single-region preference (interview Q4) costs nothing here — Cloudflare's edge is a free bonus, not a tax.
 
 #### 2. Vercel
 
@@ -71,31 +71,31 @@ The team shipped on Cloudflare because the starter was pre-wired for it — nobo
 
 - **Email is not a platform primitive.** Reminders need a third-party email API (Resend, Postmark, etc.) — MailChannels closed its free Workers route in 2024. This collides directly with PRD Open Question #1 (notification delivery channel).
 - **`scheduled()` cron can't be tested by hitting a URL.** It needs `wrangler dev --test-scheduled` plus a request to `/__scheduled` — easy to assume cron is broken when it just needs the test endpoint.
-- **Local `.dev.vars` and production secrets are separate stores.** A secret that works locally is silently absent in prod until `wrangler secret put` — and `createClient` returns `null` by design, so a missing prod secret degrades *quietly* instead of erroring loudly.
+- **Local `.dev.vars` and production secrets are separate stores.** A secret that works locally is silently absent in prod until `wrangler secret put` — and `createClient` returns `null` by design, so a missing prod secret degrades _quietly_ instead of erroring loudly.
 - **A custom domain on Workers requires the domain's DNS to be a Cloudflare-managed zone.** You can't CNAME an externally-registered domain to a Worker; nameservers must move to Cloudflare. (`*.workers.dev` needs nothing.)
-- **Free-tier limits reset daily, not monthly.** The 100k-requests/day cap is generous for this MVP, but a traffic burst (or a runaway cron) is bounded by a *daily* bucket — worth knowing before assuming "free tier = unlimited at small scale".
+- **Free-tier limits reset daily, not monthly.** The 100k-requests/day cap is generous for this MVP, but a traffic burst (or a runaway cron) is bounded by a _daily_ bucket — worth knowing before assuming "free tier = unlimited at small scale".
 
 ## Operational Story
 
 - **Preview deploys**: `npx wrangler versions upload` uploads a new version without routing production traffic and returns a preview URL (`<version-prefix>-<worker-name>.<account-subdomain>.workers.dev`). For PR-based previews, run it from a GitHub Actions workflow on `pull_request`. Preview URLs are public by default — gate them with Cloudflare Access if a preview must not be world-readable.
-- **Secrets**: production secrets live in Workers Secrets, set via `npx wrangler secret put <NAME>` (encrypted, not readable back). Local dev reads `.dev.vars` (gitignored — a *separate* store from production). CI needs a `CLOUDFLARE_API_TOKEN` stored as a GitHub Actions secret, scoped to Workers edit for this one project. Rotation: re-run `wrangler secret put` to overwrite; rotate the Supabase key in the Supabase dashboard first, then update the Worker secret.
-- **Rollback**: `npx wrangler deployments list` to find a prior version, then `npx wrangler rollback [<version-id>]` — near-instant, reverts the Worker code. Caveat: rollback reverts *code only* — a Supabase schema migration applied since the bad deploy does not roll back; reconcile DB state by hand.
+- **Secrets**: production secrets live in Workers Secrets, set via `npx wrangler secret put <NAME>` (encrypted, not readable back). Local dev reads `.dev.vars` (gitignored — a _separate_ store from production). CI needs a `CLOUDFLARE_API_TOKEN` stored as a GitHub Actions secret, scoped to Workers edit for this one project. Rotation: re-run `wrangler secret put` to overwrite; rotate the Supabase key in the Supabase dashboard first, then update the Worker secret.
+- **Rollback**: `npx wrangler deployments list` to find a prior version, then `npx wrangler rollback [<version-id>]` — near-instant, reverts the Worker code. Caveat: rollback reverts _code only_ — a Supabase schema migration applied since the bad deploy does not roll back; reconcile DB state by hand.
 - **Approval**: human-only — first production publish, rotating the Supabase key, deleting the Worker, and any nameserver/custom-domain change. An agent may run unattended: `wrangler dev`, `wrangler tail`, `wrangler deployments list`, and `wrangler versions upload` (preview). Routine production publishes go through reviewed GitHub Actions auto-deploy-on-merge (the starter's CI default).
 - **Logs**: `npx wrangler tail` streams live logs (`--format json`, `--status error`, `--search`). Retroactive logs are already enabled — `observability.enabled: true` is set in `wrangler.jsonc`, so Workers Logs retains invocation logs, queryable in the dashboard or via the Cloudflare observability MCP server.
 
 ## Risk Register
 
-| Risk | Source | Likelihood | Impact | Mitigation |
-|---|---|---|---|---|
-| Adapter regenerates worker output on every build, dropping a hand-injected `scheduled()` handler — reminders silently stop | Devil's advocate / Pre-mortem | M | H | Keep a custom worker entry under version control as `main` (not a post-build patch); add a smoke test or external uptime check asserting the cron fired |
-| 10 ms free-tier CPU limit exceeded by the AI-vision route (10 MB photo decode, JWT verify) | Devil's advocate | M | M | Upload photos directly to Supabase Storage rather than through the Worker; load-test the photo path on real `workerd` before launch; move to the $5 plan if exceeded |
-| `nodejs_compat` shim doesn't cover a Supabase/AI SDK Node API used at the edge | Devil's advocate | L | M | Exercise the full auth + AI path with `wrangler dev` (real `workerd`) before deploy; pin SDK versions |
-| Reminders need an email provider — Cloudflare has no email-send primitive (MailChannels free route closed 2024) | Unknown unknowns / Research finding | H | M | Resolve PRD Open Question #1; pick an email API (Resend/Postmark) and store its key as a Worker secret |
-| Production secret never set via `wrangler secret put` — app degrades silently (`createClient` returns `null`) | Unknown unknowns | M | H | Add a post-deploy health endpoint that asserts Supabase connectivity; include secret-set in the deploy checklist |
-| Worker bundle exceeds the size limit after a late dependency addition | Devil's advocate | L | M | Watch `wrangler deploy` bundle-size output; lazy-import the AI SDK; keep dependencies lean |
-| Following stale Cloudflare *Pages* guidance (the `deployment_target` hint still says `cloudflare-pages`) | Devil's advocate / Research finding | M | L | Project is already on the Workers shape (`assets` + `main` in `wrangler.jsonc`); ignore Pages-era tutorials; correct the stale hint in `tech-stack.md` |
-| Custom domain requires migrating the domain's DNS to a Cloudflare-managed zone | Unknown unknowns | M | L | If a custom domain is needed, plan the nameserver migration up front; `*.workers.dev` needs nothing |
-| A schema migration shipped alongside a deploy can't be undone by `wrangler rollback` | Pre-mortem / Research finding | M | M | Keep migrations additive/backward-compatible; decouple DB migration steps from code deploys |
+| Risk                                                                                                                       | Source                              | Likelihood | Impact | Mitigation                                                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adapter regenerates worker output on every build, dropping a hand-injected `scheduled()` handler — reminders silently stop | Devil's advocate / Pre-mortem       | M          | H      | Keep a custom worker entry under version control as `main` (not a post-build patch); add a smoke test or external uptime check asserting the cron fired              |
+| 10 ms free-tier CPU limit exceeded by the AI-vision route (10 MB photo decode, JWT verify)                                 | Devil's advocate                    | M          | M      | Upload photos directly to Supabase Storage rather than through the Worker; load-test the photo path on real `workerd` before launch; move to the $5 plan if exceeded |
+| `nodejs_compat` shim doesn't cover a Supabase/AI SDK Node API used at the edge                                             | Devil's advocate                    | L          | M      | Exercise the full auth + AI path with `wrangler dev` (real `workerd`) before deploy; pin SDK versions                                                                |
+| Reminders need an email provider — Cloudflare has no email-send primitive (MailChannels free route closed 2024)            | Unknown unknowns / Research finding | H          | M      | Resolve PRD Open Question #1; pick an email API (Resend/Postmark) and store its key as a Worker secret                                                               |
+| Production secret never set via `wrangler secret put` — app degrades silently (`createClient` returns `null`)              | Unknown unknowns                    | M          | H      | Add a post-deploy health endpoint that asserts Supabase connectivity; include secret-set in the deploy checklist                                                     |
+| Worker bundle exceeds the size limit after a late dependency addition                                                      | Devil's advocate                    | L          | M      | Watch `wrangler deploy` bundle-size output; lazy-import the AI SDK; keep dependencies lean                                                                           |
+| Following stale Cloudflare _Pages_ guidance (the `deployment_target` hint still says `cloudflare-pages`)                   | Devil's advocate / Research finding | M          | L      | Project is already on the Workers shape (`assets` + `main` in `wrangler.jsonc`); ignore Pages-era tutorials; correct the stale hint in `tech-stack.md`               |
+| Custom domain requires migrating the domain's DNS to a Cloudflare-managed zone                                             | Unknown unknowns                    | M          | L      | If a custom domain is needed, plan the nameserver migration up front; `*.workers.dev` needs nothing                                                                  |
+| A schema migration shipped alongside a deploy can't be undone by `wrangler rollback`                                       | Pre-mortem / Research finding       | M          | M      | Keep migrations additive/backward-compatible; decouple DB migration steps from code deploys                                                                          |
 
 ## Getting Started
 
@@ -104,11 +104,12 @@ The team shipped on Cloudflare because the starter was pre-wired for it — nobo
 3. **Set production secrets**: `npx wrangler secret put SUPABASE_URL` then `npx wrangler secret put SUPABASE_KEY`. These are independent of the local `.dev.vars` file.
 4. **Deploy**: `npm run build` then `npx wrangler deploy`. The build emits `dist/`; `wrangler.jsonc` already points `main` at the adapter entrypoint, serves `dist/` via the `ASSETS` binding, and has `nodejs_compat` + `observability` configured. Verify the returned `*.workers.dev` URL.
 5. **Wire the reminder cron**: add a `"triggers": { "crons": [...] }` block to `wrangler.jsonc` and a `scheduled()` handler. Because `@astrojs/cloudflare` emits only a `fetch` handler, use a custom worker entry that re-exports the adapter's fetch handler and adds `scheduled()`. Test locally with `npx wrangler dev --test-scheduled`, then request `http://localhost:8787/__scheduled`.
-6. **Note on local dev**: `npm run dev` (`astro dev`) already runs on `workerd` via the adapter — that *is* the day-to-day dev loop. `wrangler dev` is only needed to exercise the cron `scheduled()` handler.
+6. **Note on local dev**: `npm run dev` (`astro dev`) already runs on `workerd` via the adapter — that _is_ the day-to-day dev loop. `wrangler dev` is only needed to exercise the cron `scheduled()` handler.
 
 ## Out of Scope
 
 The following were not evaluated in this research:
+
 - Docker image configuration
 - CI/CD pipeline setup (the starter ships GitHub Actions auto-deploy-on-merge — configuring it is downstream work)
 - Production-scale architecture (multi-region, HA, DR)

@@ -16,15 +16,15 @@ Auth scaffold only: no migrations, empty `src/types.ts`, no tables, no RLS. Supa
 
 ## Key Decisions Made
 
-| Decision | Choice | Why (1 sentence) | Source |
-| --- | --- | --- | --- |
-| Care-events model | Single `care_events` table + `kind` enum | One RLS policy set, extensible, simplest cron/today queries (roadmap left this open) | Plan |
-| Care state storage | Denormalized `next_water_due_at` / `last_watered_at` on `plants` | Today-list + 1-min cron become one indexed scan, not a per-tick aggregate | Plan |
-| RLS ownership | Direct `user_id` on every table → `auth.uid() = user_id` | One predicate, no joins in the hot RLS path, standard Supabase pattern | Plan |
-| Photo storage | Private bucket + storage RLS **now**; `plants.photo_path` references it | Whole isolation boundary (DB + Storage) lands and is verifiable in one foundation | Plan |
-| Delete behavior | `ON DELETE CASCADE` location→plants→care_events, user→all | App warns before delete; retention forbids *background* GC, not explicit deletes | Plan |
-| Forward-compat | Full care-profile + reminder columns on `plants` now | One migration defines the durable shape; slices add logic, not schema | Plan |
-| RLS verification | Manual two-session deny check now; automated pgTAP **deferred** | User decision — test lands in a later test-plan rollout change | Plan |
+| Decision           | Choice                                                                  | Why (1 sentence)                                                                     | Source |
+| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------ |
+| Care-events model  | Single `care_events` table + `kind` enum                                | One RLS policy set, extensible, simplest cron/today queries (roadmap left this open) | Plan   |
+| Care state storage | Denormalized `next_water_due_at` / `last_watered_at` on `plants`        | Today-list + 1-min cron become one indexed scan, not a per-tick aggregate            | Plan   |
+| RLS ownership      | Direct `user_id` on every table → `auth.uid() = user_id`                | One predicate, no joins in the hot RLS path, standard Supabase pattern               | Plan   |
+| Photo storage      | Private bucket + storage RLS **now**; `plants.photo_path` references it | Whole isolation boundary (DB + Storage) lands and is verifiable in one foundation    | Plan   |
+| Delete behavior    | `ON DELETE CASCADE` location→plants→care_events, user→all               | App warns before delete; retention forbids _background_ GC, not explicit deletes     | Plan   |
+| Forward-compat     | Full care-profile + reminder columns on `plants` now                    | One migration defines the durable shape; slices add logic, not schema                | Plan   |
+| RLS verification   | Manual two-session deny check now; automated pgTAP **deferred**         | User decision — test lands in a later test-plan rollout change                       | Plan   |
 
 ## Scope
 
@@ -38,11 +38,11 @@ One migration per concern, ordered so nothing is referenced before it exists and
 
 ## Phases at a Glance
 
-| Phase | What it delivers | Key risk |
-| --- | --- | --- |
-| 1. Core schema + RLS | Enum, 3 tables, FKs/CASCADE, indexes, triggers, full RLS | Silent RLS gap — mitigated by same-migration RLS + manual deny check |
-| 2. Storage bucket + RLS | Private `plant-photos` bucket, per-user-folder policies | Public-bucket or wrong path-segment policy leaks photos |
-| 3. Types + DTOs | Generated types, typed client, `src/types.ts` DTOs | Generated file churns lint/format unless ignored |
+| Phase                   | What it delivers                                         | Key risk                                                             |
+| ----------------------- | -------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1. Core schema + RLS    | Enum, 3 tables, FKs/CASCADE, indexes, triggers, full RLS | Silent RLS gap — mitigated by same-migration RLS + manual deny check |
+| 2. Storage bucket + RLS | Private `plant-photos` bucket, per-user-folder policies  | Public-bucket or wrong path-segment policy leaks photos              |
+| 3. Types + DTOs         | Generated types, typed client, `src/types.ts` DTOs       | Generated file churns lint/format unless ignored                     |
 
 **Prerequisites:** none (parallel with F-01/F-03); Docker for local Supabase (`supabase start`).
 **Estimated effort:** ~1 focused session across 3 phases.
@@ -50,7 +50,7 @@ One migration per concern, ordered so nothing is referenced before it exists and
 ## Open Risks & Assumptions
 
 - Until the automated pgTAP test lands (later change), the **manual** two-session deny check is the only isolation gate — easy to skip under time pressure; the roadmap's "silent RLS gap" risk stays partially open.
-- Denormalized care-state is **app-maintained** (no trigger) — S-04 must update the plant's next-due *and* the event log together, or the today-list desyncs.
+- Denormalized care-state is **app-maintained** (no trigger) — S-04 must update the plant's next-due _and_ the event log together, or the today-list desyncs.
 - `wrangler rollback` does not undo a migration — apply to remote (`supabase db push`) as a deliberate, separate step.
 
 ## Success Criteria (Summary)

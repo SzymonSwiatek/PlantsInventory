@@ -1,4 +1,5 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: Domain Schema with RLS (F-02)
 
 - **Plan**: context/changes/domain-schema-with-rls/plan.md
@@ -9,18 +10,18 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | PASS |
-| Safety & Quality | PASS |
-| Architecture | PASS |
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | PASS    |
+| Scope Discipline    | PASS    |
+| Safety & Quality    | PASS    |
+| Architecture        | PASS    |
 | Pattern Consistency | WARNING |
-| Success Criteria | PASS |
+| Success Criteria    | PASS    |
 
 ## Summary
 
-Faithful, high-quality implementation of an already plan-reviewed plan. Every planned object exists and matches intent; no unplanned source files; all "What We're NOT Doing" boundaries respected. Two details came out *better* than planned:
+Faithful, high-quality implementation of an already plan-reviewed plan. Every planned object exists and matches intent; no unplanned source files; all "What We're NOT Doing" boundaries respected. Two details came out _better_ than planned:
 
 - The same-user FK guards use `is distinct from new.user_id`, comparing the parent's actual owner — so they reject cross-user attaches even if RLS were disabled on the parent, not only via RLS invisibility as the plan described (migration lines 127, 146).
 - Trigger functions set `search_path = ''` and schema-qualify (`public.locations` / `public.plants`) — hardening the plan didn't specify.

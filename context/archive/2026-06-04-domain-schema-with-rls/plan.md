@@ -28,15 +28,15 @@ After this plan:
 - Photos direct-to-Storage is mandated by the 10 ms CPU trap — `context/foundation/infrastructure.md:91`.
 - Care-events modeling was explicitly left to this plan — `context/foundation/roadmap.md:90`.
 - "RLS gaps are silent" is the named foundation risk — `context/foundation/roadmap.md:91`.
-- 12-month no-silent-GC retention guardrail — `context/foundation/prd.md:158`. CASCADE on *user-initiated* deletes does not violate it (it forbids background GC, not explicit deletes).
+- 12-month no-silent-GC retention guardrail — `context/foundation/prd.md:158`. CASCADE on _user-initiated_ deletes does not violate it (it forbids background GC, not explicit deletes).
 - FR-015 requires the detail screen to show "all stored care info **and the original AI suggestion**" — the original suggestion must be retained separately from the edited values.
 
 ## What We're NOT Doing
 
 - **No automated RLS regression test (pgTAP) in this change.** Deferred per user decision; the interim gate is the documented two-session manual deny check. A later change (the `/10x-test-plan` rollout) wires `supabase test db`.
 - **No domain API endpoints, services, or UI.** No `src/pages/api/locations|plants|…`, no React components. Those are S-01/S-02/S-03.
-- **No reminder/cron logic.** `next_water_due_at`, `water_snooze_until`, `winterization_cutoff`, `winterized_at` columns are *created* here but their write/read logic ships in S-04/S-05 (and the `scheduled()` handler in F-03).
-- **No AI-vision call.** The `ai_suggestion` JSON column and `species`/`description` fields are *defined* here; populating them is S-01.
+- **No reminder/cron logic.** `next_water_due_at`, `water_snooze_until`, `winterization_cutoff`, `winterized_at` columns are _created_ here but their write/read logic ships in S-04/S-05 (and the `scheduled()` handler in F-03).
+- **No AI-vision call.** The `ai_suggestion` JSON column and `species`/`description` fields are _defined_ here; populating them is S-01.
 - **No denormalization triggers.** `last_watered_at` / `next_water_due_at` are app-maintained by the slices, not kept in sync by a DB trigger (see Critical Implementation Details).
 - **No seed data** beyond what's needed for the manual deny-check (kept out of the committed `seed.sql` unless trivially useful).
 - **No Storage orphan cleanup.** DB `CASCADE` removes `plants` rows but **not** the Storage objects at their `photo_path` (there is no DB→Storage cascade). Deleting the corresponding objects is owned by the slices that perform deletes — **S-03** (plant delete) and **S-02** (location delete, which cascades plants) — not by this schema foundation.
@@ -53,9 +53,9 @@ Three phases, each one migration or one wiring step, ordered so the schema and i
 
 - **RLS must be enabled in the same migration that creates each table.** Never split "create table" and "enable RLS + policies" across migrations — between them the table is readable by anyone with the anon/authenticated key. Enable RLS and add all policies in the same file, immediately after the table.
 - **Policies use `to authenticated` and `(select auth.uid())`.** Scoping `to authenticated` skips evaluation for `anon` (deny-by-default for logged-out). Wrapping `auth.uid()` in a scalar subquery — `(select auth.uid())` — lets Postgres cache it as an initplan instead of re-evaluating per row; this is the documented Supabase performance pattern and matters for the today-list/cron scans.
-- **Denormalized care-state is app-maintained, not trigger-maintained.** `last_watered_at` / `next_water_due_at` on `plants` are written by the slices (S-01 on create, S-04 on mark-watered), not by a DB trigger. This keeps DB logic transparent and avoids coupling the interval math into the schema. The plan defines the columns + indexes only; the sequencing contract (a care action updates both the event log *and* the plant's next-due) is owned by S-04.
+- **Denormalized care-state is app-maintained, not trigger-maintained.** `last_watered_at` / `next_water_due_at` on `plants` are written by the slices (S-01 on create, S-04 on mark-watered), not by a DB trigger. This keeps DB logic transparent and avoids coupling the interval math into the schema. The plan defines the columns + indexes only; the sequencing contract (a care action updates both the event log _and_ the plant's next-due) is owned by S-04.
 - **Same-user FK integrity needs a trigger, not just RLS.** A child row's owning FK only checks existence, so a user could attach their own row to another user's parent id. This applies to **both** owning FKs in the schema: `plants.location_id` (a plant pointing at another user's location) and `care_events.plant_id` (a care event pointing at another user's plant — the insert `with check` still passes because `user_id` defaults to `auth.uid()`). Each needs a `BEFORE INSERT OR UPDATE` trigger asserting the referenced parent's `user_id` equals the row's `user_id`; RLS alone does not close either.
-- **Commit the generated types file, but exclude it from lint/format — without `.gitignore`-ing it.** `src/db/database.types.ts` is generated and large, so it should be skipped by `eslint .` / `prettier`. But it **must be committed**: CI (`.github/workflows/ci.yml`) runs `npm run build` *without* generating types, and `src/lib/supabase.ts` imports `Database` from it — `.gitignore`-ing the file would drop it from the commit and break the CI build. This repo's ESLint ignores are derived from `.gitignore` (`includeIgnoreFile(gitignorePath)` in `eslint.config.js`, where `.gitignore` already has a `# generated types` section pointing at `.astro/`), so the exclusion must instead be a **new flat-config `{ ignores: ["src/db/database.types.ts"] }` object** in `eslint.config.js`, plus a **new `.prettierignore`** (none exists yet) listing the path. Do **not** add it to `.gitignore`.
+- **Commit the generated types file, but exclude it from lint/format — without `.gitignore`-ing it.** `src/db/database.types.ts` is generated and large, so it should be skipped by `eslint .` / `prettier`. But it **must be committed**: CI (`.github/workflows/ci.yml`) runs `npm run build` _without_ generating types, and `src/lib/supabase.ts` imports `Database` from it — `.gitignore`-ing the file would drop it from the commit and break the CI build. This repo's ESLint ignores are derived from `.gitignore` (`includeIgnoreFile(gitignorePath)` in `eslint.config.js`, where `.gitignore` already has a `# generated types` section pointing at `.astro/`), so the exclusion must instead be a **new flat-config `{ ignores: ["src/db/database.types.ts"] }` object** in `eslint.config.js`, plus a **new `.prettierignore`** (none exists yet) listing the path. Do **not** add it to `.gitignore`.
 
 ---
 
@@ -237,7 +237,7 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 
 ### Manual Testing Steps:
 
-**Setup — two test users + a SQL impersonation harness.** `auth.uid()` reads `request.jwt.claims->>'sub'`; a raw `psql` session has no JWT (so `auth.uid()` is NULL) and the app has no domain UI yet, so the deny check is run by *impersonating* each user inside a transaction rather than through the app.
+**Setup — two test users + a SQL impersonation harness.** `auth.uid()` reads `request.jwt.claims->>'sub'`; a raw `psql` session has no JWT (so `auth.uid()` is NULL) and the app has no domain UI yet, so the deny check is run by _impersonating_ each user inside a transaction rather than through the app.
 
 1. `supabase db reset` — confirm all migrations apply with no error.
 2. Create two users and capture their UUIDs (local Studio → Authentication → Add user, or the auth admin API). Call them `A_UID` and `B_UID`.
@@ -257,7 +257,7 @@ Generate TypeScript types from the schema, make the Supabase client generic-type
 4. **Cross-user deny check** — open a new transaction impersonating user B (`set local request.jwt.claims = '{"sub":"<B_UID>",…}'`) and attempt `select`/`update`/`delete` on user A's `locations`, `plants`, `care_events`. Expect **zero rows returned** and **zero rows affected** on every operation.
 5. **Same-user FK guards** — still as user A, attempt (a) `insert into plants (location_id, …)` referencing user B's `location_id`, and (b) `insert into care_events (plant_id, …)` referencing user B's `plant_id`. Both must be **rejected by the guard trigger** (the referenced parent is invisible under RLS, so the subquery returns NULL ≠ `auth.uid()`).
 6. **CASCADE** — delete user A's location and confirm its plants and their care_events are gone; deleting `A_UID` from `auth.users` removes all of A's rows.
-7. **Storage deny check** — using an *authenticated* client/session (not raw SQL — `storage.objects` RLS needs a real signed request), as user A upload an object under `A_UID/…` (succeeds) and attempt upload/read under `B_UID/…` (denied). The local Studio Storage UI signed in as each user, or a small script using the anon key + each user's session, exercises this.
+7. **Storage deny check** — using an _authenticated_ client/session (not raw SQL — `storage.objects` RLS needs a real signed request), as user A upload an object under `A_UID/…` (succeeds) and attempt upload/read under `B_UID/…` (denied). The local Studio Storage UI signed in as each user, or a small script using the anon key + each user's session, exercises this.
 
 ## Performance Considerations
 

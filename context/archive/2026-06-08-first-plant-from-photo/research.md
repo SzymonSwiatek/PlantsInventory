@@ -54,16 +54,16 @@ For the S-01 slice `first-plant-from-photo` (a signed-in user uploads a plant ph
 
 **`plants` table — the form's target** (core migration ~L45–66). Required on insert: `name text` (CHECK `char_length(btrim(name)) between 1 and 100`), `location_id uuid` (FK → `locations`, ON DELETE CASCADE). Server-defaulted: `id` (`gen_random_uuid()`), `user_id` (`auth.uid()`), `created_at`/`updated_at` (`now()`). AI-fillable / user-editable (all nullable):
 
-| Column | Type | Role |
-| --- | --- | --- |
-| `species` | `text` | AI species guess (user can override) |
-| `description` | `text` | AI short prose description |
-| `sunlight` | `text` | AI light needs (free text, **not** an enum) |
-| `watering_interval_days` | `integer` | CHECK `> 0`; AI suggestion or NULL |
-| `winterization_cutoff` | `date` | NULL = "no winterization" |
-| `note` | `text` | FR-017 free-text note |
-| `photo_path` | `text` | Storage object key (`<uid>/<plant_id>/<file>`) |
-| `ai_suggestion` | `jsonb` | **write-once** snapshot of the original AI suggestion |
+| Column                   | Type      | Role                                                  |
+| ------------------------ | --------- | ----------------------------------------------------- |
+| `species`                | `text`    | AI species guess (user can override)                  |
+| `description`            | `text`    | AI short prose description                            |
+| `sunlight`               | `text`    | AI light needs (free text, **not** an enum)           |
+| `watering_interval_days` | `integer` | CHECK `> 0`; AI suggestion or NULL                    |
+| `winterization_cutoff`   | `date`    | NULL = "no winterization"                             |
+| `note`                   | `text`    | FR-017 free-text note                                 |
+| `photo_path`             | `text`    | Storage object key (`<uid>/<plant_id>/<file>`)        |
+| `ai_suggestion`          | `jsonb`   | **write-once** snapshot of the original AI suggestion |
 
 Reminder-state columns also exist (`last_watered_at`, `next_water_due_at`, `water_snooze_until`, `winterized_at`) but their write logic is **owned by S-04/S-05** — leave NULL on create. Partial index `plants_user_next_water_due_idx on (user_id, next_water_due_at) WHERE next_water_due_at IS NOT NULL` is for the future today-list/cron.
 
@@ -76,12 +76,13 @@ Reminder-state columns also exist (`last_watered_at`, `next_water_due_at`, `wate
 **DTO surface** — `src/types.ts` is the **stable import boundary; feature code imports from here, never from `database.types.ts`** (per the file's own header). Exports: `Location`/`Plant`/`CareEvent` (Rows), `LocationInsert`/`PlantInsert`/`CareEventInsert`, `LocationUpdate`/`PlantUpdate`/`CareEventUpdate`, `CareEventKind`, and:
 
 ```ts
-export interface AiSuggestion {        // src/types.ts:36-42 — shape stored in plants.ai_suggestion
+export interface AiSuggestion {
+  // src/types.ts:36-42 — shape stored in plants.ai_suggestion
   species: string | null;
   description: string | null;
   sunlight: string | null;
   watering_interval_days: number | null;
-  winterization_cutoff: string | null;  // ISO date YYYY-MM-DD
+  winterization_cutoff: string | null; // ISO date YYYY-MM-DD
 }
 ```
 
@@ -92,17 +93,20 @@ This is the contract the AI provider response should be normalized into, and the
 **Client factory** (`src/lib/supabase.ts:6-24`): `createClient(requestHeaders: Headers, cookies: AstroCookies)` builds a `createServerClient<Database>(...)` (typed!) from `SUPABASE_URL`/`SUPABASE_KEY` (imported from `astro:env/server`), parsing the inbound `Cookie` header and writing refreshed cookies back. **Returns `null` when unconfigured** (`:7-9`) — every caller null-checks. Because it carries the request JWT, `auth.uid()` resolves correctly inside both table RLS and storage RLS, and `.storage.from('plant-photos')` is usable on the same client — **no separate client needed for uploads**.
 
 **Middleware** (`src/middleware.ts`): builds a client, calls `supabase.auth.getUser()`, sets `context.locals.user = user ?? null`. `PROTECTED_ROUTES = ["/dashboard"]` (`:4`) — `startsWith` match, redirect to `/auth/signin`. **Two consequences for the plan:**
+
 - A new page like `/plants` or `/locations/[id]` is **public until added to `PROTECTED_ROUTES`**.
 - `locals.supabase` is **not** set — middleware discards its client. Each endpoint/page calls `createClient(...)` itself.
 
 **`src/env.d.ts`**: `App.Locals` has only `user: User | null`. No `supabase`.
 
 **Endpoint conventions** — all existing handlers are form-POST + redirect, none return JSON:
+
 - `src/pages/api/auth/signin.ts` — `export const POST: APIRoute`, reads `await context.request.formData()`, null-checks client → `context.redirect('/auth/signin?error=' + encodeURIComponent(...))`, calls `signInWithOtp({ email, options:{ emailRedirectTo: ${origin}/auth/confirm } })`, success → `/auth/check-email`.
 - `src/pages/api/auth/signout.ts` — minimal POST, null-degrades, redirects `/`.
 - `src/pages/auth/confirm.ts` — `GET: APIRoute` magic-link callback: `verifyOtp({ type, token_hash })`, with an open-redirect guard `safeNext()` on `?next=` (default `/dashboard`).
 
 **New-endpoint guidance (no JSON endpoint exists yet — this slice establishes it):**
+
 - `export const POST: APIRoute = async (context) => {…}`; build client via `createClient(context.request.headers, context.cookies)`; null-check.
 - **Guard auth in-endpoint** (because `/api/*` isn't in `PROTECTED_ROUTES`): read `context.locals.user`, return 401 if null.
 - JSON body: `await context.request.json()`; photo multipart: `await context.request.formData()` + `form.get('photo') as File`.
@@ -114,6 +118,7 @@ This is the contract the AI provider response should be normalized into, and the
 ### Area 3 — Frontend building blocks (form island, UI kit, layout)
 
 **Reusable form-island pattern** (the template to copy for the Add-Plant form):
+
 - `src/components/auth/SignInForm.tsx` — `useState` form state, **native** `<form method="POST" action="/api/...">` (not `fetch`), client-side validation before submit, server errors via `serverError` prop / URL `?error=`. No form library (no react-hook-form).
 - `src/components/auth/FormField.tsx` — controlled input + label + error/hint + left icon (auth-styled, hardcoded colors — reference, not directly reusable).
 - `src/components/auth/SubmitButton.tsx` — uses `useFormStatus()` for the pending/spinner state (works with native form POST).
@@ -134,9 +139,11 @@ This is the contract the AI provider response should be normalized into, and the
 ### Area 4 — Runtime, secrets, AI seam & storage-upload constraints
 
 **Secret pattern** (`astro.config.mjs:17-22`): two secrets declared identically — `envField.string({ context:"server", access:"secret", optional:true })` — read via `import { SUPABASE_URL, SUPABASE_KEY } from "astro:env/server"` (`src/lib/supabase.ts:3`). `access:"secret"` means runtime-read, **not** baked into the bundle. **To add the AI key**, append to the schema:
+
 ```js
 AI_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
 ```
+
 Keep `optional: true` — a missing key must degrade to manual create (PRD guardrail "catalog survives AI outage"), not throw. Add base-URL/model as sibling `envField.string` entries if the chosen provider needs them.
 
 **Local + prod stores are separate.** `.env` (Node toolchain) and `.dev.vars` (workerd local) are gitignored; `.env.example` documents keys (currently `SUPABASE_URL`, `SUPABASE_KEY`). Dev must add `AI_API_KEY` to **both** `.dev.vars` and `.env`, plus `AI_API_KEY=###` to `.env.example`. Prod needs `npx wrangler secret put AI_API_KEY` separately — a missing prod secret degrades **silently** (same trap as Supabase).
@@ -144,6 +151,7 @@ Keep `optional: true` — a missing key must degrade to manual create (PRD guard
 **`wrangler.jsonc`**: `name:"10x-plants-inventory"` (**tripwire resolved** — CLAUDE.md is stale; `package.json` matches), `main:"@astrojs/cloudflare/entrypoints/server"`, `compatibility_date:"2026-05-08"`, `compatibility_flags:["nodejs_compat"]`, Workers-with-static-assets (`assets` binding `ASSETS`, `./dist`), `observability.enabled:true`, **no `vars`, no secrets bindings, no `triggers.crons`** (correct — cron is deferred to S-04/S-05). First deploy auto-provisioned a KV `SESSION` and an unused Cloudflare `IMAGES` binding (storage routes to Supabase, not Cloudflare Images — ignore `IMAGES` for this slice).
 
 **workerd constraints that shape the design:**
+
 - Standard `fetch` to the AI provider works (no adapter). `nodejs_compat` is a **partial** shim — a Node-oriented AI SDK reaching for `fs`/`net`/stream internals can fail only at the edge; **lazy-import** any SDK and exercise the path on real `wrangler dev`/`workerd` before deploy. Keep the bundle lean (current 391 KiB gzip; free-tier cap ~3 MB).
 - `Request.formData()`/`File`/`Blob` are supported (auth routes already use `formData()`), **but** the team decided **not** to stream the 10 MB image through the Worker at all (next point).
 - **CPU ~10 ms free tier** is the binding constraint and the reason decoding a ~10 MB image in-Worker is forbidden (infrastructure.md). Workers bill **CPU**, not wall-clock, so an `await`ed ~10 s AI `fetch` does **not** by itself blow the CPU budget while suspended.
@@ -177,7 +185,7 @@ GitHub permalinks (commit `14446b1`). Local `path:line` anchors are also clickab
 ## Architecture Insights
 
 - **Type flow is deliberate and one-directional:** SQL migration → `supabase gen types` → `src/db/database.types.ts` → re-exported DTOs in `src/types.ts` → feature code. Feature code must import from `src/types.ts` (the generated file is lint/format-excluded and not a stable boundary). `PlantInsert` and `AiSuggestion` are the two types the plan will lean on.
-- **Security is layered, not UI-trusted:** per-user isolation is enforced at the DB (RLS `auth.uid() = user_id`), reinforced by FK-guard triggers (cross-user references), and at Storage (per-folder RLS via the `<uid>/…` key). The endpoint inherits all of this for free *as long as it uses the JWT-scoped client* and does not pass an explicit foreign `user_id`.
+- **Security is layered, not UI-trusted:** per-user isolation is enforced at the DB (RLS `auth.uid() = user_id`), reinforced by FK-guard triggers (cross-user references), and at Storage (per-folder RLS via the `<uid>/…` key). The endpoint inherits all of this for free _as long as it uses the JWT-scoped client_ and does not pass an explicit foreign `user_id`.
 - **The `ai_suggestion jsonb` column is a product decision encoded in the schema:** it exists to snapshot the original suggestion write-once, feeding both the FR-015 "view original" surface and the ≥75% acceptance metric (diff saved-vs-suggested). The plan should persist the normalized `AiSuggestion` on create and never overwrite it on edit.
 - **The "don't put bytes in the Worker" rule is the spine of the design** — it dictates direct-to-Storage signed upload, an AI route that reads from Storage, lazy-imported SDKs, and a lean bundle. Violating it (server-side `storage.upload(file)`, decoding the image in-Worker) is the single most likely way to break the 10 MB NFR on the free tier.
 - **The slice establishes three new conventions the codebase doesn't have yet:** the first JSON-returning API endpoint, the first `fetch`-based (non-native-POST) form island, and the first domain list/CRUD UI. These are net-new patterns, so the plan should set them thoughtfully (they'll be copied by S-02/S-03).

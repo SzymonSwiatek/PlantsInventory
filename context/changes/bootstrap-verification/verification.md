@@ -52,10 +52,10 @@ solo-builder workflow.
 
 ## Pre-scaffold verification
 
-| Signal       | Value                                                                | Severity | Notes                                                            |
-| ------------ | -------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
-| npm package  | not run                                                              | n/a      | cmd_template starts with `git clone`; no npm CLI to version-check |
-| GitHub repo  | przeprogramowani/10x-astro-starter last pushed 2026-05-17T10:33:39Z  | fresh    | from card.docs_url; 3 days old at bootstrap time                  |
+| Signal      | Value                                                               | Severity | Notes                                                             |
+| ----------- | ------------------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| npm package | not run                                                             | n/a      | cmd_template starts with `git clone`; no npm CLI to version-check |
+| GitHub repo | przeprogramowani/10x-astro-starter last pushed 2026-05-17T10:33:39Z | fresh    | from card.docs_url; 3 days old at bootstrap time                  |
 
 ## Scaffold log
 
@@ -68,6 +68,7 @@ solo-builder workflow.
 **.bootstrap-scaffold cleanup**: deleted (after .git/ removal per git-clone strategy)
 
 **Engine warnings during `npm install` (informational, install succeeded)**:
+
 - Local Node version: v22.11.0
 - astro@6.3.1 requires Node >=22.12.0
 - vite@7.3.3 requires Node ^20.19.0 || >=22.12.0
@@ -94,11 +95,13 @@ None.
 #### MODERATE findings
 
 Direct (3):
+
 - **@astrojs/check** — via @astrojs/language-server → volar-service-yaml → yaml-language-server → yaml (advisory 1115556)
 - **@astrojs/cloudflare** — via @cloudflare/vite-plugin and wrangler (chains into miniflare → ws advisory 1119108)
 - **wrangler** — via miniflare → ws (advisory 1119108)
 
 Transitive (7):
+
 - **@astrojs/language-server**, **@cloudflare/vite-plugin**, **miniflare**, **volar-service-yaml**, **ws**, **yaml**, **yaml-language-server**
 
 All MODERATE findings cluster around two upstream advisories: the `ws` DoS advisory (1119108) reached through Miniflare, and the `yaml` parsing advisory (1115556) reached through the YAML language server. Neither is fixable by changing a direct dependency in the starter today — both clear when upstream packages bump their pins.
@@ -109,27 +112,28 @@ None.
 
 ## Hints recorded but not acted on
 
-| Hint                       | Value                |
-| -------------------------- | -------------------- |
-| bootstrapper_confidence    | first-class          |
-| quality_override           | false                |
-| path_taken                 | standard             |
-| self_check_answers         | null                 |
-| team_size                  | solo                 |
-| deployment_target          | cloudflare-pages     |
-| ci_provider                | github-actions       |
-| ci_default_flow            | auto-deploy-on-merge |
-| has_auth                   | true                 |
-| has_payments               | false                |
-| has_realtime               | false                |
-| has_ai                     | true                 |
-| has_background_jobs        | true                 |
+| Hint                    | Value                |
+| ----------------------- | -------------------- |
+| bootstrapper_confidence | first-class          |
+| quality_override        | false                |
+| path_taken              | standard             |
+| self_check_answers      | null                 |
+| team_size               | solo                 |
+| deployment_target       | cloudflare-pages     |
+| ci_provider             | github-actions       |
+| ci_default_flow         | auto-deploy-on-merge |
+| has_auth                | true                 |
+| has_payments            | false                |
+| has_realtime            | false                |
+| has_ai                  | true                 |
+| has_background_jobs     | true                 |
 
 ## Next steps
 
 Next: a future skill will set up agent context (CLAUDE.md, AGENTS.md). For now, your project is scaffolded and verified — happy hacking.
 
 Useful manual steps in the meantime:
+
 - `git init` (if you have not already) to start your own repo history.
 - Review `CLAUDE.md.scaffold` and decide what (if anything) from the starter's instructions you want to merge into your existing `CLAUDE.md`.
 - Switch Node to a version that satisfies the starter's engines: `nvm use` (uses the shipped `.nvmrc`) or upgrade to ≥22.13.0.

@@ -79,12 +79,12 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                            | Goal (one line)                                                                                                                     | Risks covered | Test types                                                                                       | Status      | Change folder                  |
-| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------ | ----------- | ------------------------------ |
-| 1   | Bootstrap + AI-parse unit suite       | Stand up the runner; prove the suggestion normalizer never throws and emits a contract-valid profile across provider shape variants | #5            | unit                                                                                             | complete    | context/changes/ai-parse-unit/ |
-| 2   | Isolation & auth-boundary integration | One two-session harness vs local Supabase proves cross-user denial, storage-path scoping, and endpoint auth gating                  | #2, #3, #4    | integration                                                                                      | not started | —                              |
-| 3   | AI-outage resilience                  | Fault-inject the provider; prove the add-plant flow degrades to manual entry with the photo preserved                               | #1            | integration (fault injection) + thin e2e only if the UI fallback is unreachable from integration | not started | —                              |
-| 4   | Quality-gates wiring                  | Add the test step to CI and lock unit + integration as a required gate                                                              | cross-cutting | gates                                                                                            | not started | —                              |
+| #   | Phase name                            | Goal (one line)                                                                                                                     | Risks covered | Test types                                                                                       | Status      | Change folder                              |
+| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------ | ----------- | ------------------------------------------ |
+| 1   | Bootstrap + AI-parse unit suite       | Stand up the runner; prove the suggestion normalizer never throws and emits a contract-valid profile across provider shape variants | #5            | unit                                                                                             | complete    | context/changes/ai-parse-unit/             |
+| 2   | Isolation & auth-boundary integration | One two-session harness vs local Supabase proves cross-user denial, storage-path scoping, and endpoint auth gating                  | #2, #3, #4    | integration                                                                                      | complete    | context/changes/auth-boundary-integration/ |
+| 3   | AI-outage resilience                  | Fault-inject the provider; prove the add-plant flow degrades to manual entry with the photo preserved                               | #1            | integration (fault injection) + thin e2e only if the UI fallback is unreachable from integration | not started | —                                          |
+| 4   | Quality-gates wiring                  | Add the test step to CI and lock unit + integration as a required gate                                                              | cross-cutting | gates                                                                                            | not started | —                                          |
 
 **Status vocabulary** (fixed — parser literals):
 
@@ -186,7 +186,47 @@ untrusted input into a typed contract.
 
 ### 6.2 Adding an integration test
 
-- TBD — see §3 Phase 2 (two-session local-Supabase harness: cross-user denial, storage-path scoping, endpoint auth gating).
+Pattern proven by `tests/integration/` (Risk #2 / #3 / #4 suites).
+Use it for any test that must run against a real Supabase DB, Storage, or
+a running SSR server — where mocks would undercut the signal.
+
+- **Separate runner.** Integration tests live under `tests/integration/` and
+  use `vitest.integration.config.ts` (not `vitest.config.ts`). Run them with
+  `npm run test:integration`. `vitest.config.ts` excludes `tests/integration/**`
+  so `npm run test:run` stays Docker-free. New integration files must match
+  `*.integration.test.ts`.
+- **Preflight via `globalSetup`.** `tests/integration/globalSetup.ts` shells
+  `supabase status --output json`, captures `API_URL` / `ANON_KEY` /
+  `SERVICE_ROLE_KEY` into `process.env.SUPABASE_TEST_*`, and fails fast with
+  "run `npx supabase start` first" if Supabase is not up. Every test file
+  relies on these env vars — never hardcode keys.
+- **Two-client split: service-role for seed/teardown, anon-sessioned for
+  assertions.** Use `serviceRoleClient()` (from `tests/integration/helpers/clients.ts`)
+  only in `beforeAll`/`afterAll` to mint and delete users via `admin.*`. Every
+  assertion runs through a `sessionedClient(session)` — the anon-key client
+  carrying the user's access token — so RLS is never bypassed during the test.
+- **Fresh unique users per file.** Call `createTestUser()` (from
+  `tests/integration/helpers/sessions.ts`) in `beforeAll`. It mints a
+  timestamp-suffixed email + password, immediately signs in, and returns
+  `{ id, email, session, client }`. Unique emails prevent collisions on parallel
+  runs and re-runs (local rate limit: 30 sign-ins / 5 min).
+- **Assert denied / zero-rows shapes, not "no error".** For RLS scenarios:
+  - SELECT → `data` is an empty array, no error object.
+  - UPDATE / DELETE of a row you don't own → zero rows affected (row is
+    invisible to RLS; use `count` or check `data` length, not `error`).
+  - INSERT with a cross-user parent FK → `error.code === "23514"` (trigger
+    `check_violation` from the app's `SECURITY INVOKER` BEFORE-triggers).
+  - Storage cross-user write → denied (RLS `WITH CHECK`); read → denied / not found.
+- **Storage teardown is explicit.** `admin.deleteUser` cascades FK rows but
+  leaves `storage.objects`. Call `deleteTestUser(user)` (the helper lists then
+  removes objects under `${user.id}/` before calling `admin.deleteUser`) to keep
+  the bucket clean across runs.
+- **Reference files:** `tests/integration/globalSetup.ts`,
+  `tests/integration/helpers/clients.ts`,
+  `tests/integration/helpers/sessions.ts`,
+  `tests/integration/smoke.integration.test.ts` (session-fixture smoke),
+  `tests/integration/isolation.integration.test.ts` (RLS matrix),
+  `tests/integration/storage.integration.test.ts` (IDOR / Storage RLS).
 
 ### 6.3 Adding an e2e test
 
@@ -194,7 +234,38 @@ untrusted input into a typed contract.
 
 ### 6.4 Adding a test for a new API endpoint
 
-- TBD — see §3 Phase 2 (auth-gating + ownership pattern for `src/pages/api/` routes; assert 401/redirect for no session before asserting the authed shape).
+Pattern proven by `tests/integration/auth-boundary.integration.test.ts` (Risk #3).
+Use it for any new `src/pages/api/` route to lock in its no-session and
+invalid-session behavior before it ships.
+
+- **Boot the real SSR app.** The auth-boundary suite uses
+  `tests/integration/helpers/server.ts` — `startServer()` spawns `astro dev` on
+  a test port with `SUPABASE_URL` / `SUPABASE_KEY` set to the captured local
+  `API_URL` / `ANON_KEY` (wired via env on the child process and/or a temp
+  `.dev.vars`). Call `startServer()` in `beforeAll` and `stop()` in `afterAll`.
+  Scope the server lifecycle to the file that needs it — other suites (RLS,
+  Storage) should not pay the boot cost.
+- **`redirect: "manual"` is required.** Every `fetch` in the auth-boundary suite
+  must pass `{ redirect: "manual" }` — otherwise a 302 to `/auth/signin` is
+  silently followed to a 200 and the denial is invisible.
+- **Assert the heterogeneous deny contract, not a uniform 401.** API routes are
+  outside `PROTECTED_ROUTES` and self-guard; their no-session responses differ:
+  - JSON `POST` endpoints (e.g. `/api/plants`, `/api/plants/upload-url`) → **401 JSON** `{error:"unauthorized"}`.
+  - Form-POST endpoints (e.g. `/api/locations`) → **302** to `/auth/signin`.
+  - Protected page routes (`/dashboard`, `/locations/*`) → **302** to `/auth/signin`.
+  - Public routes (`/`, `/auth/signin`, `/auth/check-email`) → **200**.
+    Use `it.each` over a `[route, method, expectedStatus]` table — one row per
+    endpoint — rather than a shared `expect(status).toBe(401)` loop.
+- **Test the costly endpoint first.** For `POST /api/plants/suggest`: assert the
+  response is 401 JSON with the `unauthorized` shape. A 401 proves the
+  `requireUser` guard fired before the AI call (a 200 with `ai_unavailable`
+  would mean the guard was bypassed).
+- **Add an invalid-session case.** Repeat one JSON endpoint and one protected
+  page with a garbage `sb-...-auth-token` cookie value → same deny status as
+  no-session. This proves `getUser()` actually validates the token (not just
+  checks presence).
+- **Reference files:** `tests/integration/helpers/server.ts`,
+  `tests/integration/auth-boundary.integration.test.ts`.
 
 ### 6.5 Adding a fault-injection test for an external provider
 

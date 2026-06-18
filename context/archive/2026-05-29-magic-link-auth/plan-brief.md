@@ -16,16 +16,16 @@ A user opens `/auth/signin`, types their email, clicks "Send sign-in link", and 
 
 ## Key Decisions Made
 
-| Decision                       | Choice                                                                                  | Why                                                                                                                  | Source |
-| ------------------------------ | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------ |
-| Entry-form shape               | Single combined `/auth/signin` page (email-only); `/auth/signup` becomes a 308 redirect | Matches PRD verbatim ("Sign-up and sign-in collapse into a single flow"); no signin-vs-signup decision for the user | Plan   |
-| Verification pattern           | GET `/auth/confirm` with `verifyOtp({ token_hash, type: 'email' })`                     | Current Supabase SSR recommendation; works directly with cookie-session middleware; easy to curl-test                | Plan   |
-| Post-submit screen             | Redirect to renamed `/auth/check-email` page (was `confirm-email`)                      | Reuses existing page; clean separation between "request" and "waiting" states; survives refresh                      | Plan   |
-| Landing target                 | `/dashboard` by default; same-origin `?next=` override                                  | Sets up deep-link reminders (S-04/S-05) without paying for them now; sanitization stops open-redirect                | Plan   |
-| Sign-out scope                 | Local session only (default `signOut()`)                                                | PRD explicitly defers "sign me out of all devices" out of v1; current behavior is already correct                    | Plan   |
-| Bad-link error UX              | Redirect to `/auth/signin?error=<msg>` (reuses `ServerError`)                           | One click from recovery; no new pages; both expired and reused collapse to "request a new link"                      | Plan   |
-| Email template ownership       | Commit `supabase/templates/magic_link.html`, reference from `config.toml`               | Required — default template lacks `{{ .TokenHash }}`; git-tracked template keeps local + prod in sync                | Plan   |
-| Production SMTP                | Out of scope — defer to S-04 (which also needs a real provider)                         | Avoids duplicate setup; respects main_goal=speed; Inbucket covers local, Supabase default sender covers dev-on-prod  | Plan   |
+| Decision                 | Choice                                                                                  | Why                                                                                                                 | Source |
+| ------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------ |
+| Entry-form shape         | Single combined `/auth/signin` page (email-only); `/auth/signup` becomes a 308 redirect | Matches PRD verbatim ("Sign-up and sign-in collapse into a single flow"); no signin-vs-signup decision for the user | Plan   |
+| Verification pattern     | GET `/auth/confirm` with `verifyOtp({ token_hash, type: 'email' })`                     | Current Supabase SSR recommendation; works directly with cookie-session middleware; easy to curl-test               | Plan   |
+| Post-submit screen       | Redirect to renamed `/auth/check-email` page (was `confirm-email`)                      | Reuses existing page; clean separation between "request" and "waiting" states; survives refresh                     | Plan   |
+| Landing target           | `/dashboard` by default; same-origin `?next=` override                                  | Sets up deep-link reminders (S-04/S-05) without paying for them now; sanitization stops open-redirect               | Plan   |
+| Sign-out scope           | Local session only (default `signOut()`)                                                | PRD explicitly defers "sign me out of all devices" out of v1; current behavior is already correct                   | Plan   |
+| Bad-link error UX        | Redirect to `/auth/signin?error=<msg>` (reuses `ServerError`)                           | One click from recovery; no new pages; both expired and reused collapse to "request a new link"                     | Plan   |
+| Email template ownership | Commit `supabase/templates/magic_link.html`, reference from `config.toml`               | Required — default template lacks `{{ .TokenHash }}`; git-tracked template keeps local + prod in sync               | Plan   |
+| Production SMTP          | Out of scope — defer to S-04 (which also needs a real provider)                         | Avoids duplicate setup; respects main_goal=speed; Inbucket covers local, Supabase default sender covers dev-on-prod | Plan   |
 
 ## Scope
 
@@ -74,11 +74,11 @@ Three vertical phases, each independently verifiable: Phase 1 lands the email te
 
 ## Phases at a Glance
 
-| Phase                                       | What it delivers                                                             | Key risk                                                                                |
-| ------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| 1. Email delivery and Supabase config       | Custom magic-link template + config wired; Inbucket shows correct link       | Template placeholder typo silently breaks `verifyOtp` — caught by Phase 1's manual step |
-| 2. Server-side auth flow                    | `/api/auth/signin` (OTP) + `/auth/confirm` (verify); curl round-trip works   | Cookies not persisting on redirect, or `?next` becoming an open-redirect vector         |
-| 3. UI cleanup and single entry surface      | Email-only `SignInForm`, renamed `check-email`, signup redirect, deletions   | Stale references to deleted components/imports break the build                          |
+| Phase                                  | What it delivers                                                           | Key risk                                                                                |
+| -------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 1. Email delivery and Supabase config  | Custom magic-link template + config wired; Inbucket shows correct link     | Template placeholder typo silently breaks `verifyOtp` — caught by Phase 1's manual step |
+| 2. Server-side auth flow               | `/api/auth/signin` (OTP) + `/auth/confirm` (verify); curl round-trip works | Cookies not persisting on redirect, or `?next` becoming an open-redirect vector         |
+| 3. UI cleanup and single entry surface | Email-only `SignInForm`, renamed `check-email`, signup redirect, deletions | Stale references to deleted components/imports break the build                          |
 
 **Prerequisites:** Local Supabase running (`npx supabase start`), Docker available, `.env`/`.dev.vars` populated from `.env.example`. No upstream roadmap dependencies (F-01 is itself a foundation).
 **Estimated effort:** ~1–2 working sessions across the three phases — most of the time is in manual end-to-end verification, not code.

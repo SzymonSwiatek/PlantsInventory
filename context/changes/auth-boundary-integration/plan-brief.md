@@ -27,15 +27,15 @@ with its correct status. `npm test` (unit) stays hermetic and Docker-free.
 
 ## Key Decisions Made
 
-| Decision | Choice | Why (1 sentence) | Source |
-| --- | --- | --- | --- |
-| Risk #3 seam | Real running SSR server + `fetch` (no cookie) | Only seam that validates the _configured_ boundary — that `/api/**` is outside `PROTECTED_ROUTES` | Plan |
-| Risks #2/#4 seam | Direct local Supabase, two sessioned clients | Cheapest real signal; tests the exact production (JWT-scoped) path | Research |
-| Session minting | Service-role for seed/teardown; anon sessions for assertions | Deterministic seed + cascade cleanup, yet assertions never bypass RLS | Plan |
-| Local Supabase + keys | `globalSetup` checks `supabase status`, captures keys, fails fast | Deterministic, no committed secrets, doubles as the Docker gate | Plan |
-| Suite separation | Separate `vitest.integration.config.ts` + `test:integration` | Keeps the fast unit gate green without Docker | Plan |
-| Test isolation | Fresh unique users per file + explicit storage teardown | Parallel-safe & re-runnable; storage objects aren't FK-cascaded | Plan |
-| RLS test layer | Vitest two-session only (no pgTAP) | One tool/harness; matches §4 stack + research | Plan |
+| Decision              | Choice                                                            | Why (1 sentence)                                                                                  | Source   |
+| --------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| Risk #3 seam          | Real running SSR server + `fetch` (no cookie)                     | Only seam that validates the _configured_ boundary — that `/api/**` is outside `PROTECTED_ROUTES` | Plan     |
+| Risks #2/#4 seam      | Direct local Supabase, two sessioned clients                      | Cheapest real signal; tests the exact production (JWT-scoped) path                                | Research |
+| Session minting       | Service-role for seed/teardown; anon sessions for assertions      | Deterministic seed + cascade cleanup, yet assertions never bypass RLS                             | Plan     |
+| Local Supabase + keys | `globalSetup` checks `supabase status`, captures keys, fails fast | Deterministic, no committed secrets, doubles as the Docker gate                                   | Plan     |
+| Suite separation      | Separate `vitest.integration.config.ts` + `test:integration`      | Keeps the fast unit gate green without Docker                                                     | Plan     |
+| Test isolation        | Fresh unique users per file + explicit storage teardown           | Parallel-safe & re-runnable; storage objects aren't FK-cascaded                                   | Plan     |
+| RLS test layer        | Vitest two-session only (no pgTAP)                                | One tool/harness; matches §4 stack + research                                                     | Plan     |
 
 ## Scope
 
@@ -59,13 +59,13 @@ separate Vitest config; `vitest.config.ts` excludes that dir.
 
 ## Phases at a Glance
 
-| Phase | What it delivers | Key risk |
-| --- | --- | --- |
-| 1. Harness foundation | Separate config + `test:integration`, `globalSetup` preflight, two-client session fixtures, cleanup, smoke test | Forgetting to exclude `tests/integration/**` from the unit config breaks the hermetic gate |
-| 2. Risk #2 (RLS) | Table × operation denial matrix, `23514` child-scoping, anon denial, cascade | Under-testing the trigger-based child-scoping (RLS alone doesn't stop it) |
-| 3. Risk #4 (IDOR) | Cross-user storage read/write/sign denial; owner path succeeds | Storage teardown (objects aren't FK-cascaded) leaking across runs |
-| 4. Risk #3 (boundary) | SSR-server boot + per-route deny contract, suggest 401-before-spend, invalid-session case | Server lifecycle/cold-start + wiring local Supabase env into `astro dev` |
-| 5. Cookbook + status sync | Fill test-plan §6.2/§6.4; advance §3 Phase 2 status | None (docs) |
+| Phase                     | What it delivers                                                                                                | Key risk                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1. Harness foundation     | Separate config + `test:integration`, `globalSetup` preflight, two-client session fixtures, cleanup, smoke test | Forgetting to exclude `tests/integration/**` from the unit config breaks the hermetic gate |
+| 2. Risk #2 (RLS)          | Table × operation denial matrix, `23514` child-scoping, anon denial, cascade                                    | Under-testing the trigger-based child-scoping (RLS alone doesn't stop it)                  |
+| 3. Risk #4 (IDOR)         | Cross-user storage read/write/sign denial; owner path succeeds                                                  | Storage teardown (objects aren't FK-cascaded) leaking across runs                          |
+| 4. Risk #3 (boundary)     | SSR-server boot + per-route deny contract, suggest 401-before-spend, invalid-session case                       | Server lifecycle/cold-start + wiring local Supabase env into `astro dev`                   |
+| 5. Cookbook + status sync | Fill test-plan §6.2/§6.4; advance §3 Phase 2 status                                                             | None (docs)                                                                                |
 
 **Prerequisites:** Docker + `npx supabase start`; no new npm dependencies (`@supabase/supabase-js`, `supabase` CLI, Node `child_process` suffice).
 **Estimated effort:** ~3–4 sessions across 5 phases (Phase 4's server lifecycle is the heaviest).

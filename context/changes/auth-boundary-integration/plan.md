@@ -225,6 +225,7 @@ client). All read the `SUPABASE_TEST_*` env from globalSetup.
 non-cascaded storage objects.
 
 **Contract**:
+
 - `createTestUser()` → `{ id, email, password, session, client }`: service-role
   `admin.createUser({ email, password, email_confirm: true })` with a timestamp-unique email,
   then `signInWithPassword` (anon client) to obtain a real session → returns a
@@ -279,6 +280,7 @@ child-scoping guard and the delete-user cascade.
 table × operation matrix, then the two non-obvious enforcement layers.
 
 **Contract**:
+
 - `beforeAll`: mint users A and B; A seeds one `location`, one `plant`, one `care_event`
   (via A's sessioned client; `user_id` defaults to `auth.uid()`).
 - **Matrix (B against A's rows)** via `it.each` over `{locations, plants, care_events} × {select, insert, update, delete}`:
@@ -326,6 +328,7 @@ operation to the owner.
 binds to the session JWT), asserting cross-user denial on every operation.
 
 **Contract**:
+
 - `beforeAll`: mint A and B; A uploads a small object to `${A.id}/<plantId>/photo.png`
   (A's sessioned client) → succeeds.
 - B's sessioned client, against A's prefix:
@@ -380,6 +383,7 @@ status — encoding the heterogeneous contract, not a uniform 401.
 
 **Contract**: `beforeAll` `startServer()`; `afterAll` `stop()`. All `fetch` use
 `redirect: "manual"`. Cases (`it.each` over a route × expected-status table):
+
 - `GET /dashboard`, `/locations/<id>`, `/locations/<id>/plants/new` (no cookie) → **302** with `Location: /auth/signin`.
 - `POST /api/plants`, `POST /api/plants/upload-url` (no cookie) → **401 JSON** `{error:"unauthorized"}`.
 - `POST /api/plants/suggest` (no cookie) → **401 JSON**, and the body is the unauthorized shape — proving the guard fired before any AI call (not a 200/`ai_unavailable`).
@@ -422,6 +426,7 @@ authors, and advance the rollout status.
 **Intent**: Replace the §6.2 and §6.4 "TBD — see §3 Phase 2" stubs with the proven patterns.
 
 **Contract**:
+
 - §6.2 (integration test): the two-session local-Supabase harness — separate config +
   `test:integration`, `globalSetup` preflight, service-role-seed/anon-assert split, fresh
   unique users + storage teardown, assert denied/zero-rows shapes.
@@ -543,20 +548,20 @@ None — test-only change, no schema or production-code changes.
 
 #### Automated
 
-- [x] 4.1 All deny-contract + invalid-session cases pass against the booted server: `npm run test:integration`
-- [x] 4.2 The suite tears the server down (no orphaned `astro dev` process)
-- [x] 4.3 Lint passes: `npm run lint`
+- [x] 4.1 All deny-contract + invalid-session cases pass against the booted server: `npm run test:integration` — 0b3026d
+- [x] 4.2 The suite tears the server down (no orphaned `astro dev` process) — 0b3026d
+- [x] 4.3 Lint passes: `npm run lint` — 0b3026d
 
 #### Manual
 
-- [x] 4.4 Server boots with local Supabase wired (invalid-session case is meaningful)
-- [x] 4.5 Total `npm run test:integration` time is acceptable for local use
+- [x] 4.4 Server boots with local Supabase wired (invalid-session case is meaningful) — 0b3026d
+- [x] 4.5 Total `npm run test:integration` time is acceptable for local use — 0b3026d
 
 ### Phase 5: Test-plan cookbook + status sync
 
 #### Automated
 
-- [ ] 5.1 Markdown lint/format passes: `npm run format`
+- [x] 5.1 Markdown lint/format passes: `npm run format`
 
 #### Manual
 

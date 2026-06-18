@@ -9,7 +9,7 @@ normalizer `normalizeSuggestion` (`src/lib/ai/suggest.ts:137`) **never throws** 
 return (missing, extra, null, wrong-typed, out-of-range fields; non-object roots).
 This covers Risk #5 (Medium impact × High likelihood).
 
-The oracle — what the normalizer *should* output — comes from the PRD care-profile
+The oracle — what the normalizer _should_ output — comes from the PRD care-profile
 contract, the `AiSuggestion` type, and the DB CHECK constraints (research.md §2),
 **not** from re-reading the function's current output.
 
@@ -26,7 +26,7 @@ contract, the `AiSuggestion` type, and the DB CHECK constraints (research.md §2
 - **The throws live upstream.** `requestSuggestion`/`extractText`/`JSON.parse`
   (`suggest.ts:59-108`, `152-167`) throw on provider/transport/parse failures; the
   endpoint catches them → `ai_unavailable`. Those belong to Risk #1 (Phase 3), not here.
-  The normalizer's input is *whatever `JSON.parse(text)` yields* — so the unit fixtures
+  The normalizer's input is _whatever `JSON.parse(text)` yields_ — so the unit fixtures
   are parsed-JSON values.
 - **Bootstrap constraints:** `"type": "module"` (config must be ESM); repo-wide
   `overrides.vite = "^7.3.2"` → use **Vitest 3.x** (Vite-7 compatible); `tsconfig.json`
@@ -43,7 +43,7 @@ contract, the `AiSuggestion` type, and the DB CHECK constraints (research.md §2
 - `src/types.ts:36-42` — `AiSuggestion`, the declared 5-field nullable output contract.
 - `supabase/migrations/20260608171954_core_domain_schema.sql:51-62` — DB CHECK
   constraints (`watering_interval_days > 0` integer; `winterization_cutoff date`) — the
-  *why* behind the coercions, and the reason `"none"`/`2024-02-30` must never be emitted.
+  _why_ behind the coercions, and the reason `"none"`/`2024-02-30` must never be emitted.
 - `context/foundation/prd.md:55,117,119,121,166` — the PRD care-profile oracle.
 - `asIsoDate` leading-regex branch (`suggest.ts:196-202`) returns a regex-matching but
   **calendar-invalid** date (`2024-02-30`) verbatim — the latent second face of Risk #5.
@@ -75,7 +75,7 @@ green; the four test-plan edits are present and links resolve.
 ## What We're NOT Doing
 
 - **Not fixing** the calendar-invalid-date passthrough (`2024-02-30`). That is a
-  bug→fix→regression change (Lesson 5). This phase only *documents* it with a
+  bug→fix→regression change (Lesson 5). This phase only _documents_ it with a
   characterization test and a §6.6 escalation note.
 - **Not testing** `requestSuggestion`, `extractText`, retries, or the `/suggest`
   endpoint's `ai_unavailable` degradation — that is Risk #1 / Phase 3 (fault injection).
@@ -84,7 +84,7 @@ green; the four test-plan edits are present and links resolve.
 - **Not wiring** the suite into CI as a required gate — that is rollout Phase 4.
 - **Not installing or wiring Stryker.** Mutation testing stays an optional, ad-hoc
   selective gate (test-plan §1 / CLAUDE.md), runnable manually but not part of this scope.
-- **Not** asserting AI suggestion *quality* (is the species guess correct?) — explicitly
+- **Not** asserting AI suggestion _quality_ (is the species guess correct?) — explicitly
   excluded in test-plan §7.
 
 ## Implementation Approach
@@ -93,7 +93,7 @@ Three phases that match the executor split CLAUDE.md recommends:
 
 1. **Bootstrap (infra)** via `/10x-implement` — install Vitest, add config + scripts +
    a `TZ=UTC` setup file, and a single smoke test that import-resolves the module
-   through the `@` alias. This proves the runner works *and* that the normalizer needs
+   through the `@` alias. This proves the runner works _and_ that the normalizer needs
    no env machinery, before any contract assertions are written.
 2. **Contract suite (oracle assertions)** via `/10x-tdd` — each behavior is a nameable
    red test, expanded in the same test file. Assert the cross-domain invariants as
@@ -296,7 +296,7 @@ References the §6.6 escalation note.
 - The calendar-invalid test is unambiguously labeled as documenting a known gap, not a
   desired contract
 - (Optional, ad-hoc) `npx stryker run --mutate "src/lib/ai/suggest.ts"` shows no
-  *meaningful* survived mutant in `normalizeSuggestion` and its helpers; cosmetic/
+  _meaningful_ survived mutant in `normalizeSuggestion` and its helpers; cosmetic/
   equivalent mutants ignored consciously (not a gate)
 
 **Implementation Note**: After completing this phase and all automated verification
@@ -401,7 +401,7 @@ correctly before closing the change.
 1. `npm test` — watch mode starts, suite is green.
 2. Temporarily break a helper (e.g. make `asPositiveInt` drop the `> 0` check) and
    confirm the watering property test goes red — proves the suite has teeth.
-3. Confirm the calendar-invalid characterization test is green *and* clearly labeled.
+3. Confirm the calendar-invalid characterization test is green _and_ clearly labeled.
 
 ## Performance Considerations
 

@@ -29,26 +29,26 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 
 > Live status: GitHub milestone [MVP v1](https://github.com/SzymonSwiatek/PlantsInventory/milestone/1). Issue numbers below link to the canonical work-tracking entry; this file remains the source of truth for narrative and sequencing.
 
-| ID    | Change ID                | Outcome (user can …)                                                       | Prerequisites      | PRD refs                                                          | Status   | Issue |
-| ----- | ------------------------ | -------------------------------------------------------------------------- | ------------------ | ----------------------------------------------------------------- | -------- | ----- |
-| F-01  | magic-link-auth          | (foundation) magic-link sign-in replaces password scaffold; sign-out works | —                  | FR-001, FR-002, FR-003, Access Control                            | done     | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) |
-| F-02  | domain-schema-with-rls   | (foundation) locations + plants + care-events tables exist with per-user RLS | —                | NFR per-user isolation, NFR 12-month retention, Access Control    | done     | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
-| F-03  | cron-scheduled-skeleton  | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds | —          | US-02, FR-018, FR-019                                             | ready    | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
-| S-01  | first-plant-from-photo   | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save | F-01, F-02 | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | done     | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
-| S-02  | location-management      | rename a location, delete (with non-empty warning), see all locations with plant counts | F-01, F-02 | FR-005, FR-006, FR-007                                            | proposed | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
-| S-03  | plant-management         | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01 | FR-015, FR-016, FR-017                                            | proposed | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
-| S-04  | watering-reminder-loop   | see today's care list, receive a watering reminder, mark watered (bulk too), snooze | F-03, S-01 | US-02, US-03, FR-018, FR-020, FR-021, FR-022                      | proposed | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) |
-| S-05  | winterization-reminder   | receive a reminder when a winterization cutoff approaches; mark winterized | F-03, S-01         | US-02, US-03, FR-019, FR-020                                      | proposed | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) |
+| ID   | Change ID               | Outcome (user can …)                                                                      | Prerequisites | PRD refs                                                              | Status   | Issue                                                           |
+| ---- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------- | -------- | --------------------------------------------------------------- |
+| F-01 | magic-link-auth         | (foundation) magic-link sign-in replaces password scaffold; sign-out works                | —             | FR-001, FR-002, FR-003, Access Control                                | done     | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) |
+| F-02 | domain-schema-with-rls  | (foundation) locations + plants + care-events tables exist with per-user RLS              | —             | NFR per-user isolation, NFR 12-month retention, Access Control        | done     | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
+| F-03 | cron-scheduled-skeleton | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds         | —             | US-02, FR-018, FR-019                                                 | ready    | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
+| S-01 | first-plant-from-photo  | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save     | F-01, F-02    | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | done     | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
+| S-02 | location-management     | rename a location, delete (with non-empty warning), see all locations with plant counts   | F-01, F-02    | FR-005, FR-006, FR-007                                                | proposed | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
+| S-03 | plant-management        | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01          | FR-015, FR-016, FR-017                                                | proposed | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
+| S-04 | watering-reminder-loop  | see today's care list, receive a watering reminder, mark watered (bulk too), snooze       | F-03, S-01    | US-02, US-03, FR-018, FR-020, FR-021, FR-022                          | proposed | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) |
+| S-05 | winterization-reminder  | receive a reminder when a winterization cutoff approaches; mark winterized                | F-03, S-01    | US-02, US-03, FR-019, FR-020                                          | proposed | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) |
 
 ## Streams
 
 Navigation aid — groups items that share a Prerequisites chain. Canonical ordering still lives in the dependency graph below; this table is the proposed reading order across parallel tracks.
 
-| Stream | Theme           | Chain                                  | Note                                                                                  |
-| ------ | --------------- | -------------------------------------- | ------------------------------------------------------------------------------------- |
-| A      | Account access  | `F-01` (joins B at `S-01`)             | Auth conversion is small but unblocks every slice — scope it to magic-link only.       |
-| B      | Plant catalog   | `F-02` → `S-01` → `S-02` → `S-03`      | Carries the north star. `S-01` ships first; `S-02`/`S-03` sequential to avoid sprawl. |
-| C      | Care reminders  | `F-03` → `S-04` → `S-05`               | `F-03` can land in parallel with B; `S-04`/`S-05` depend on Stream B at `S-01`.       |
+| Stream | Theme          | Chain                             | Note                                                                                  |
+| ------ | -------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
+| A      | Account access | `F-01` (joins B at `S-01`)        | Auth conversion is small but unblocks every slice — scope it to magic-link only.      |
+| B      | Plant catalog  | `F-02` → `S-01` → `S-02` → `S-03` | Carries the north star. `S-01` ships first; `S-02`/`S-03` sequential to avoid sprawl. |
+| C      | Care reminders | `F-03` → `S-04` → `S-05`          | `F-03` can land in parallel with B; `S-04`/`S-05` depend on Stream B at `S-01`.       |
 
 ## Baseline
 
@@ -173,16 +173,16 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                | Issue | Title                                                                  | Ready for `/10x-plan` | Notes                                       |
-| ---------- | ------------------------ | ----- | ---------------------------------------------------------------------- | --------------------- | ------------------------------------------- |
-| F-01       | magic-link-auth          | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) | Replace password auth scaffold with magic-link sign-in (FR-001/002/003) | yes                   | Run `/10x-plan magic-link-auth`             |
-| F-02       | domain-schema-with-rls   | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) | Land Postgres schema for locations + plants + care-events with RLS     | yes                   | Run `/10x-plan domain-schema-with-rls`      |
-| F-03       | cron-scheduled-skeleton  | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) | Add `scheduled()` Worker entry + cron trigger + smoke test             | yes                   | Run `/10x-plan cron-scheduled-skeleton`     |
-| S-01       | first-plant-from-photo   | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) | North star — add a plant from a photo with AI-suggested care info      | no                    | Blocked on F-01 + F-02                      |
-| S-02       | location-management      | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) | Location rename / delete (with non-empty warning) / list with counts   | no                    | Blocked on F-01 + F-02                      |
-| S-03       | plant-management         | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) | Plant detail (editable in place) + delete + free-text note             | no                    | Blocked on S-01                             |
-| S-04       | watering-reminder-loop   | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) | Watering reminder loop — cron, mark-done (incl. bulk), snooze, today list | no                | Blocked on F-03 + S-01; defaults for OQ-1/OQ-3 |
-| S-05       | winterization-reminder   | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) | Winterization reminder + mark-winterized                               | no                    | Blocked on F-03 + S-01; first defer candidate |
+| Roadmap ID | Change ID               | Issue                                                           | Title                                                                     | Ready for `/10x-plan` | Notes                                          |
+| ---------- | ----------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------- | ---------------------------------------------- |
+| F-01       | magic-link-auth         | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) | Replace password auth scaffold with magic-link sign-in (FR-001/002/003)   | yes                   | Run `/10x-plan magic-link-auth`                |
+| F-02       | domain-schema-with-rls  | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) | Land Postgres schema for locations + plants + care-events with RLS        | yes                   | Run `/10x-plan domain-schema-with-rls`         |
+| F-03       | cron-scheduled-skeleton | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) | Add `scheduled()` Worker entry + cron trigger + smoke test                | yes                   | Run `/10x-plan cron-scheduled-skeleton`        |
+| S-01       | first-plant-from-photo  | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) | North star — add a plant from a photo with AI-suggested care info         | no                    | Blocked on F-01 + F-02                         |
+| S-02       | location-management     | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) | Location rename / delete (with non-empty warning) / list with counts      | no                    | Blocked on F-01 + F-02                         |
+| S-03       | plant-management        | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) | Plant detail (editable in place) + delete + free-text note                | no                    | Blocked on S-01                                |
+| S-04       | watering-reminder-loop  | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) | Watering reminder loop — cron, mark-done (incl. bulk), snooze, today list | no                    | Blocked on F-03 + S-01; defaults for OQ-1/OQ-3 |
+| S-05       | winterization-reminder  | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) | Winterization reminder + mark-winterized                                  | no                    | Blocked on F-03 + S-01; first defer candidate  |
 
 ## Open Roadmap Questions
 

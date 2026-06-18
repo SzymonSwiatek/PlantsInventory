@@ -21,12 +21,12 @@ last_updated_by: Szymon Świątek
 
 ## Research Question
 
-For Phase 2 of the test plan — *Isolation & auth-boundary integration tests*, covering
+For Phase 2 of the test plan — _Isolation & auth-boundary integration tests_, covering
 Risks **#2** (cross-user data isolation / RLS), **#3** (endpoint & route auth gating
 after magic-link conversion), and **#4** (signed-upload path scoping / IDOR) — **where do
 these failure scenarios actually live in the live codebase?** Per the test plan's §1
-principle #3, this research is the ground truth for *where the failure lives*; the risk map
-only documents *what could fail and why*.
+principle #3, this research is the ground truth for _where the failure lives_; the risk map
+only documents _what could fail and why_.
 
 ## Summary
 
@@ -40,7 +40,7 @@ open hole. Concretely:
   every `UPDATE` carries both `USING` and `WITH CHECK`. **No policy gaps.** Two non-obvious
   enforcement layers must be tested explicitly: (a) **anon is denied by default** (no
   `to authenticated` policy applies), and (b) **`SECURITY INVOKER` BEFORE-triggers** close
-  the child-scoping gap that RLS alone does *not*. **No service-role / RLS-bypass client
+  the child-scoping gap that RLS alone does _not_. **No service-role / RLS-bypass client
   exists** anywhere in `src/`.
 - **Risk #3 (auth gating):** `/api/**` is **outside** the middleware's `PROTECTED_ROUTES`,
   so each endpoint **self-guards**. All four data endpoints do. The costly
@@ -53,8 +53,8 @@ open hole. Concretely:
   segment to `auth.uid()` with `WITH CHECK` on writes. **No IDOR gap.** Defense-in-depth in
   three layers.
 
-**Two CLAUDE.md staleness findings surfaced** (see Architecture Insights): the repo is *not*
-"auth scaffold only" (the full domain is built), and auth is *not* "email/password" (it is
+**Two CLAUDE.md staleness findings surfaced** (see Architecture Insights): the repo is _not_
+"auth scaffold only" (the full domain is built), and auth is _not_ "email/password" (it is
 magic-link OTP). The Phase-2 plan must account for both.
 
 ## Detailed Findings
@@ -74,10 +74,10 @@ RLS that belongs in the isolation matrix):
 **Policy matrix (domain tables × operation × role).** All `to authenticated`; anon/public
 implicitly denied (no policy = no access once RLS is on).
 
-| Table | SELECT | INSERT | UPDATE (USING+CHECK) | DELETE | Role |
-|---|---|---|---|---|---|
-| `locations` | ✅ `locations_select_own` | ✅ `locations_insert_own` | ✅ `locations_update_own` | ✅ `locations_delete_own` | authenticated |
-| `plants` | ✅ `plants_select_own` | ✅ `plants_insert_own` | ✅ `plants_update_own` | ✅ `plants_delete_own` | authenticated |
+| Table         | SELECT                      | INSERT                      | UPDATE (USING+CHECK)        | DELETE                      | Role          |
+| ------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | ------------- |
+| `locations`   | ✅ `locations_select_own`   | ✅ `locations_insert_own`   | ✅ `locations_update_own`   | ✅ `locations_delete_own`   | authenticated |
+| `plants`      | ✅ `plants_select_own`      | ✅ `plants_insert_own`      | ✅ `plants_update_own`      | ✅ `plants_delete_own`      | authenticated |
 | `care_events` | ✅ `care_events_select_own` | ✅ `care_events_insert_own` | ✅ `care_events_update_own` | ✅ `care_events_delete_own` | authenticated |
 
 **Gaps found: none.** Predicate everywhere is `(select auth.uid()) = user_id`
@@ -136,19 +136,19 @@ separately defend against.
 
 **Route × guard matrix (behavior on NO session):**
 
-| Route / Endpoint | In `PROTECTED_ROUTES`? | Self-guards? | No-session behavior |
-|---|---|---|---|
-| `/dashboard` (page) | ✅ `/dashboard` | no | **302 → `/auth/signin`** |
-| `/locations/[id]` (page) | ✅ `/locations` prefix | no | **302 → `/auth/signin`** |
-| `/locations/[id]/plants/new` (page) | ✅ `/locations` prefix | no | **302 → `/auth/signin`** |
-| `POST /api/plants` | ❌ | ✅ `requireUser` | **401 JSON** |
-| `POST /api/plants/suggest` (costly) | ❌ | ✅ `requireUser` | **401 JSON — AI call NOT reached** |
-| `POST /api/plants/upload-url` | ❌ | ✅ `requireUser` | **401 JSON** |
-| `POST /api/locations` | ❌ | ✅ manual `locals.user` check | **302 → `/auth/signin`** |
-| `POST /api/auth/signin` | ❌ | n/a (public) | 302 (intended) |
-| `POST /api/auth/signout` | ❌ | n/a (public) | 302 → `/` (intended) |
-| `GET /auth/confirm` (magic-link) | ❌ | n/a (establishes session) | 302 (intended) |
-| `/auth/{signin,signup,check-email}`, `/` | ❌ | n/a (public) | 200 (intended) |
+| Route / Endpoint                         | In `PROTECTED_ROUTES`? | Self-guards?                  | No-session behavior                |
+| ---------------------------------------- | ---------------------- | ----------------------------- | ---------------------------------- |
+| `/dashboard` (page)                      | ✅ `/dashboard`        | no                            | **302 → `/auth/signin`**           |
+| `/locations/[id]` (page)                 | ✅ `/locations` prefix | no                            | **302 → `/auth/signin`**           |
+| `/locations/[id]/plants/new` (page)      | ✅ `/locations` prefix | no                            | **302 → `/auth/signin`**           |
+| `POST /api/plants`                       | ❌                     | ✅ `requireUser`              | **401 JSON**                       |
+| `POST /api/plants/suggest` (costly)      | ❌                     | ✅ `requireUser`              | **401 JSON — AI call NOT reached** |
+| `POST /api/plants/upload-url`            | ❌                     | ✅ `requireUser`              | **401 JSON**                       |
+| `POST /api/locations`                    | ❌                     | ✅ manual `locals.user` check | **302 → `/auth/signin`**           |
+| `POST /api/auth/signin`                  | ❌                     | n/a (public)                  | 302 (intended)                     |
+| `POST /api/auth/signout`                 | ❌                     | n/a (public)                  | 302 → `/` (intended)               |
+| `GET /auth/confirm` (magic-link)         | ❌                     | n/a (establishes session)     | 302 (intended)                     |
+| `/auth/{signin,signup,check-email}`, `/` | ❌                     | n/a (public)                  | 200 (intended)                     |
 
 **Self-guard convention:** `requireUser(context)` returns a **401 JSON**
 `{error:"unauthorized"}` when `context.locals.user` is falsy (`src/lib/api.ts:25-31`);
@@ -164,7 +164,7 @@ provider. (Post-auth provider failure returns `{status:"ai_unavailable"}` HTTP 2
 Risk #1 / Phase 3 territory, not Phase 2.)
 
 **Gap analysis: zero true defects.** All four data endpoints are outside `PROTECTED_ROUTES`
-*and* self-guard correctly. The findings that matter for test design:
+_and_ self-guard correctly. The findings that matter for test design:
 
 1. **Heterogeneous no-session contract** — JSON endpoints → **401**; `/api/locations` →
    **302**; protected pages → **302**. A test asserting a uniform 401 across `/api/**` will
@@ -200,19 +200,20 @@ layers.
 2. **`storage.objects` RLS** re-pins the first folder segment to the owner on every
    operation (`supabase/migrations/20260608174754_plant_photos_storage.sql:38-68`):
 
-   | Operation | Policy | Role | Confines to owner prefix? |
-   |---|---|---|---|
-   | SELECT | `plant_photos_select_own` | authenticated | ✅ (USING) |
-   | INSERT | `plant_photos_insert_own` | authenticated | ✅ (WITH CHECK) |
-   | UPDATE | `plant_photos_update_own` | authenticated | ✅ (USING + WITH CHECK) |
-   | DELETE | `plant_photos_delete_own` | authenticated | ✅ (USING) |
-   | any | — | anon | denied (no policy) |
+   | Operation | Policy                    | Role          | Confines to owner prefix? |
+   | --------- | ------------------------- | ------------- | ------------------------- |
+   | SELECT    | `plant_photos_select_own` | authenticated | ✅ (USING)                |
+   | INSERT    | `plant_photos_insert_own` | authenticated | ✅ (WITH CHECK)           |
+   | UPDATE    | `plant_photos_update_own` | authenticated | ✅ (USING + WITH CHECK)   |
+   | DELETE    | `plant_photos_delete_own` | authenticated | ✅ (USING)                |
+   | any       | —                         | anon          | denied (no policy)        |
 
    Predicate (identical across all four), e.g. INSERT (`...:45-50`):
    `bucket_id = 'plant-photos' and (storage.foldername(name))[1] = (select auth.uid())::text`.
    Bucket `plant-photos` is **private** (`public = false`), 10 MiB, png/jpeg/webp
    (`...:18-26`). Because writes carry a `WITH CHECK`, even a forged/stolen upload token
    cannot write outside the caller's `<uid>/` prefix.
+
 3. **Persist-time validation** — `src/pages/api/plants/index.ts:54-58` rejects any
    client-supplied `photoPath` not starting with `${user.id}/` (400 `invalid_photo_path`),
    even though Storage RLS already enforces it.
@@ -300,17 +301,16 @@ non-existent/different object — a self-namespace integrity edge, never a cross
 ## Architecture Insights
 
 - **Defense-in-depth is the consistent pattern.** Both isolation risks are guarded at ≥2
-  independent layers: RLS *and* same-user triggers (#2); server-derived key *and* input
-  validation *and* `storage.objects` RLS *and* persist-time namespace check (#4). Tests
+  independent layers: RLS _and_ same-user triggers (#2); server-derived key _and_ input
+  validation _and_ `storage.objects` RLS _and_ persist-time namespace check (#4). Tests
   should target each layer's distinct failure, not just the aggregate happy path.
-- **`/api/**` is deliberately outside middleware**; JSON endpoints self-guard via
-  `requireUser`. The mixed 401-vs-302 contract is intentional (JSON vs native form-POST), not
+- **`/api/**`is deliberately outside middleware**; JSON endpoints self-guard via`requireUser`. The mixed 401-vs-302 contract is intentional (JSON vs native form-POST), not
   a bug — but it shapes the assertions.
 - **`auth.uid()` defaults make the cross-user-parent attack possible at the RLS layer** — the
   triggers, not RLS, are what stop it. This is the single most likely place a naive matrix
   would under-test.
 - **No service-role anywhere** — the entire app runs on the JWT-scoped publishable client, so
-  the integration suite's two-session approach *is* the production path.
+  the integration suite's two-session approach _is_ the production path.
 
 ### ⚠️ CLAUDE.md staleness (flag for the Phase-2 plan and a doc fix)
 
@@ -345,7 +345,7 @@ non-existent/different object — a self-namespace integrity edge, never a cross
   JWT-scoped client and does not pass an explicit foreign `user_id`."
 - **Local autoconfirm is the session-creation lever** —
   `context/archive/2026-05-29-magic-link-auth/plan.md:21`: "Locally `enable_confirmations =
-  false` auto-confirms new users."
+false` auto-confirms new users."
 - **PRD anchors** — `context/foundation/prd.md:170-174`: "unauthenticated visits to any route
   redirect to the sign-in screen"; isolation "enforced at the storage boundary, not the UI."
 

@@ -1,4 +1,5 @@
 <!-- PLAN-REVIEW-REPORT -->
+
 # Plan Review: First plant from a photo (S-01 north star)
 
 - **Plan**: context/changes/first-plant-from-photo/plan.md
@@ -9,13 +10,13 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| End-State Alignment | PASS |
-| Lean Execution | PASS |
+| Dimension             | Verdict |
+| --------------------- | ------- |
+| End-State Alignment   | PASS    |
+| Lean Execution        | PASS    |
 | Architectural Fitness | WARNING |
-| Blind Spots | WARNING |
-| Plan Completeness | PASS |
+| Blind Spots           | WARNING |
+| Plan Completeness     | PASS    |
 
 ## Grounding
 
@@ -67,7 +68,7 @@
 - **Impact**: 🔎 MEDIUM — real tradeoff; pause to reason through it
 - **Dimension**: Blind Spots
 - **Location**: Phase 5 §1 (`/api/plants` create) ⇄ §3 (`AddPlantForm`)
-- **Detail**: This slice exists to drive Success Criteria #1 (≥75% suggestions accepted) and #2 (≥75% via AI), both of which read `plants.ai_suggestion`. But the snapshot round-trips through the browser: `/suggest` returns it, the form holds it, and `/api/plants` trusts whatever `aiSuggestion` the client posts back. A buggy form that sends the *edited* field values as the snapshot (instead of the original) makes the saved-vs-snapshot acceptance diff always zero — silently inflating the headline metric. Not a security issue (the user's own data); a fidelity risk for the one number this slice is meant to produce.
+- **Detail**: This slice exists to drive Success Criteria #1 (≥75% suggestions accepted) and #2 (≥75% via AI), both of which read `plants.ai_suggestion`. But the snapshot round-trips through the browser: `/suggest` returns it, the form holds it, and `/api/plants` trusts whatever `aiSuggestion` the client posts back. A buggy form that sends the _edited_ field values as the snapshot (instead of the original) makes the saved-vs-snapshot acceptance diff always zero — silently inflating the headline metric. Not a security issue (the user's own data); a fidelity risk for the one number this slice is meant to produce.
 - **Fix**: Decide consciously — either accept the client-supplied snapshot for the MVP and note it, or stash the normalized suggestion server-side at `/suggest` time (keyed by the pre-minted plantId) so create reads the original rather than trusting the round-trip. Cheapest middle ground: keep the round-trip but add a test/assertion that the posted snapshot is byte-identical to `/suggest`'s response.
 - **Decision**: FIXED via option (i) — accept the client-supplied snapshot for the MVP; added an explicit "MVP fidelity caveat (conscious decision)" to the plan's Critical Implementation Details `ai_suggestion` bullet, naming the server-side stash as the hardening follow-up.
 

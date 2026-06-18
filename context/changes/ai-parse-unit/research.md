@@ -21,10 +21,10 @@ last_updated_by: Szymon Świątek
 
 ## Research Question
 
-Rollout Phase 1 of `context/foundation/test-plan.md` §3 — *Bootstrap test runner + AI-parse
-normalizer unit suite*. Surface the **oracle** for Risk #5: *the suggestion normalizer throws,
+Rollout Phase 1 of `context/foundation/test-plan.md` §3 — _Bootstrap test runner + AI-parse
+normalizer unit suite_. Surface the **oracle** for Risk #5: _the suggestion normalizer throws,
 or emits a malformed / garbage care profile, when the provider returns missing, extra, or
-differently-typed fields* (Medium impact × High likelihood). The oracle — what the normalizer
+differently-typed fields_ (Medium impact × High likelihood). The oracle — what the normalizer
 **should** output — must come from sources (PRD, type contracts, DB schema, the editable form,
 the S-01 plan), **not** from re-reading the normalizer's current output (avoid the snapshot
 tautology). Also: confirm what standing up Vitest requires here.
@@ -40,8 +40,8 @@ tautology). Also: confirm what standing up Vitest requires here.
 - **The throws are upstream, not in the normalizer.** `normalizeSuggestion` has no `throw` in
   its subtree. The throws that produce the `ai_unavailable` envelope live in `requestSuggestion`
   / `extractText` / `JSON.parse` (the provider seam), and are caught by the endpoint. So the
-  "normalizer throws" face of Risk #5 is really *"does the normalizer survive every shape of
-  `JSON.parse` output without throwing"* — a pure-function unit concern.
+  "normalizer throws" face of Risk #5 is really _"does the normalizer survive every shape of
+  `JSON.parse` output without throwing"_ — a pure-function unit concern.
 - **The oracle is firm on the shape, soft on two coercion policies.** All sources agree on the
   five-field care profile, every field nullable, watering as a **positive integer (days) or
   null**, winterization as a **`YYYY-MM-DD` date or null** (PRD's "none" → `null`). Sources do
@@ -92,14 +92,14 @@ One determinism caveat: the **fallback** branch of `asIsoDate` calls `new Date(<
 whose parsing of non-ISO strings is engine-defined — relevant when choosing what dates to assert
 (see Open Question 2). The leading-`YYYY-MM-DD` branch pins `T00:00:00Z`, so it is deterministic.
 
-**Per-field behavior TODAY** (what the code *does* — for fixture design, not for the expected
+**Per-field behavior TODAY** (what the code _does_ — for fixture design, not for the expected
 column of mirror tests):
 
-| Output field | Helper | `null`/missing/non-record-root | wrong type | empty/whitespace string | notable |
-|---|---|---|---|---|---|
-| `species`, `description`, `sunlight` | `asNonEmptyString` | `null` | non-string → `null` | trimmed; `""`/`"  "` → `null` | extra/unknown keys silently dropped |
-| `watering_interval_days` | `asPositiveInt` | `null` | bool/obj/array → `null` | numeric string coerced (`"7"`→7) | `Math.round` (7.5→8); `≤0`, `NaN`, `Infinity` → `null` |
-| `winterization_cutoff` | `asIsoDate` | `null` | non-string → `null` | empty → `null` | leading `YYYY-MM-DD` returned **verbatim, no calendar check**; else `new Date(...)→slice(0,10)`; unparseable → `null` |
+| Output field                         | Helper             | `null`/missing/non-record-root | wrong type              | empty/whitespace string          | notable                                                                                                               |
+| ------------------------------------ | ------------------ | ------------------------------ | ----------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `species`, `description`, `sunlight` | `asNonEmptyString` | `null`                         | non-string → `null`     | trimmed; `""`/`"  "` → `null`    | extra/unknown keys silently dropped                                                                                   |
+| `watering_interval_days`             | `asPositiveInt`    | `null`                         | bool/obj/array → `null` | numeric string coerced (`"7"`→7) | `Math.round` (7.5→8); `≤0`, `NaN`, `Infinity` → `null`                                                                |
+| `winterization_cutoff`               | `asIsoDate`        | `null`                         | non-string → `null`     | empty → `null`                   | leading `YYYY-MM-DD` returned **verbatim, no calendar check**; else `new Date(...)→slice(0,10)`; unparseable → `null` |
 
 Top-level guard: `isRecord` is `true` for **arrays** (`typeof [] === "object"`), so an array root
 → treated as a record with no matching keys → all five fields `null`. Primitives/`null` root → `{}`
@@ -110,9 +110,9 @@ Top-level guard: `isRecord` is `true` for **arrays** (`typeof [] === "object"`),
 Three independent sources, reconciled (none read the normalizer body for expected values):
 
 **PRD** — [`prd.md:166`](https://github.com/SzymonSwiatek/PlantsInventory/blob/8a39413798c7396595103f532ceca68645452f56/context/foundation/prd.md#L166)
-(Outputs): *"a structured care profile per plant — species (with the user able to override the
+(Outputs): _"a structured care profile per plant — species (with the user able to override the
 AI's guess), watering interval, light needs, winterization cutoff (a date or 'none'), and a short
-prose description."* Reinforced at `prd.md:55` (US-01 AC), `:117` (FR-009), `:119`/`:121`
+prose description."_ Reinforced at `prd.md:55` (US-01 AC), `:117` (FR-009), `:119`/`:121`
 (every field editable/overridable, manual create must work → nothing mandatory from the provider).
 
 **Type contract** — [`src/types.ts:36-42`](https://github.com/SzymonSwiatek/PlantsInventory/blob/8a39413798c7396595103f532ceca68645452f56/src/types.ts#L36-L42),
@@ -133,15 +133,16 @@ non-date string.
 
 #### Reconciled field-by-field oracle (the contract a test asserts against)
 
-| Field | Type | Required? | Allowed value (oracle) | When provider omits / sends garbage |
-|---|---|---|---|---|
-| `species` | `string \| null` | optional | any non-empty free text | `null` |
-| `description` | `string \| null` | optional | non-empty free prose (no enforced cap) | `null` |
-| `sunlight` | `string \| null` | optional | non-empty free text | `null` |
-| `watering_interval_days` | `number \| null` | optional | **positive integer ≥ 1** (days). MUST NEVER be 0, negative, non-finite, or non-integer | `null` |
-| `winterization_cutoff` | `string \| null` | optional | a **calendar-valid `YYYY-MM-DD`** date. PRD "none" / non-date → `null`. MUST NEVER be the literal "none" or a non-date string | `null` |
+| Field                    | Type             | Required? | Allowed value (oracle)                                                                                                        | When provider omits / sends garbage |
+| ------------------------ | ---------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `species`                | `string \| null` | optional  | any non-empty free text                                                                                                       | `null`                              |
+| `description`            | `string \| null` | optional  | non-empty free prose (no enforced cap)                                                                                        | `null`                              |
+| `sunlight`               | `string \| null` | optional  | non-empty free text                                                                                                           | `null`                              |
+| `watering_interval_days` | `number \| null` | optional  | **positive integer ≥ 1** (days). MUST NEVER be 0, negative, non-finite, or non-integer                                        | `null`                              |
+| `winterization_cutoff`   | `string \| null` | optional  | a **calendar-valid `YYYY-MM-DD`** date. PRD "none" / non-date → `null`. MUST NEVER be the literal "none" or a non-date string | `null`                              |
 
 **Invariants that hold across the whole input domain (these are the high-signal assertions):**
+
 1. **Never throws** for any input — including `null`, `undefined`, arrays, primitives, and objects
    with missing/extra/wrong-type/null fields.
 2. **Always returns an object with exactly these 5 keys**, each value being the typed value or `null`.
@@ -157,14 +158,14 @@ non-date string.
 Provider is **Google Gemini `gemini-2.5-flash`** via REST `generateContent`
 (`src/lib/ai/suggest.ts:19-20`), with a structured-output `responseSchema` declaring all five
 fields `STRING/INTEGER` + `nullable: true` (`:35-44`). The prompt (`:22-33`) instructs:
-*"Use null for any field you cannot determine… null is better than a bad value."* So **null and
+_"Use null for any field you cannot determine… null is better than a bad value."_ So **null and
 missing fields are the expected, normal case — not an exotic edge.**
 
 `requestSuggestion` walks the Gemini envelope with `extractText` (`:152-167`); a missing
 `candidates`/`parts`/text part → **throws** "missing JSON text part"; `JSON.parse` of the text
 part can throw `SyntaxError`. **All these throws are upstream of the normalizer** and collapse to
 `{ status: "ai_unavailable" }` (HTTP 200) at the endpoint — they belong to Risk #1 (AI outage,
-Phase 3), not Risk #5. The normalizer's input is *whatever `JSON.parse(text)` yields*, so the unit
+Phase 3), not Risk #5. The normalizer's input is _whatever `JSON.parse(text)` yields_, so the unit
 fixtures should be the parsed JSON values, e.g.:
 
 - Happy path (all 5 fields valid).
@@ -216,20 +217,20 @@ No fixtures, mocks, or sample responses exist in the repo yet (Phase 1 is unstar
 - **The normalizer is the deliberate provider-agnostic seam.** Its header docstring
   (`suggest.ts:1-17`) states the API key is injected by the caller so the module imports nothing
   from `astro:env`/network at the top level — "swapping providers later should touch only this
-  file." This is *why* it is unit-testable in isolation, and the test should protect that property.
+  file." This is _why_ it is unit-testable in isolation, and the test should protect that property.
 - **Defense in depth on the care profile.** The same coercion runs twice: at suggestion time
   (`/suggest`) and again at save time (`/api/plants` re-normalizes the posted snapshot). The DB
-  `check > 0` and `date` column are the final backstop. The unit suite protects the *first* layer;
-  the DB constraints are the oracle for *why* the coercions exist.
+  `check > 0` and `date` column are the final backstop. The unit suite protects the _first_ layer;
+  the DB constraints are the oracle for _why_ the coercions exist.
 - **Risk #5 vs Risk #1 boundary.** "Normalizer throws" sounds like Risk #5, but every actual throw
   is upstream in the provider seam and is owned by the AI-outage path (Risk #1 / Phase 3). Phase 1
-  should assert the *pure* normalizer never throws and emits a contract-valid profile — not the
+  should assert the _pure_ normalizer never throws and emits a contract-valid profile — not the
   endpoint's outage behavior.
 
 ## Historical Context (from prior changes)
 
 - `context/archive/2026-06-08-first-plant-from-photo/plan.md:223,239,418` — the **S-01 plan**.
-  Specifies the contract as a *source* (predates the code): "Export pure `normalizeSuggestion`…
+  Specifies the contract as a _source_ (predates the code): "Export pure `normalizeSuggestion`…
   all nullable, `watering_interval_days` → positive int or null, `winterization_cutoff` → ISO
   `YYYY-MM-DD` or null"; acceptance "pure export… verified against a missing-field and an
   extra-field payload"; Progress "[x] handles missing/extra fields without throwing — d699847".
@@ -246,16 +247,16 @@ No fixtures, mocks, or sample responses exist in the repo yet (Phase 1 is unstar
 ## Open Questions (decisions for `/10x-plan` — do NOT bake a mirror assertion)
 
 These are the points where sources do **not** unambiguously fix the expected value. The lesson's
-oracle rule says to assert the *property* the sources guarantee, and flag the rest for a decision
+oracle rule says to assert the _property_ the sources guarantee, and flag the rest for a decision
 rather than asserting "whatever the code currently does."
 
 1. **Non-integer watering — round or reject?** Sources guarantee only "positive integer or null."
    `7.5` → `8` (current `Math.round`) and `7.5` → `null` both satisfy that. **Recommendation:**
-   assert the *property* (`out === null || (Number.isInteger(out) && out >= 1)`), which catches
+   assert the _property_ (`out === null || (Number.isInteger(out) && out >= 1)`), which catches
    the real regression (0, −5, 7.5-as-7.5, NaN reaching the DB) without pinning round-vs-reject.
    Decide explicitly whether to additionally pin the rounding behavior.
 
-2. **Non-ISO date formats — parse or null?** Sources require the *output* to be `YYYY-MM-DD` or
+2. **Non-ISO date formats — parse or null?** Sources require the _output_ to be `YYYY-MM-DD` or
    `null`; they do not mandate accepting `"October 1, 2026"` or `"2026/10/01"`. The current
    fallback `new Date(<arbitrary>)` is **engine-defined** (a flakiness risk across Node/workerd).
    **Recommendation:** assert only deterministic cases — a valid leading `YYYY-MM-DD` → that date;
@@ -265,12 +266,12 @@ rather than asserting "whatever the code currently does."
 3. **Latent second face of Risk #5 — calendar-invalid dates pass through.** `asIsoDate`'s
    leading-regex branch returns `2024-02-30` **verbatim** (regex matches; JS `Date` rolls it over,
    so the validity check passes), yet the DB `date` column would reject `2024-02-30`. So the
-   normalizer *can* emit a malformed care profile — the exact thing Risk #5 fears. **Surface only,
+   normalizer _can_ emit a malformed care profile — the exact thing Risk #5 fears. **Surface only,
    do not fix here** (bug→fix→regression-test is Lesson 5). The plan should decide whether to add a
-   *characterization* test documenting current behavior, or escalate the gap to a Lesson-5 change.
+   _characterization_ test documenting current behavior, or escalate the gap to a Lesson-5 change.
 
 4. **Does the normalizer itself trim / null empty strings, or rely on downstream?** The form and
-   `/api/plants` (`emptyToNull`) already trim. The contract only guarantees the *persisted* value is
+   `/api/plants` (`emptyToNull`) already trim. The contract only guarantees the _persisted_ value is
    clean. Since this suite tests the normalizer **in isolation**, asserting its own empty→`null`
    behavior is reasonable (it matches the form's expectation), but confirm that's the intended layer.
 

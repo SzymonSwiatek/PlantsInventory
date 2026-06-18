@@ -15,6 +15,7 @@ domain does not exist yet. Goal: get the deploy pipeline working end-to-end on
 the auth scaffold so later features ship along a proven path.
 
 **Decisions confirmed with the user:**
+
 - A hosted Supabase project exists → set Worker secrets so sign-in works in
   production.
 - Wire automatic deployment from GitHub Actions on merge to `main`.
@@ -25,6 +26,7 @@ the auth scaffold so later features ship along a proven path.
 auth (`@supabase/ssr`), `wrangler` 4.94.0, npm, GitHub Actions auto-deploy-on-merge.
 
 **Out of scope for this deployment:**
+
 - The reminder `scheduled()` cron (infrastructure.md step 5) — the reminder
   feature does not exist; deferred until the reminder domain is built.
 - A custom domain — `*.workers.dev` is sufficient; a custom domain requires
@@ -35,7 +37,7 @@ auth (`@supabase/ssr`), `wrangler` 4.94.0, npm, GitHub Actions auto-deploy-on-me
 
 ---
 
-## Phase 0 — Accounts & prerequisites  `[user]`
+## Phase 0 — Accounts & prerequisites `[user]`
 
 **Status:** ◐ in progress — Cloudflare account ready; Supabase keys still to copy
 
@@ -59,7 +61,7 @@ Prerequisites that have no code; gather these before touching the repo.
 
 ---
 
-## Phase 1 — Rename & local config  `[agent-safe]`
+## Phase 1 — Rename & local config `[agent-safe]`
 
 **Status:** ☑ done
 
@@ -84,7 +86,7 @@ external side effects.
 
 ---
 
-## Phase 2 — Authenticate wrangler  `[user]`
+## Phase 2 — Authenticate wrangler `[user]`
 
 **Status:** ☑ done
 
@@ -96,16 +98,17 @@ external side effects.
       single account, so no `CLOUDFLARE_ACCOUNT_ID` override is needed locally.
 
 **Edge support:**
-- *No browser available (headless/SSH/remote shell):* skip `wrangler login`.
+
+- _No browser available (headless/SSH/remote shell):_ skip `wrangler login`.
   Instead create an API token (Phase 7 step 1) and `export
-  CLOUDFLARE_API_TOKEN=<token>` in the shell — `wrangler` uses it automatically.
-- *Your login has access to multiple Cloudflare accounts:* `wrangler` will error
+CLOUDFLARE_API_TOKEN=<token>` in the shell — `wrangler` uses it automatically.
+- _Your login has access to multiple Cloudflare accounts:_ `wrangler` will error
   asking which one. Set `export CLOUDFLARE_ACCOUNT_ID=<id>` (the value from
   `wrangler whoami`).
 
 ---
 
-## Phase 3 — Build & first deploy  `[user]`
+## Phase 3 — Build & first deploy `[user]`
 
 **Status:** ☑ done — live at https://10x-plants-inventory.swiatek1996.workers.dev
 
@@ -137,17 +140,18 @@ infrastructure.md requires.
 > Workers Scripts, or CI deploys fail when re-provisioning the binding.
 
 **Edge support:**
-- *`workerd` compatibility-date warning* (`The latest compatibility date
-  supported by the installed Cloudflare Workers Runtime is "…", but you've
-  requested "2026-05-08". Falling back…`) — harmless; the deploy still succeeds.
+
+- _`workerd` compatibility-date warning_ (`The latest compatibility date
+supported by the installed Cloudflare Workers Runtime is "…", but you've
+requested "2026-05-08". Falling back…`) — harmless; the deploy still succeeds.
   It just means the local `wrangler` bundles a slightly older runtime.
-- *Build fails with `require is not defined` or `Fetch API cannot load`* — see
+- _Build fails with `require is not defined` or `Fetch API cannot load`_ — see
   Edge cases #2 and #3.
-- *`wrangler deploy` reports a large bundle* — see Edge cases #6.
+- _`wrangler deploy` reports a large bundle_ — see Edge cases #6.
 
 ---
 
-## Phase 4 — Production secrets  `[user]`
+## Phase 4 — Production secrets `[user]`
 
 **Status:** ☑ done — `SUPABASE_URL` + `SUPABASE_KEY` set (verified via `secret list`)
 
@@ -167,12 +171,13 @@ not readable back, and **survive every future `wrangler deploy`** (CI deploys
 included).
 
 **Edge support:**
-- *`wrangler secret put` fails "script not found"* — the Worker was not deployed
+
+- _`wrangler secret put` fails "script not found"_ — the Worker was not deployed
   yet. Run Phase 3 first (this is exactly why Phase 4 follows Phase 3).
 
 ---
 
-## Phase 5 — Supabase Auth URL configuration  `[user]`
+## Phase 5 — Supabase Auth URL configuration `[user]`
 
 **Status:** ☑ done — Site URL + Redirect URLs set; "Confirm email" is **ON**
 
@@ -192,18 +197,19 @@ password-reset emails link to `localhost` and break for real users.
       emailed link before `signInWithPassword` will succeed.
 
 **Edge support:**
-- *Confirmation email never arrives / arrives slowly:* Supabase's **built-in
+
+- _Confirmation email never arrives / arrives slowly:_ Supabase's **built-in
   email sender is rate-limited** (~2–4 emails/hour) and is explicitly not for
   production volume. Fine for scaffold testing — just don't retry signup in a
   tight loop. For real launch traffic, wiring custom SMTP (Resend, Postmark,
   SendGrid) via Supabase → Authentication → SMTP Settings is **future work**,
   out of scope here.
-- *Auth works on the homepage but redirects bounce to `localhost`:* the Site URL
+- _Auth works on the homepage but redirects bounce to `localhost`:_ the Site URL
   edit did not save, or the Redirect URLs list is missing the Worker origin.
 
 ---
 
-## Phase 6 — Verification  `[user]`
+## Phase 6 — Verification `[user]`
 
 **Status:** ☑ done — auth verified end-to-end on production; no edge errors
 
@@ -214,7 +220,7 @@ Run after Phases 3–5. This proves the deploy and the secret wiring.
       middleware `PROTECTED_ROUTES` in `src/middleware.ts`).
 - [x] Full **sign-up → confirm email → sign-in** flow succeeds. `wrangler tail`
       captured `POST /api/auth/signup → /auth/confirm-email → GET /?code=… →
-      POST /api/auth/signin → GET /` — all `Ok`. The confirmation email linked to
+    POST /api/auth/signin → GET /` — all `Ok`. The confirmation email linked to
       the Worker URL (not `localhost`), proving Phase 5.
 
   > This is the real proof the secrets landed. `createClient` returns `null`
@@ -236,12 +242,13 @@ Run after Phases 3–5. This proves the deploy and the secret wiring.
 > ticket, not a deployment blocker.
 
 **Edge support:**
-- *Every route returns `[object Object]`* — see Edge cases #1.
-- *`crypto` / `stream` errors in `wrangler tail`* — see Edge cases #4, #5.
+
+- _Every route returns `[object Object]`_ — see Edge cases #1.
+- _`crypto` / `stream` errors in `wrangler tail`_ — see Edge cases #4, #5.
 
 ---
 
-## Phase 7 — GitHub Actions auto-deploy  `[user]` gates + `[agent-safe]` code
+## Phase 7 — GitHub Actions auto-deploy `[user]` gates + `[agent-safe]` code
 
 **Status:** ☑ done — first CI run green (`ci` → `deploy`); CI-deployed version `a195a3cd` live at 100%
 
@@ -295,15 +302,16 @@ CI ships along a known-good path.
   Cloudflare Workers" token includes Workers KV Storage edit).
 
 **Edge support:**
-- *Token rejected (`Authentication error 10000`):* the token template was wrong
+
+- _Token rejected (`Authentication error 10000`):_ the token template was wrong
   or the token is scoped to a different account than `CLOUDFLARE_ACCOUNT_ID`.
-- *Actions Node-20 deprecation notice:* addressed above — both jobs use `@v6`
+- _Actions Node-20 deprecation notice:_ addressed above — both jobs use `@v6`
   actions, which run on Node 24. The `node-version: 22` build input is a
   separate setting and stays (matches CLAUDE.md and `package.json` engines).
 
 ---
 
-## Phase 8 — Finalize the audit artifact  `[user]`
+## Phase 8 — Finalize the audit artifact `[user]`
 
 **Status:** ☑ done
 
@@ -318,18 +326,18 @@ CI ships along a known-good path.
 Scan this table when something breaks. Each entry names the trigger, the cause,
 and the fix.
 
-| # | Symptom | Cause & fix |
-|---|---|---|
-| 1 | Every SSR route returns `[object Object]` | `nodejs_compat` + native process v2 makes Astro mis-detect Node and emit async-iterable bodies `workerd` can't serve. **Should not occur here** — `compatibility_date: 2026-05-08` is past the `2026-02-19` cutoff where `fetch_iterable_type_support` auto-enables ([withastro/astro#14511](https://github.com/withastro/astro/issues/14511)). If it ever appears (e.g. after a compat-date downgrade), add `"disable_nodejs_process_v2"` to `compatibility_flags` in `wrangler.jsonc`. |
-| 2 | Build fails: `Fetch API cannot load: /` | Astro 6 + Cloudflare adapter + Supabase auth endpoints ([withastro/astro#16190](https://github.com/withastro/astro/issues/16190)). Generally resolved on Astro `^6.3.1`. If hit: `npm update astro @astrojs/cloudflare`, re-run `npx astro sync`, rebuild. |
-| 3 | Build fails: `require is not defined` (picomatch) | An Astro-6-beta-era regression ([withastro/astro#15796](https://github.com/withastro/astro/issues/15796)). Resolved on stable 6.3.1 — `npm update astro` if seen. |
-| 4 | Edge error: `Dynamic require of 'stream' is not supported` | `@supabase/ssr` needs the `nodejs_compat` flag — it's already set in `wrangler.jsonc`. If this still fires, confirm the flag survived the Phase 1 rename and that `compatibility_date` is recent. |
-| 5 | Edge error mentioning `crypto` during sign-in | `@supabase/ssr` JWT verification uses Node `crypto` via the `nodejs_compat` shim; surfaces only on real `workerd`, not local `astro dev`. Catch it with `wrangler tail` during the Phase 6 sign-in test; if it fires, pin `@supabase/ssr` / `@supabase/supabase-js` and retest. |
-| 6 | `wrangler deploy` warns the bundle is large | Free limit is 3 MB compressed (10 MB paid). Astro SSR + React 19 + Supabase SDK is normally well under. Watch the size line; keep dependencies lean as the domain grows. |
-| 7 | `wrangler secret put` → "script not found" | The Worker isn't deployed. Run Phase 3 before Phase 4. |
-| 8 | `wrangler` errors asking which account | The login has multiple accounts. `export CLOUDFLARE_ACCOUNT_ID=<id>` (from `wrangler whoami`). |
-| 9 | CI deploys with a different `wrangler` than local | `wrangler-action` defaults to the latest v4. Pin `wranglerVersion: "4.94.0"` in the `deploy` job to match `package.json`. |
-| 10 | Sign-in works but post-auth redirect lands on `localhost` | Phase 5 incomplete — Supabase **Site URL** / **Redirect URLs** still point at `localhost`. |
+| #   | Symptom                                                    | Cause & fix                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Every SSR route returns `[object Object]`                  | `nodejs_compat` + native process v2 makes Astro mis-detect Node and emit async-iterable bodies `workerd` can't serve. **Should not occur here** — `compatibility_date: 2026-05-08` is past the `2026-02-19` cutoff where `fetch_iterable_type_support` auto-enables ([withastro/astro#14511](https://github.com/withastro/astro/issues/14511)). If it ever appears (e.g. after a compat-date downgrade), add `"disable_nodejs_process_v2"` to `compatibility_flags` in `wrangler.jsonc`. |
+| 2   | Build fails: `Fetch API cannot load: /`                    | Astro 6 + Cloudflare adapter + Supabase auth endpoints ([withastro/astro#16190](https://github.com/withastro/astro/issues/16190)). Generally resolved on Astro `^6.3.1`. If hit: `npm update astro @astrojs/cloudflare`, re-run `npx astro sync`, rebuild.                                                                                                                                                                                                                               |
+| 3   | Build fails: `require is not defined` (picomatch)          | An Astro-6-beta-era regression ([withastro/astro#15796](https://github.com/withastro/astro/issues/15796)). Resolved on stable 6.3.1 — `npm update astro` if seen.                                                                                                                                                                                                                                                                                                                        |
+| 4   | Edge error: `Dynamic require of 'stream' is not supported` | `@supabase/ssr` needs the `nodejs_compat` flag — it's already set in `wrangler.jsonc`. If this still fires, confirm the flag survived the Phase 1 rename and that `compatibility_date` is recent.                                                                                                                                                                                                                                                                                        |
+| 5   | Edge error mentioning `crypto` during sign-in              | `@supabase/ssr` JWT verification uses Node `crypto` via the `nodejs_compat` shim; surfaces only on real `workerd`, not local `astro dev`. Catch it with `wrangler tail` during the Phase 6 sign-in test; if it fires, pin `@supabase/ssr` / `@supabase/supabase-js` and retest.                                                                                                                                                                                                          |
+| 6   | `wrangler deploy` warns the bundle is large                | Free limit is 3 MB compressed (10 MB paid). Astro SSR + React 19 + Supabase SDK is normally well under. Watch the size line; keep dependencies lean as the domain grows.                                                                                                                                                                                                                                                                                                                 |
+| 7   | `wrangler secret put` → "script not found"                 | The Worker isn't deployed. Run Phase 3 before Phase 4.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 8   | `wrangler` errors asking which account                     | The login has multiple accounts. `export CLOUDFLARE_ACCOUNT_ID=<id>` (from `wrangler whoami`).                                                                                                                                                                                                                                                                                                                                                                                           |
+| 9   | CI deploys with a different `wrangler` than local          | `wrangler-action` defaults to the latest v4. Pin `wranglerVersion: "4.94.0"` in the `deploy` job to match `package.json`.                                                                                                                                                                                                                                                                                                                                                                |
+| 10  | Sign-in works but post-auth redirect lands on `localhost`  | Phase 5 incomplete — Supabase **Site URL** / **Redirect URLs** still point at `localhost`.                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ## Risks from infrastructure.md relevant to this deployment
 
@@ -339,20 +347,20 @@ and the fix.
 - **`nodejs_compat` shim doesn't cover a Node API Supabase uses at the edge** —
   mitigated by `wrangler tail` + the sign-in test on real `workerd` (Phase 6),
   and Edge cases #4–#5.
-- **Stale Cloudflare *Pages* guidance** — we use `wrangler deploy` (Workers); the
+- **Stale Cloudflare _Pages_ guidance** — we use `wrangler deploy` (Workers); the
   `wrangler.jsonc` is already in the Workers shape (`assets` + adapter `main`).
   Ignore Pages-era tutorials; Phase 1 also corrects the stale `tech-stack.md`
   `deployment_target` hint.
 
 ## Files changed by this plan
 
-| File | Change | Phase |
-|---|---|---|
-| `wrangler.jsonc` | `name` → `10x-plants-inventory` | 1 |
-| `package.json` | `name` → `10x-plants-inventory`; add `deploy` script | 1 |
-| `context/foundation/tech-stack.md` | frontmatter `deployment_target` fix | 1 |
-| `.github/workflows/ci.yml` | new `deploy` job | 7 |
-| `context/changes/deployment/deployment-plan.md` | this artifact + Outcome below | 8 |
+| File                                            | Change                                               | Phase |
+| ----------------------------------------------- | ---------------------------------------------------- | ----- |
+| `wrangler.jsonc`                                | `name` → `10x-plants-inventory`                      | 1     |
+| `package.json`                                  | `name` → `10x-plants-inventory`; add `deploy` script | 1     |
+| `context/foundation/tech-stack.md`              | frontmatter `deployment_target` fix                  | 1     |
+| `.github/workflows/ci.yml`                      | new `deploy` job                                     | 7     |
+| `context/changes/deployment/deployment-plan.md` | this artifact + Outcome below                        | 8     |
 
 ## End-to-end verification
 

@@ -1,24 +1,25 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: Magic-link Authentication
 
 - **Plan**: context/changes/magic-link-auth/plan.md
 - **Scope**: All 3 phases (full plan)
 - **Date**: 2026-06-02
 - **Verdict**: APPROVED
-- **Findings**: 0 critical  1 warning  1 observation
+- **Findings**: 0 critical 1 warning 1 observation
 
 Evidence: `npm run lint` ✓, `npm run build` ✓, `npx astro sync` ✓, `npx tsc --noEmit` 0 errors. Grep gates all clean (no `signInWithPassword` / `signUp(` / `PasswordToggle` / `SignUpForm` / `MIN_PASSWORD_LENGTH` / `password` in the auth surface). Deletions (`SignUpForm.tsx`, `PasswordToggle.tsx`, `api/auth/signup.ts`) and the `confirm-email.astro` → `check-email.astro` rename confirmed. All 13 changed files map to the plan — no unplanned source changes. The two type annotations that looked risky (`React.SubmitEvent<T>`, `EmailOtpType` via `?? "email"`) are both genuinely type-valid (`SubmitEvent` exists in @types/react v19; `EmailOtpType` includes a `(string & {})` member) — not findings.
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | PASS |
-| Safety & Quality | WARNING |
-| Architecture | PASS |
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | PASS    |
+| Scope Discipline    | PASS    |
+| Safety & Quality    | WARNING |
+| Architecture        | PASS    |
 | Pattern Consistency | WARNING |
-| Success Criteria | PASS |
+| Success Criteria    | PASS    |
 
 ## Findings
 
