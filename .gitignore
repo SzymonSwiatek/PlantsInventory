@@ -40,3 +40,11 @@ CLAUDE.md.scaffold
 .claude/prompts/*
 .github/prompts/*
 .agents/prompts/*
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+/.playwright-cli/
