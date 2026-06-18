@@ -532,25 +532,25 @@ None — test-only change, no schema or production-code changes.
 
 #### Automated
 
-- [x] 3.1 All cross-user storage cases pass: `npm run test:integration`
-- [x] 3.2 Lint passes: `npm run lint`
+- [x] 3.1 All cross-user storage cases pass: `npm run test:integration` — 592c230
+- [x] 3.2 Lint passes: `npm run lint` — 592c230
 
 #### Manual
 
-- [x] 3.3 `plant-photos` bucket is empty of test objects after the run
+- [x] 3.3 `plant-photos` bucket is empty of test objects after the run — 592c230
 
 ### Phase 4: Risk #3 — auth-boundary (real SSR server)
 
 #### Automated
 
-- [ ] 4.1 All deny-contract + invalid-session cases pass against the booted server: `npm run test:integration`
-- [ ] 4.2 The suite tears the server down (no orphaned `astro dev` process)
-- [ ] 4.3 Lint passes: `npm run lint`
+- [x] 4.1 All deny-contract + invalid-session cases pass against the booted server: `npm run test:integration`
+- [x] 4.2 The suite tears the server down (no orphaned `astro dev` process)
+- [x] 4.3 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 4.4 Server boots with local Supabase wired (invalid-session case is meaningful)
-- [ ] 4.5 Total `npm run test:integration` time is acceptable for local use
+- [x] 4.4 Server boots with local Supabase wired (invalid-session case is meaningful)
+- [x] 4.5 Total `npm run test:integration` time is acceptable for local use
 
 ### Phase 5: Test-plan cookbook + status sync
 
