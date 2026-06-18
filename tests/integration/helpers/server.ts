@@ -24,8 +24,13 @@ export interface ServerHandle {
 /**
  * Spawn `astro dev` on a dedicated test port with the local Supabase keys
  * wired so that `getUser()` actually validates tokens rather than returning
- * null because the client is unconfigured. Only the auth-boundary file calls
- * this; per-file parallelism therefore does not race on `.dev.vars`.
+ * null because the client is unconfigured.
+ *
+ * Multiple suites call this (auth-boundary, ai-outage). It binds a fixed port
+ * (TEST_PORT) and mutates the shared repo-root `.dev.vars`, so callers must NOT
+ * run in parallel — `vitest.integration.config.ts` sets `fileParallelism: false`
+ * to guarantee that. Without it, concurrent suites collide on the port and race
+ * the `.dev.vars` capture/restore (leaving a polluted file behind).
  */
 export async function startServer(): Promise<ServerHandle> {
   const supabaseUrl = process.env.SUPABASE_TEST_URL;
