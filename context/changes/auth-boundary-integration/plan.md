@@ -561,7 +561,7 @@ None — test-only change, no schema or production-code changes.
 
 #### Automated
 
-- [x] 5.1 Markdown lint/format passes: `npm run format`
+- [x] 5.1 Markdown lint/format passes: `npm run format` — 0c01e0a
 
 #### Manual
 
