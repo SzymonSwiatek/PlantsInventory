@@ -520,24 +520,24 @@ None — test-only change, no schema or production-code changes.
 
 #### Automated
 
-- [x] 2.1 All matrix + child-scoping + anon + cascade cases pass: `npm run test:integration`
-- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.1 All matrix + child-scoping + anon + cascade cases pass: `npm run test:integration` — 55bd9e7
+- [x] 2.2 Lint passes: `npm run lint` — 55bd9e7
 
 #### Manual
 
-- [ ] 2.3 Spot-check that an isolation assertion asserts denial, not "no error"
-- [ ] 2.4 No leftover A/B users or rows after the run
+- [x] 2.3 Spot-check that an isolation assertion asserts denial, not "no error" — 55bd9e7
+- [x] 2.4 No leftover A/B users or rows after the run — 55bd9e7
 
 ### Phase 3: Risk #4 — storage path-scoping (IDOR)
 
 #### Automated
 
-- [ ] 3.1 All cross-user storage cases pass: `npm run test:integration`
-- [ ] 3.2 Lint passes: `npm run lint`
+- [x] 3.1 All cross-user storage cases pass: `npm run test:integration`
+- [x] 3.2 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 3.3 `plant-photos` bucket is empty of test objects after the run
+- [x] 3.3 `plant-photos` bucket is empty of test objects after the run
 
 ### Phase 4: Risk #3 — auth-boundary (real SSR server)
 
