@@ -54,9 +54,19 @@ export async function createTestUser(): Promise<TestUser> {
  * user delete then cascades all domain rows (`on delete cascade`).
  */
 export async function deleteTestUser(user: TestUser): Promise<void> {
+  await deleteTestUserById(user.id);
+}
+
+/**
+ * Tear a user down by id alone — for callers (e.g. the Playwright
+ * `globalTeardown`, a separate process) that only persisted the user id, not the
+ * full `TestUser`. Storage objects under `<uid>/...` are removed first, then the
+ * user delete cascades all domain rows.
+ */
+export async function deleteTestUserById(userId: string): Promise<void> {
   const admin = serviceRoleClient();
-  await removeUserStorage(admin, user.id);
-  const { error } = await admin.auth.admin.deleteUser(user.id);
+  await removeUserStorage(admin, userId);
+  const { error } = await admin.auth.admin.deleteUser(userId);
   if (error !== null) {
     throw new Error(`deleteTestUser: admin.deleteUser failed: ${error.message}`);
   }

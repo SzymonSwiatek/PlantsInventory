@@ -107,7 +107,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 | unit + integration             | Vitest                                                             | `^3.2.6` (installed; checked: 2026-06-14) | Vite-native, matches the Astro/Vite 7 toolchain; runs unit suite at `environment: "node"`, `@/*` alias replicated in `vitest.config.ts`, `TZ=UTC` in `vitest.setup.ts` |
 | integration env (DB + Storage) | local Supabase (`npx supabase start`)                              | CLI 2.23 (installed)                      | two real user sessions for RLS / IDOR / auth-boundary tests; needs Docker                                                                                              |
 | API / provider mocking         | network-edge stub (e.g. MSW) or `vi.mock` at the provider boundary | none yet — see §3 Phase 3                 | mock the AI provider HTTP edge only, never internal modules; pick at plan time                                                                                         |
-| e2e                            | Playwright (only if needed)                                        | none yet — see §3 Phase 3                 | introduced only if the AI-outage UI fallback is unreachable from integration                                                                                           |
+| e2e                            | Playwright                                                         | `^1.61.0` (installed/wired; checked: 2026-06-18) | wired in §3 Phase 3 for Risk #1's client-rendered fallback (unreachable from integration): `playwright.config.ts` + `tests/e2e/` (storageState auth, `webServer` with AI off); run `npm run test:e2e`. See §6.3 |
 | accessibility                  | none                                                               | n/a                                       | WCAG floor deferred per PRD Open Question 5; not in this rollout                                                                                                       |
 | (optional) AI-native           | considered, deferred — see §7                                      | n/a                                       | not used: the feared bugs are deterministic (parsing, fallback, isolation)                                                                                             |
 
@@ -115,7 +115,7 @@ The classic test base for this project. AI-native tools (if any) carry a
 
 - Docs: Context7 / framework docs MCP — not available in current session; Cloudflare doc-backed skills (`wrangler`, `workers-best-practices`) available; checked: 2026-06-10
 - Search: Exa.ai — not available in current session; `WebSearch` / `WebFetch` available for current-status checks; checked: 2026-06-10
-- Runtime/browser: Playwright MCP — not present; Playwright would be installed by §3 Phase 3 only if an e2e layer is warranted; checked: 2026-06-10
+- Runtime/browser: Playwright installed and wired (§3 Phase 3) — drives system Chrome via `channel: "chrome"`; Playwright MCP not present (specs are authored + run via the CLI); checked: 2026-06-18
 - Provider/platform: Cloudflare + Supabase skills available (read-only docs grounding for Workers `scheduled()`, wrangler config, Supabase RLS/Storage); checked: 2026-06-10
 
 ## 5. Quality Gates
@@ -230,7 +230,52 @@ a running SSR server — where mocks would undercut the signal.
 
 ### 6.3 Adding an e2e test
 
-- TBD — see §3 Phase 3 (only if the AI-outage UI fallback is unreachable from integration).
+Pattern proven by Risk #1's client-rendered manual fallback
+(`tests/e2e/add-plant-ai-outage.spec.ts`). Use Playwright e2e ONLY for a risk
+that lives in the rendered, interactive UI and is unreachable from integration
+(here: the React island's "create manually" banner + manual save) — never to
+re-prove an endpoint contract a booted-server integration test already covers.
+
+- **Authenticate without the magic-link UI — inject the session.** Email delivery
+  is out of test scope (§3). A Playwright `globalSetup`
+  (`tests/e2e/global-setup.ts`) mints a user the same way the integration suite
+  does (`createTestUser`, admin API + `signInWithPassword`), then lets
+  `@supabase/ssr`'s `createServerClient` emit the `sb-<ref>-auth-token` cookies
+  via a cookie-capturing adapter + `setSession(...)` — never hand-rolled — and
+  writes them into Playwright `storageState` (`playwright/.auth/user.json`,
+  gitignored). The same URL `supabase status` reports must feed BOTH the
+  storageState cookies and the server's `.dev.vars` `SUPABASE_URL`, or the cookie
+  ref won't match. `globalTeardown` deletes the user (cascade) and restores
+  `.dev.vars`.
+- **Boot the real app with the outage lever, zero stub.** The `webServer` runs a
+  prep step (`tests/e2e/setup-dev-vars.ts`) that writes `.dev.vars` with
+  `AI_API_KEY=` forced OFF (same lever as §6.5's booted server) BEFORE `astro
+  dev` starts, so every suggest call degrades and the banner appears. Manual
+  negative check: supply a real `AI_API_KEY` and the banner must NOT appear.
+- **Warm the dev server in `globalSetup`, or a cold-start reload flakes the test.**
+  The first real browser page-load makes Vite optimize the island's client deps
+  and the cloudflare platformProxy load `.dev.vars` secrets — each forces a full
+  reload that, mid-test, wipes the just-selected photo. A throwaway browser in
+  `globalSetup` loads the page twice (`waitUntil: "networkidle"`) so the deps are
+  pre-bundled before the real test opens. (A server-side `fetch` can't warm the
+  client bundle.)
+- **Use a DECODABLE image fixture.** The upload path is happy with any bytes, but
+  the suggest path runs `downscaleToBase64` (`createImageBitmap` + canvas) in the
+  browser. A malformed/1×1 PNG throws there, and the client's `catch` shows the
+  fallback banner for the WRONG reason — a false positive that passes even when
+  the server never degrades. `tests/e2e/fixtures/plant.png` is a real 64×64 PNG;
+  the deliberate-break check (force the server to answer `ok`) must turn the test
+  RED, proving the banner tracks the server degrade, not a decode error.
+- **Accessibility-first locators, wait-for-state, unique data.**
+  `getByRole`/`getByLabel`/`getByText` only (no CSS/XPath); assert
+  `toBeVisible()` / `toBeEnabled()` / `waitForURL(...)`, never
+  `waitForTimeout`; per-test timestamp-suffixed names; cleanup via
+  `globalTeardown` (cascade), not per-test teardown of a shared fixture.
+- **Reference files:** `tests/e2e/add-plant-ai-outage.spec.ts`,
+  `tests/e2e/global-setup.ts`, `tests/e2e/global-teardown.ts`,
+  `tests/e2e/setup-dev-vars.ts`, `playwright.config.ts`,
+  `tests/integration/helpers/sessions.ts` (`createTestUser` /
+  `deleteTestUserById`, shared with the e2e setup).
 
 ### 6.4 Adding a test for a new API endpoint
 

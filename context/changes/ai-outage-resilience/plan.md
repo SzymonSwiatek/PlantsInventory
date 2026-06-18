@@ -391,27 +391,27 @@ exposed, add `undici` as a devDependency in Phase 1).
 
 #### Automated
 
-- [x] 1.1 Integration suite passes: `npm run test:integration`
-- [x] 1.2 Unit suite (incl. handler fault test) passes: `npm run test:run`
-- [x] 1.3 Lint passes: `npm run lint`
-- [x] 1.4 Typecheck/build passes: `npx astro sync && npm run build`
+- [x] 1.1 Integration suite passes: `npm run test:integration` — de5f757
+- [x] 1.2 Unit suite (incl. handler fault test) passes: `npm run test:run` — de5f757
+- [x] 1.3 Lint passes: `npm run lint` — de5f757
+- [x] 1.4 Typecheck/build passes: `npx astro sync && npm run build` — de5f757
 
 #### Manual
 
-- [x] 1.5 Integration test fails if the `photoPath` linkage is broken (tests preservation, not shape)
-- [x] 1.6 Handler fault test fails if the endpoint catch is removed (tests real degrade conversion)
+- [x] 1.5 Integration test fails if the `photoPath` linkage is broken (tests preservation, not shape) — de5f757
+- [x] 1.6 Handler fault test fails if the endpoint catch is removed (tests real degrade conversion) — de5f757
 
 ### Phase 2: Thin e2e for the client-rendered manual fallback
 
 #### Automated
 
-- [ ] 2.1 E2e passes: `npm run test:e2e`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Typecheck/build passes: `npx astro sync && npm run build`
-- [ ] 2.4 Placeholder `tests/e2e/seed.spec.ts` no longer exists
+- [x] 2.1 E2e passes: `npm run test:e2e`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Typecheck/build passes: `npx astro sync && npm run build`
+- [x] 2.4 Placeholder `tests/e2e/seed.spec.ts` no longer exists
 
 #### Manual
 
-- [ ] 2.5 Headed run shows banner appearing + manual save redirect matching the assertion
-- [ ] 2.6 Spec fails if `AI_API_KEY` is provided to the webServer (banner never appears)
-- [ ] 2.7 `storageState` auth works — new-plant page loads without a sign-in redirect
+- [x] 2.5 Headed run shows banner appearing + manual save redirect matching the assertion
+- [x] 2.6 Spec fails if `AI_API_KEY` is provided to the webServer (banner never appears)
+- [x] 2.7 `storageState` auth works — new-plant page loads without a sign-in redirect
