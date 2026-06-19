@@ -177,6 +177,59 @@ describe("/api/plants/[id] — PATCH validation", () => {
   });
 });
 
+describe("/api/plants/[id] — PATCH photo_path cleanup", () => {
+  beforeEach(() => {
+    vi.mocked(createClient).mockReturnValue(null);
+    vi.mocked(removePhotos).mockClear();
+    vi.mocked(removePhotos).mockResolvedValue(undefined);
+  });
+
+  it("removes orphaned old object when photo_path changes to a different value", async () => {
+    const OLD_PATH = "uid/plantid/old-photo.jpg";
+    const NEW_PATH = "uid/plantid/new-photo.jpg";
+
+    const mockClient = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: { photo_path: OLD_PATH }, error: null }),
+          }),
+        }),
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }),
+      }),
+    };
+    vi.mocked(createClient).mockReturnValue(mockClient as never);
+
+    const res = await PATCH(fakeContext("PATCH", VALID_UUID, { photo_path: NEW_PATH }));
+    expect(res.status).toBe(200);
+    expect(vi.mocked(removePhotos)).toHaveBeenCalledWith(mockClient, [OLD_PATH]);
+  });
+
+  it("does not call removePhotos when photo_path is set to the same value", async () => {
+    const SAME_PATH = "uid/plantid/photo.jpg";
+
+    const mockClient = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: { photo_path: SAME_PATH }, error: null }),
+          }),
+        }),
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }),
+      }),
+    };
+    vi.mocked(createClient).mockReturnValue(mockClient as never);
+
+    const res = await PATCH(fakeContext("PATCH", VALID_UUID, { photo_path: SAME_PATH }));
+    expect(res.status).toBe(200);
+    expect(vi.mocked(removePhotos)).not.toHaveBeenCalled();
+  });
+});
+
 describe("/api/plants/[id] — DELETE validation", () => {
   beforeEach(() => {
     vi.mocked(createClient).mockReturnValue(null);

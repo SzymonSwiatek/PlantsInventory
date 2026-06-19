@@ -293,28 +293,28 @@ None — no schema change. All fields already exist on `plants`.
 
 #### Automated
 
-- [x] 3.1 Type checking + lint pass (incl. react-compiler): `npx astro sync && npm run lint`
-- [x] 3.2 Existing unit tests still pass: `npm run test:run`
-- [x] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Type checking + lint pass (incl. react-compiler): `npx astro sync && npm run lint` — b501bef
+- [x] 3.2 Existing unit tests still pass: `npm run test:run` — b501bef
+- [x] 3.3 Production build succeeds: `npm run build` — b501bef
 
 #### Manual
 
-- [x] 3.4 Each field edits in place with check/cancel; one save doesn't touch others; cancel reverts
-- [x] 3.5 Watering rejects non-positive/non-int; winterization toggle clears the date to null
-- [x] 3.6 Location `<select>` moves the plant; only own locations selectable
-- [x] 3.7 AI hints show only where a snapshot value exists
-- [x] 3.8 Delete `AlertDialog` confirm removes the plant and lands on its location page
+- [x] 3.4 Each field edits in place with check/cancel; one save doesn't touch others; cancel reverts — b501bef
+- [x] 3.5 Watering rejects non-positive/non-int; winterization toggle clears the date to null — b501bef
+- [x] 3.6 Location `<select>` moves the plant; only own locations selectable — b501bef
+- [x] 3.7 AI hints show only where a snapshot value exists — b501bef
+- [x] 3.8 Delete `AlertDialog` confirm removes the plant and lands on its location page — b501bef
 
 ### Phase 4: Photo replacement
 
 #### Automated
 
-- [ ] 4.1 Type checking + lint pass: `npx astro sync && npm run lint`
-- [ ] 4.2 Unit tests pass (incl. photo_path old-object-cleanup case): `npm run test:run`
-- [ ] 4.3 Production build succeeds: `npm run build`
+- [x] 4.1 Type checking + lint pass: `npx astro sync && npm run lint`
+- [x] 4.2 Unit tests pass (incl. photo_path old-object-cleanup case): `npm run test:run`
+- [x] 4.3 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 4.4 Replacing with a new filename shows the new image; `photo_path` updates; old object removed
-- [ ] 4.5 Replacing with a same-named file overwrites in place and displays correctly
-- [ ] 4.6 A stalled/failed upload surfaces a retry path; plant never points at a missing object
+- [x] 4.4 Replacing with a new filename shows the new image; `photo_path` updates; old object removed
+- [x] 4.5 Replacing with a same-named file overwrites in place and displays correctly
+- [x] 4.6 A stalled/failed upload surfaces a retry path; plant never points at a missing object

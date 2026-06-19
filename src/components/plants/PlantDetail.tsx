@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { AlertCircle, Loader2, Trash2 } from "lucide-react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { AlertCircle, ImagePlus, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -16,9 +17,21 @@ import { Button } from "@/components/ui/button";
 import type { Plant, AiSuggestion } from "@/types";
 import EditableField from "./EditableField";
 
+const UPLOAD_TIMEOUT_MS = 60_000;
+const ALLOWED_TYPES = "image/png,image/jpeg,image/webp";
+
+type UploadStatus = "idle" | "uploading" | "uploaded" | "failed";
+
 interface LocationOption {
   id: string;
   name: string;
+}
+
+interface MintResponse {
+  plantId: string;
+  path: string;
+  token: string;
+  signedUrl: string;
 }
 
 interface Props {
@@ -29,14 +42,102 @@ interface Props {
 
 export default function PlantDetail({ plant, locations, photoUrl }: Props) {
   const [currentLocationId, setCurrentLocationId] = useState(plant.location_id);
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(photoUrl);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const fileRef = useRef<File | null>(null);
+  const previewRef = useRef<string | null>(null);
 
   const ai = plant.ai_suggestion as AiSuggestion | null;
   const aiWateringHint =
     ai?.watering_interval_days != null
       ? `every ${ai.watering_interval_days} day${ai.watering_interval_days === 1 ? "" : "s"}`
       : null;
+
+  useEffect(() => {
+    return () => {
+      if (previewRef.current) {
+        URL.revokeObjectURL(previewRef.current);
+      }
+    };
+  }, []);
+
+  async function runPhotoUpload(file: File) {
+    setUploadStatus("uploading");
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      controller.abort();
+    }, UPLOAD_TIMEOUT_MS);
+    try {
+      const mintRes = await fetch("/api/plants/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          locationId: currentLocationId,
+          filename: file.name,
+          contentType: file.type,
+          plantId: plant.id,
+        }),
+        signal: controller.signal,
+      });
+      if (!mintRes.ok) {
+        throw new Error(`mint failed: ${mintRes.status.toString()}`);
+      }
+      const mint = (await mintRes.json()) as MintResponse;
+
+      const putRes = await fetch(mint.signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type, "x-upsert": "true" },
+        body: file,
+        signal: controller.signal,
+      });
+      if (!putRes.ok) {
+        throw new Error(`upload failed: ${putRes.status.toString()}`);
+      }
+
+      const patchRes = await fetch(`/api/plants/${plant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photo_path: mint.path }),
+        signal: controller.signal,
+      });
+      if (!patchRes.ok) {
+        throw new Error(`patch failed: ${patchRes.status.toString()}`);
+      }
+
+      setCurrentPhotoUrl(previewRef.current);
+      setUploadStatus("uploaded");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[PlantDetail] photo upload failed:", err);
+      setUploadStatus("failed");
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    fileRef.current = file;
+    if (previewRef.current) {
+      URL.revokeObjectURL(previewRef.current);
+    }
+    const url = URL.createObjectURL(file);
+    previewRef.current = url;
+    void runPhotoUpload(file);
+  }
+
+  function retryPhotoUpload() {
+    const file = fileRef.current;
+    if (file) {
+      void runPhotoUpload(file);
+    }
+  }
 
   async function handleDelete() {
     setDeleting(true);
@@ -55,15 +156,49 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
 
   return (
     <div className="space-y-4">
-      {photoUrl ? (
-        <div className="mb-8">
-          <img src={photoUrl} alt={plant.name} className="h-64 w-full rounded-2xl object-cover" />
-        </div>
-      ) : (
-        <div className="mb-8 flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-4xl text-blue-100/30">
-          🌱
-        </div>
-      )}
+      <div className="mb-8">
+        {currentPhotoUrl ? (
+          <img src={currentPhotoUrl} alt={plant.name} className="h-64 w-full rounded-2xl object-cover" />
+        ) : (
+          <div className="flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-4xl text-blue-100/30">
+            🌱
+          </div>
+        )}
+        <label
+          htmlFor="replace-photo"
+          className={cn(
+            "mt-2 flex w-fit items-center gap-1.5 text-sm text-blue-300",
+            uploadStatus === "uploading" ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:text-blue-200",
+          )}
+        >
+          {uploadStatus === "uploading" ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <ImagePlus className="size-4" />
+          )}
+          {uploadStatus === "uploading" ? "Uploading…" : "Replace photo"}
+          <input
+            id="replace-photo"
+            type="file"
+            accept={ALLOWED_TYPES}
+            className="hidden"
+            onChange={handlePhotoChange}
+            disabled={uploadStatus === "uploading"}
+          />
+        </label>
+        {uploadStatus === "uploaded" && <p className="mt-1 text-xs text-emerald-400">Photo updated.</p>}
+        {uploadStatus === "failed" && (
+          <Alert variant="destructive" className="mt-2 py-2">
+            <AlertCircle className="size-3" />
+            <AlertDescription className="flex items-center gap-2 text-xs">
+              Photo upload failed.
+              <Button type="button" variant="outline" size="sm" onClick={retryPhotoUpload} className="h-6 px-2 text-xs">
+                <RefreshCw className="size-3" /> Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
 
       <div className="space-y-5 rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
         <EditableField plantId={plant.id} field="name" label="Name" kind="text" value={plant.name} />
