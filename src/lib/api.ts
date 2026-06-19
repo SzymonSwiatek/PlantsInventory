@@ -7,6 +7,13 @@ import type { User } from "@supabase/supabase-js";
  * outside the middleware's PROTECTED_ROUTES, so each endpoint self-guards.
  */
 
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// SQLSTATE codes that mean "the client sent something we won't persist" rather
+// than a server fault: 23514 check_violation (name length, watering > 0, the
+// same-user FK guard trigger), 23503 foreign_key_violation, 42501 RLS denial.
+export const CLIENT_ERROR_CODES = new Set(["23514", "23503", "42501"]);
+
 /** Build a JSON `Response` with the right content type. */
 export function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {

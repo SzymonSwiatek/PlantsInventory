@@ -234,30 +234,30 @@ No schema migration — the schema already supports rename (`update`), delete (`
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run build`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 `astro sync` regenerates types cleanly: `npx astro sync`
+- [x] 1.1 Type checking passes: `npm run build` — 3f85e43
+- [x] 1.2 Linting passes: `npm run lint` — 3f85e43
+- [x] 1.3 `astro sync` regenerates types cleanly: `npx astro sync` — 3f85e43
 
 #### Manual
 
-- [ ] 1.4 Each location row shows an accurate plant count, including "0 plants"
-- [ ] 1.5 Count updates on reload after adding/deleting a plant
-- [ ] 1.6 Create form and empty state still render and work
+- [x] 1.4 Each location row shows an accurate plant count, including "0 plants" — 3f85e43
+- [x] 1.5 Count updates on reload after adding/deleting a plant — 3f85e43
+- [x] 1.6 Create form and empty state still render and work — 3f85e43
 
 ### Phase 2: Rename + delete JSON endpoint
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npm run build`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Unit tests pass: `npm run test:run`
+- [x] 2.1 Type checking passes: `npm run build`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Unit tests pass: `npm run test:run`
 
 #### Manual
 
-- [ ] 2.4 PATCH renames with valid name; name length bounds return 400
-- [ ] 2.5 DELETE removes empty + non-empty locations, cascades plants, removes Storage objects
-- [ ] 2.6 Cross-user rename/delete is a no-op
-- [ ] 2.7 Unauthenticated returns 401; unconfigured Supabase returns 503
+- [x] 2.4 PATCH renames with valid name; name length bounds return 400
+- [x] 2.5 DELETE removes empty + non-empty locations, cascades plants, removes Storage objects
+- [x] 2.6 Cross-user rename/delete is a no-op
+- [x] 2.7 Unauthenticated returns 401; unconfigured Supabase returns 503
 
 ### Phase 3: Dashboard actions island
 

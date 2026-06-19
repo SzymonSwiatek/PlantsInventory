@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import type { Json } from "@/db/database.types";
 import type { PlantInsert } from "@/types";
-import { json, requireUser } from "@/lib/api";
+import { json, requireUser, UUID_RE, CLIENT_ERROR_CODES } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
 import { normalizeSuggestion } from "@/lib/ai/suggest";
 
@@ -16,13 +16,6 @@ import { normalizeSuggestion } from "@/lib/ai/suggest";
  * BEFORE-trigger rejects a `location_id` owned by another user. `/api/*` is
  * outside the middleware guard, so this endpoint self-guards.
  */
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-// SQLSTATE codes that mean "the client sent something we won't persist" rather
-// than a server fault: 23514 check_violation (name length, watering > 0, the
-// same-user FK guard trigger), 23503 foreign_key_violation, 42501 RLS denial.
-const CLIENT_ERROR_CODES = new Set(["23514", "23503", "42501"]);
 
 export const POST: APIRoute = async (context) => {
   const user = requireUser(context);

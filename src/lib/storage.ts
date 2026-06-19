@@ -23,6 +23,22 @@ export async function signedPhotoUrl(
 }
 
 /**
+ * Best-effort batch delete of Storage objects by path. Swallows errors — a
+ * Storage failure after a successful location delete is a nuisance, not a
+ * user-facing error. No-op on empty input.
+ */
+export async function removePhotos(supabase: SupabaseClient, paths: string[]): Promise<void> {
+  if (paths.length === 0) {
+    return;
+  }
+  const { error } = await supabase.storage.from(PHOTO_BUCKET).remove(paths);
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("[storage] removePhotos failed:", error);
+  }
+}
+
+/**
  * Batch variant of {@link signedPhotoUrl}: mint signed **read** URLs for many
  * `plant-photos` objects in a single round-trip via the plural
  * `createSignedUrls`, instead of one `createSignedUrl` call per object. Returns

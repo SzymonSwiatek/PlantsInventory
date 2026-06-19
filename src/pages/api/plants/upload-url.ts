@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { json, requireUser } from "@/lib/api";
+import { json, requireUser, UUID_RE } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -20,7 +20,6 @@ import { createClient } from "@/lib/supabase";
 
 const PHOTO_BUCKET = "plant-photos";
 const ALLOWED_CONTENT_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const POST: APIRoute = async (context) => {
   const user = requireUser(context);
