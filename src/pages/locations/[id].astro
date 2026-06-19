@@ -64,18 +64,23 @@ if (!location) {
           {plants.length > 0 ? (
             <ul class="space-y-3">
               {plants.map((plant) => (
-                <li class="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
-                  {plant.photoUrl ? (
-                    <img src={plant.photoUrl} alt={plant.name} class="h-16 w-16 shrink-0 rounded-lg object-cover" />
-                  ) : (
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-white/5 text-blue-100/30">
-                      🌱
+                <li>
+                  <a
+                    href={`/plants/${plant.id}`}
+                    class="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl transition-colors hover:bg-white/15"
+                  >
+                    {plant.photoUrl ? (
+                      <img src={plant.photoUrl} alt={plant.name} class="h-16 w-16 shrink-0 rounded-lg object-cover" />
+                    ) : (
+                      <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-white/5 text-blue-100/30">
+                        🌱
+                      </div>
+                    )}
+                    <div class="min-w-0">
+                      <p class="truncate font-medium">{plant.name}</p>
+                      <p class="text-sm text-blue-100/50">Not scheduled yet</p>
                     </div>
-                  )}
-                  <div class="min-w-0">
-                    <p class="truncate font-medium">{plant.name}</p>
-                    <p class="text-sm text-blue-100/50">Not scheduled yet</p>
-                  </div>
+                  </a>
                 </li>
               ))}
             </ul>
