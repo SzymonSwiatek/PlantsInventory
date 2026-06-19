@@ -1,7 +1,7 @@
 ---
 change_id: location-management
 title: Location management — rename, delete (with non-empty warning), list with plant counts
-status: implementing
+status: implemented
 created: 2026-06-18
 updated: 2026-06-19
 archived_at: null

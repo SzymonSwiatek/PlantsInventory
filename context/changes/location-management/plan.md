@@ -263,14 +263,14 @@ No schema migration — the schema already supports rename (`update`), delete (`
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run build`
-- [x] 3.2 Linting passes: `npm run lint` (incl. react-compiler)
-- [x] 3.3 `astro sync` clean: `npx astro sync`
+- [x] 3.1 Type checking passes: `npm run build` — 8095763
+- [x] 3.2 Linting passes: `npm run lint` (incl. react-compiler) — 8095763
+- [x] 3.3 `astro sync` clean: `npx astro sync` — 8095763
 
 #### Manual
 
-- [x] 3.4 Rename from dashboard persists after refresh
-- [x] 3.5 Empty-location delete confirm has no count line; removes it
-- [x] 3.6 Non-empty delete warns with plant count; removes location + plants + photos; cancel is a no-op
-- [x] 3.7 Failure paths surface an inline error
-- [x] 3.8 AlertDialog keyboard/focus behavior works (Esc cancels, focus trapped)
+- [x] 3.4 Rename from dashboard persists after refresh — 8095763
+- [x] 3.5 Empty-location delete confirm has no count line; removes it — 8095763
+- [x] 3.6 Non-empty delete warns with plant count; removes location + plants + photos; cancel is a no-op — 8095763
+- [x] 3.7 Failure paths surface an inline error — 8095763
+- [x] 3.8 AlertDialog keyboard/focus behavior works (Esc cancels, focus trapped) — 8095763
