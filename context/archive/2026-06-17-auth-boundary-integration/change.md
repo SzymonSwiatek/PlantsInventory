@@ -1,10 +1,10 @@
 ---
 change_id: auth-boundary-integration
 title: Isolation & auth-boundary integration tests (test-plan phase 2)
-status: implemented
+status: archived
 created: 2026-06-17
-updated: 2026-06-18
-archived_at: null
+updated: 2026-06-20
+archived_at: 2026-06-19T22:50:30Z
 ---
 
 ## Notes
