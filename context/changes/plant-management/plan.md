@@ -267,27 +267,27 @@ None — no schema change. All fields already exist on `plants`.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npx astro sync && npm run lint`
-- [x] 1.2 Production build succeeds: `npm run build`
+- [x] 1.1 Type checking passes: `npx astro sync && npm run lint` — a463ef8
+- [x] 1.2 Production build succeeds: `npm run build` — a463ef8
 
 #### Manual
 
-- [ ] 1.3 Detail page shows photo + every field with correct breadcrumb
-- [ ] 1.4 AI hints show where a suggestion exists; manual plants show none and don't error
-- [ ] 1.5 Foreign/unknown id renders the 404 state (no data leak)
-- [ ] 1.6 Plant cards on the location page navigate to the detail page
+- [x] 1.3 Detail page shows photo + every field with correct breadcrumb — a463ef8
+- [x] 1.4 AI hints show where a suggestion exists; manual plants show none and don't error — a463ef8
+- [x] 1.5 Foreign/unknown id renders the 404 state (no data leak) — a463ef8
+- [x] 1.6 Plant cards on the location page navigate to the detail page — a463ef8
 
 ### Phase 2: Plant update/delete endpoint
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test:run`
-- [ ] 2.2 Type checking + lint pass: `npx astro sync && npm run lint`
+- [x] 2.1 Unit tests pass: `npm run test:run`
+- [x] 2.2 Type checking + lint pass: `npx astro sync && npm run lint`
 
 #### Manual
 
-- [ ] 2.3 Single-field PATCH persists; PATCH of `ai_suggestion` leaves the snapshot unchanged
-- [ ] 2.4 DELETE removes the plant and its photo object
+- [x] 2.3 Single-field PATCH persists; PATCH of `ai_suggestion` leaves the snapshot unchanged
+- [x] 2.4 DELETE removes the plant and its photo object
 
 ### Phase 3: Editable detail island
 
