@@ -3,7 +3,7 @@ project: 10xPlantsInventory
 version: 1
 status: draft
 created: 2026-05-25
-updated: 2026-06-14
+updated: 2026-06-20
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -35,8 +35,8 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 | F-02 | domain-schema-with-rls  | (foundation) locations + plants + care-events tables exist with per-user RLS              | —             | NFR per-user isolation, NFR 12-month retention, Access Control        | done     | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
 | F-03 | cron-scheduled-skeleton | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds         | —             | US-02, FR-018, FR-019                                                 | ready    | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
 | S-01 | first-plant-from-photo  | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save     | F-01, F-02    | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | done     | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
-| S-02 | location-management     | rename a location, delete (with non-empty warning), see all locations with plant counts   | F-01, F-02    | FR-005, FR-006, FR-007                                                | proposed | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
-| S-03 | plant-management        | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01          | FR-015, FR-016, FR-017                                                | proposed | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
+| S-02 | location-management     | rename a location, delete (with non-empty warning), see all locations with plant counts   | F-01, F-02    | FR-005, FR-006, FR-007                                                | done     | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
+| S-03 | plant-management        | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01          | FR-015, FR-016, FR-017                                                | done     | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
 | S-04 | watering-reminder-loop  | see today's care list, receive a watering reminder, mark watered (bulk too), snooze       | F-03, S-01    | US-02, US-03, FR-018, FR-020, FR-021, FR-022                          | proposed | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) |
 | S-05 | winterization-reminder  | receive a reminder when a winterization cutoff approaches; mark winterized                | F-03, S-01    | US-02, US-03, FR-019, FR-020                                          | proposed | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) |
 
@@ -130,7 +130,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Trivial CRUD with one gotcha — FR-006 mandates a non-empty-warning UX before delete; easy to forget when copying form patterns from the plant or auth screens.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: Plant management
 
@@ -142,7 +142,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The editable-detail-screen is the busiest UI in the app — per FR-015 there is no read-only / edit-mode split, so every field needs inline validation, save-on-blur or save-on-confirm semantics, and an undo path consistent with US-03 AC for the care actions.
-- **Status:** proposed
+- **Status:** done
 
 ### S-04: Watering reminder loop
 
@@ -211,3 +211,5 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **F-01: (foundation) Magic-link sign-in replaces the existing password scaffold; entering an email sends a single-use link; clicking the link creates the account on first use and signs the user in on subsequent uses; sign-out works from any authenticated screen.** — Archived 2026-06-14 → `context/archive/2026-05-29-magic-link-auth/`. Lesson: —.
 - **F-02: (foundation) locations + plants + care-events tables exist with per-user RLS** — Archived 2026-06-14 → `context/archive/2026-06-04-domain-schema-with-rls/`. Lesson: —.
 - **S-01: A signed-in user creates their first location, taps "Add plant", uploads a photo, sees an AI-suggested species + care profile within ~10 seconds, accepts or edits any field (or replaces the suggestion entirely), and saves the plant into the chosen location. The plant is immediately visible in the location's plant list. The manual-creation fallback works if the AI is unavailable.** — Archived 2026-06-14 → `context/archive/2026-06-08-first-plant-from-photo/`. Lesson: —.
+- **S-02: A signed-in user can rename a location, delete a location (with a warning if it still contains plants), and view a list of all their locations with the number of plants per location.** — Archived 2026-06-19 → `context/archive/2026-06-18-location-management/`. Lesson: —.
+- **S-03: A signed-in user can open a plant's detail screen showing all stored care info and the original AI suggestion, edit any field in place (no separate edit mode), delete the plant, and add a free-text note.** — Archived 2026-06-19 → `context/archive/2026-06-19-plant-management/`. Lesson: —.
