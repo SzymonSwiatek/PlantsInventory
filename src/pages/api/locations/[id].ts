@@ -63,7 +63,11 @@ export const DELETE: APIRoute = async (context) => {
   }
 
   // Collect photo paths before deleting (cascade removes the rows, making paths unrecoverable after).
-  const { data: plants } = await supabase.from("plants").select("photo_path").eq("location_id", id);
+  const { data: plants, error: plantsError } = await supabase.from("plants").select("photo_path").eq("location_id", id);
+  if (plantsError) {
+    // eslint-disable-next-line no-console
+    console.error("[locations] DELETE photo-path collect failed:", plantsError);
+  }
   const paths = (plants ?? []).map((p) => p.photo_path).filter((p): p is string => p !== null);
 
   const { error } = await supabase.from("locations").delete().eq("id", id);
