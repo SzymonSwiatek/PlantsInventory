@@ -1,10 +1,10 @@
 ---
 change_id: plant-management
 title: Plant detail screen — edit any field in place, delete plant, add free-text note
-status: impl_reviewed
+status: archived
 created: 2026-06-19
-updated: 2026-06-20
-archived_at: null
+updated: 2026-06-19
+archived_at: 2026-06-19T22:54:48Z
 ---
 
 ## Notes
