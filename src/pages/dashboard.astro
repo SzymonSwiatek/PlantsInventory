@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
+import LocationActions from "@/components/locations/LocationActions";
 
 const { user } = Astro.locals;
 const error = Astro.url.searchParams.get("error");
@@ -64,14 +65,12 @@ const { data: locations } = supabase
             {locations.map((loc) => {
               const count = loc.plants[0]?.count ?? 0;
               return (
-                <li>
-                  <a
-                    href={`/locations/${loc.id}`}
-                    class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur-xl transition-colors hover:bg-white/20"
-                  >
+                <li class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur-xl transition-colors hover:bg-white/20">
+                  <a href={`/locations/${loc.id}`} class="flex items-center gap-3">
                     <span class="font-medium">{loc.name}</span>
                     <span class="text-sm text-blue-100/40">{count === 1 ? "1 plant" : `${count} plants`}</span>
                   </a>
+                  <LocationActions client:load id={loc.id} name={loc.name} plantCount={count} />
                 </li>
               );
             })}

@@ -248,29 +248,29 @@ No schema migration — the schema already supports rename (`update`), delete (`
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `npm run build`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Unit tests pass: `npm run test:run`
+- [x] 2.1 Type checking passes: `npm run build` — 2daf575
+- [x] 2.2 Linting passes: `npm run lint` — 2daf575
+- [x] 2.3 Unit tests pass: `npm run test:run` — 2daf575
 
 #### Manual
 
-- [x] 2.4 PATCH renames with valid name; name length bounds return 400
-- [x] 2.5 DELETE removes empty + non-empty locations, cascades plants, removes Storage objects
-- [x] 2.6 Cross-user rename/delete is a no-op
-- [x] 2.7 Unauthenticated returns 401; unconfigured Supabase returns 503
+- [x] 2.4 PATCH renames with valid name; name length bounds return 400 — 2daf575
+- [x] 2.5 DELETE removes empty + non-empty locations, cascades plants, removes Storage objects — 2daf575
+- [x] 2.6 Cross-user rename/delete is a no-op — 2daf575
+- [x] 2.7 Unauthenticated returns 401; unconfigured Supabase returns 503 — 2daf575
 
 ### Phase 3: Dashboard actions island
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `npm run build`
-- [ ] 3.2 Linting passes: `npm run lint` (incl. react-compiler)
-- [ ] 3.3 `astro sync` clean: `npx astro sync`
+- [x] 3.1 Type checking passes: `npm run build`
+- [x] 3.2 Linting passes: `npm run lint` (incl. react-compiler)
+- [x] 3.3 `astro sync` clean: `npx astro sync`
 
 #### Manual
 
-- [ ] 3.4 Rename from dashboard persists after refresh
-- [ ] 3.5 Empty-location delete confirm has no count line; removes it
-- [ ] 3.6 Non-empty delete warns with plant count; removes location + plants + photos; cancel is a no-op
-- [ ] 3.7 Failure paths surface an inline error
-- [ ] 3.8 AlertDialog keyboard/focus behavior works (Esc cancels, focus trapped)
+- [x] 3.4 Rename from dashboard persists after refresh
+- [x] 3.5 Empty-location delete confirm has no count line; removes it
+- [x] 3.6 Non-empty delete warns with plant count; removes location + plants + photos; cancel is a no-op
+- [x] 3.7 Failure paths surface an inline error
+- [x] 3.8 AlertDialog keyboard/focus behavior works (Esc cancels, focus trapped)
