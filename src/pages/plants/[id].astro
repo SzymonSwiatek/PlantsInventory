@@ -2,23 +2,30 @@
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
 import { signedPhotoUrl } from "@/lib/storage";
-import type { Plant, AiSuggestion } from "@/types";
+import type { Plant } from "@/types";
+import PlantDetail from "@/components/plants/PlantDetail";
 
 const id = Astro.params.id;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 let plant: Plant | null = null;
 let photoUrl: string | null = null;
+let locations: { id: string; name: string }[] = [];
 
 if (id && supabase) {
-  const { data } = await supabase
-    .from("plants")
-    .select(
-      "id, name, species, description, sunlight, note, watering_interval_days, winterization_cutoff, photo_path, ai_suggestion, location_id, user_id, created_at, updated_at, last_watered_at, next_water_due_at, water_snooze_until, winterized_at",
-    )
-    .eq("id", id)
-    .maybeSingle();
-  plant = data;
+  const [plantResult, locationsResult] = await Promise.all([
+    supabase
+      .from("plants")
+      .select(
+        "id, name, species, description, sunlight, note, watering_interval_days, winterization_cutoff, photo_path, ai_suggestion, location_id, user_id, created_at, updated_at, last_watered_at, next_water_due_at, water_snooze_until, winterized_at",
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    supabase.from("locations").select("id, name").order("name"),
+  ]);
+
+  plant = plantResult.data;
+  locations = locationsResult.data ?? [];
 
   if (plant?.photo_path) {
     photoUrl = await signedPhotoUrl(supabase, plant.photo_path);
@@ -28,14 +35,6 @@ if (id && supabase) {
 if (!plant) {
   Astro.response.status = 404;
 }
-
-const aiSuggestion = plant?.ai_suggestion as AiSuggestion | null;
-
-const aiSpecies = aiSuggestion?.species ?? null;
-const aiDescription = aiSuggestion?.description ?? null;
-const aiSunlight = aiSuggestion?.sunlight ?? null;
-const aiWateringDays = aiSuggestion?.watering_interval_days ?? null;
-const aiWinterizationCutoff = aiSuggestion?.winterization_cutoff ?? null;
 ---
 
 <Layout title={plant?.name ?? "Plant not found"}>
@@ -55,77 +54,7 @@ const aiWinterizationCutoff = aiSuggestion?.winterization_cutoff ?? null;
             </h1>
           </header>
 
-          {photoUrl ? (
-            <div class="mb-8">
-              <img src={photoUrl} alt={plant.name} class="h-64 w-full rounded-2xl object-cover" />
-            </div>
-          ) : (
-            <div class="mb-8 flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-4xl text-blue-100/30">
-              🌱
-            </div>
-          )}
-
-          <div class="space-y-4">
-            <div class="space-y-5 rounded-2xl border border-white/10 bg-white/10 p-6 backdrop-blur-xl">
-              <div>
-                <p class="mb-1 text-xs font-medium tracking-wider text-blue-100/50 uppercase">Name</p>
-                <p class="font-medium">{plant.name}</p>
-              </div>
-
-              <div>
-                <p class="mb-1 text-xs font-medium tracking-wider text-blue-100/50 uppercase">Species</p>
-                <p class="font-medium">{plant.species ?? <span class="text-blue-100/40 italic">—</span>}</p>
-                {aiSpecies && <p class="mt-1 text-xs text-blue-100/40 italic">AI suggested: {aiSpecies}</p>}
-              </div>
-
-              <div>
-                <p class="mb-1 text-xs font-medium tracking-wider text-blue-100/50 uppercase">Description</p>
-                <p class="text-sm leading-relaxed">
-                  {plant.description ?? <span class="text-blue-100/40 italic">—</span>}
-                </p>
-                {aiDescription && <p class="mt-1 text-xs text-blue-100/40 italic">AI suggested: {aiDescription}</p>}
-              </div>
-
-              <div>
-                <p class="mb-1 text-xs font-medium tracking-wider text-blue-100/50 uppercase">Sunlight</p>
-                <p class="font-medium">{plant.sunlight ?? <span class="text-blue-100/40 italic">—</span>}</p>
-                {aiSunlight && <p class="mt-1 text-xs text-blue-100/40 italic">AI suggested: {aiSunlight}</p>}
-              </div>
-
-              <div>
-                <p class="mb-1 text-xs font-medium tracking-wider text-blue-100/50 uppercase">Watering interval</p>
-                <p class="font-medium">
-                  {plant.watering_interval_days !== null ? (
-                    `Every ${plant.watering_interval_days} day${plant.watering_interval_days === 1 ? "" : "s"}`
-                  ) : (
-                    <span class="text-blue-100/40 italic">—</span>
-                  )}
-                </p>
-                {aiWateringDays !== null && (
-                  <p class="mt-1 text-xs text-blue-100/40 italic">
-                    AI suggested: every {aiWateringDays} day{aiWateringDays === 1 ? "" : "s"}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <p class="mb-1 text-xs font-medium tracking-wider text-blue-100/50 uppercase">Winterization cutoff</p>
-                <p class="font-medium">
-                  {plant.winterization_cutoff ?? <span class="text-blue-100/40 italic">No winterization needed</span>}
-                </p>
-                {aiWinterizationCutoff && (
-                  <p class="mt-1 text-xs text-blue-100/40 italic">AI suggested: {aiWinterizationCutoff}</p>
-                )}
-              </div>
-
-              <div>
-                <p class="mb-1 text-xs font-medium tracking-wider text-blue-100/50 uppercase">Note</p>
-                <p class="text-sm leading-relaxed whitespace-pre-wrap">
-                  {plant.note ?? <span class="text-blue-100/40 italic">—</span>}
-                </p>
-              </div>
-            </div>
-          </div>
+          <PlantDetail client:load plant={plant} locations={locations} photoUrl={photoUrl} />
         </div>
       ) : (
         <div class="flex min-h-screen items-center justify-center">

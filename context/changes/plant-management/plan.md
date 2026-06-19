@@ -281,29 +281,29 @@ None — no schema change. All fields already exist on `plants`.
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm run test:run`
-- [x] 2.2 Type checking + lint pass: `npx astro sync && npm run lint`
+- [x] 2.1 Unit tests pass: `npm run test:run` — 3377e7e
+- [x] 2.2 Type checking + lint pass: `npx astro sync && npm run lint` — 3377e7e
 
 #### Manual
 
-- [x] 2.3 Single-field PATCH persists; PATCH of `ai_suggestion` leaves the snapshot unchanged
-- [x] 2.4 DELETE removes the plant and its photo object
+- [x] 2.3 Single-field PATCH persists; PATCH of `ai_suggestion` leaves the snapshot unchanged — 3377e7e
+- [x] 2.4 DELETE removes the plant and its photo object — 3377e7e
 
 ### Phase 3: Editable detail island
 
 #### Automated
 
-- [ ] 3.1 Type checking + lint pass (incl. react-compiler): `npx astro sync && npm run lint`
-- [ ] 3.2 Existing unit tests still pass: `npm run test:run`
-- [ ] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Type checking + lint pass (incl. react-compiler): `npx astro sync && npm run lint`
+- [x] 3.2 Existing unit tests still pass: `npm run test:run`
+- [x] 3.3 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Each field edits in place with check/cancel; one save doesn't touch others; cancel reverts
-- [ ] 3.5 Watering rejects non-positive/non-int; winterization toggle clears the date to null
-- [ ] 3.6 Location `<select>` moves the plant; only own locations selectable
-- [ ] 3.7 AI hints show only where a snapshot value exists
-- [ ] 3.8 Delete `AlertDialog` confirm removes the plant and lands on its location page
+- [x] 3.4 Each field edits in place with check/cancel; one save doesn't touch others; cancel reverts
+- [x] 3.5 Watering rejects non-positive/non-int; winterization toggle clears the date to null
+- [x] 3.6 Location `<select>` moves the plant; only own locations selectable
+- [x] 3.7 AI hints show only where a snapshot value exists
+- [x] 3.8 Delete `AlertDialog` confirm removes the plant and lands on its location page
 
 ### Phase 4: Photo replacement
 
