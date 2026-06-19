@@ -75,7 +75,11 @@ export const PATCH: APIRoute = async (context) => {
   }
 
   if (has(body, "winterization_cutoff")) {
-    update.winterization_cutoff = emptyToNull(readString(body, "winterization_cutoff"));
+    const cutoff = emptyToNull(readString(body, "winterization_cutoff"));
+    if (cutoff !== null && !isIsoDate(cutoff)) {
+      return json({ error: "invalid_winterization_cutoff" }, 400);
+    }
+    update.winterization_cutoff = cutoff;
   }
 
   if (has(body, "location_id")) {
@@ -87,7 +91,14 @@ export const PATCH: APIRoute = async (context) => {
   }
 
   if (has(body, "photo_path")) {
-    update.photo_path = emptyToNull(readString(body, "photo_path"));
+    const photoPath = emptyToNull(readString(body, "photo_path"));
+    // Defense-in-depth, mirroring the create endpoint (index.ts:49): a non-null
+    // photo key must live under the caller's own folder. RLS gates the row; this
+    // guards its contents so a plant can't point at another tenant's object key.
+    if (photoPath !== null && !photoPath.startsWith(`${user.id}/`)) {
+      return json({ error: "invalid_photo_path" }, 400);
+    }
+    update.photo_path = photoPath;
   }
 
   // Strip non-whitelisted keys (safety net: only the above assignments reach `update`)
@@ -197,4 +208,11 @@ function asPositiveInt(value: unknown): number | null | typeof INVALID {
   const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
   if (!Number.isInteger(n) || n < 1) return INVALID;
   return n;
+}
+
+/** Accepts a strict YYYY-MM-DD calendar date (matches the column's `date` type); rejects overflow like 2026-02-30. */
+function isIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(value);
 }

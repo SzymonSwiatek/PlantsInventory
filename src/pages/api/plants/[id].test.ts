@@ -185,8 +185,8 @@ describe("/api/plants/[id] — PATCH photo_path cleanup", () => {
   });
 
   it("removes orphaned old object when photo_path changes to a different value", async () => {
-    const OLD_PATH = "uid/plantid/old-photo.jpg";
-    const NEW_PATH = "uid/plantid/new-photo.jpg";
+    const OLD_PATH = "test-user/plantid/old-photo.jpg";
+    const NEW_PATH = "test-user/plantid/new-photo.jpg";
 
     const mockClient = {
       from: vi.fn().mockReturnValue({
@@ -208,7 +208,7 @@ describe("/api/plants/[id] — PATCH photo_path cleanup", () => {
   });
 
   it("does not call removePhotos when photo_path is set to the same value", async () => {
-    const SAME_PATH = "uid/plantid/photo.jpg";
+    const SAME_PATH = "test-user/plantid/photo.jpg";
 
     const mockClient = {
       from: vi.fn().mockReturnValue({
@@ -226,6 +226,20 @@ describe("/api/plants/[id] — PATCH photo_path cleanup", () => {
 
     const res = await PATCH(fakeContext("PATCH", VALID_UUID, { photo_path: SAME_PATH }));
     expect(res.status).toBe(200);
+    expect(vi.mocked(removePhotos)).not.toHaveBeenCalled();
+  });
+
+  it("rejects a photo_path outside the caller's own folder with 400", async () => {
+    const mockClient = {
+      from: vi.fn().mockReturnValue({
+        update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+      }),
+    };
+    vi.mocked(createClient).mockReturnValue(mockClient as never);
+
+    const res = await PATCH(fakeContext("PATCH", VALID_UUID, { photo_path: "other-user/plantid/photo.jpg" }));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "invalid_photo_path" });
     expect(vi.mocked(removePhotos)).not.toHaveBeenCalled();
   });
 });
