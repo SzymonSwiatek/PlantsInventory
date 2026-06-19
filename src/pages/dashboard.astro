@@ -7,7 +7,7 @@ const error = Astro.url.searchParams.get("error");
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 const { data: locations } = supabase
-  ? await supabase.from("locations").select("id, name").order("created_at", { ascending: true })
+  ? await supabase.from("locations").select("id, name, plants(count)").order("created_at", { ascending: true })
   : { data: null };
 ---
 
@@ -61,17 +61,20 @@ const { data: locations } = supabase
       {
         locations && locations.length > 0 ? (
           <ul class="space-y-3">
-            {locations.map((loc) => (
-              <li>
-                <a
-                  href={`/locations/${loc.id}`}
-                  class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur-xl transition-colors hover:bg-white/20"
-                >
-                  <span class="font-medium">{loc.name}</span>
-                  <span class="text-blue-100/40">→</span>
-                </a>
-              </li>
-            ))}
+            {locations.map((loc) => {
+              const count = loc.plants[0]?.count ?? 0;
+              return (
+                <li>
+                  <a
+                    href={`/locations/${loc.id}`}
+                    class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur-xl transition-colors hover:bg-white/20"
+                  >
+                    <span class="font-medium">{loc.name}</span>
+                    <span class="text-sm text-blue-100/40">{count === 1 ? "1 plant" : `${count} plants`}</span>
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <div class="rounded-2xl border border-dashed border-white/15 bg-white/5 p-8 text-center text-sm text-blue-100/60">
