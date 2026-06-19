@@ -1,9 +1,9 @@
 ---
 change_id: plant-management
 title: Plant detail screen — edit any field in place, delete plant, add free-text note
-status: implementing
+status: implemented
 created: 2026-06-19
-updated: 2026-06-19
+updated: 2026-06-20
 archived_at: null
 ---
 

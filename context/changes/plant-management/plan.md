@@ -309,12 +309,12 @@ None — no schema change. All fields already exist on `plants`.
 
 #### Automated
 
-- [x] 4.1 Type checking + lint pass: `npx astro sync && npm run lint`
-- [x] 4.2 Unit tests pass (incl. photo_path old-object-cleanup case): `npm run test:run`
-- [x] 4.3 Production build succeeds: `npm run build`
+- [x] 4.1 Type checking + lint pass: `npx astro sync && npm run lint` — 8e08dad
+- [x] 4.2 Unit tests pass (incl. photo_path old-object-cleanup case): `npm run test:run` — 8e08dad
+- [x] 4.3 Production build succeeds: `npm run build` — 8e08dad
 
 #### Manual
 
-- [x] 4.4 Replacing with a new filename shows the new image; `photo_path` updates; old object removed
-- [x] 4.5 Replacing with a same-named file overwrites in place and displays correctly
-- [x] 4.6 A stalled/failed upload surfaces a retry path; plant never points at a missing object
+- [x] 4.4 Replacing with a new filename shows the new image; `photo_path` updates; old object removed — 8e08dad
+- [x] 4.5 Replacing with a same-named file overwrites in place and displays correctly — 8e08dad
+- [x] 4.6 A stalled/failed upload surfaces a retry path; plant never points at a missing object — 8e08dad
