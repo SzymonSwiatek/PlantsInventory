@@ -154,16 +154,16 @@ export default function TodayList({ plants: initialPlants }: Props) {
                     </div>
                   ) : (
                     <Button
-                      size="icon"
+                      size="sm"
                       variant="ghost"
                       onClick={() => {
                         setSnoozePlantId(plant.id);
                       }}
                       disabled={loading}
-                      title="Snooze"
-                      className="size-8 text-blue-100/60 hover:text-white"
+                      className="gap-1.5 rounded-lg border border-white/20 bg-white/5 text-sm text-blue-100/60 hover:text-white"
                     >
                       <Clock className="size-4" />
+                      Snooze
                     </Button>
                   )}
 
