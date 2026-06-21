@@ -25,7 +25,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      - run: node -e "const c=JSON.parse(require('fs').readFileSync('dist/server/wrangler.json','utf8')); if(!c.triggers?.crons?.length){console.error('triggers.crons missing from dist/server/wrangler.json');process.exit(1)}"
+      - run: node scripts/check-dist-config.mjs
 
   deploy:
     needs: ci

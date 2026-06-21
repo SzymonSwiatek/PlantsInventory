@@ -1,7 +1,7 @@
 ---
 change_id: cron-scheduled-skeleton
 title: Cron scheduled() Worker handler skeleton (F-03)
-status: implemented
+status: impl_reviewed
 created: 2026-06-20
 updated: 2026-06-21
 

@@ -33,7 +33,7 @@ After this plan:
 
 - `src/worker.ts` is committed and is the Worker's `main`; it re-exports the adapter `fetch` handler unchanged and adds a `scheduled()` handler.
 - `scheduled()` delegates to a `runScheduledTick()` function in `src/lib/reminders/`, wraps it in try/catch, logs structurally, and never throws.
-- `wrangler.jsonc` declares `triggers.crons: ["0 8 * * *"]` and `main: "src/worker.ts"`.
+- `wrangler.jsonc` declares `triggers.crons: ["0 18 * * *"]` and `main: "src/worker.ts"`.
 - `npm run build` succeeds and the generated `dist/server/wrangler.json` contains the daily cron under `triggers.crons` and a non-node_modules `main`.
 - A hermetic Vitest unit test exercises `runScheduledTick()` and asserts it logs a heartbeat; a config-guard test asserts `wrangler.jsonc` keeps `main` pointing at the custom entry and a non-empty `triggers.crons`.
 - A live cron tick is observed once in production (Workers Logs) and locally via `--test-scheduled`.
@@ -106,7 +106,7 @@ Use `ctx.waitUntil(...)` so the async tick is awaited by the runtime; the `.catc
 
 **Intent**: Make the committed entry the Worker source and declare the daily cron. Both changes live in version-controlled source so they propagate into the generated `dist/server/wrangler.json`.
 
-**Contract**: Change `main` from `"@astrojs/cloudflare/entrypoints/server"` to `"src/worker.ts"`. Add a top-level `"triggers": { "crons": ["0 8 * * *"] }` block (daily at 08:00 UTC — matches the eventual one-daily-digest default from roadmap OQ-3, inherited unchanged by S-04).
+**Contract**: Change `main` from `"@astrojs/cloudflare/entrypoints/server"` to `"src/worker.ts"`. Add a top-level `"triggers": { "crons": ["0 18 * * *"] }` block (daily at 18:00 UTC / 20:00 CEST — adjusted from the original 08:00 UTC before shipping).
 
 #### 4. Hermetic unit test
 
