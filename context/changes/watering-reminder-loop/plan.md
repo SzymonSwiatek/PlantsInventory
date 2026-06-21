@@ -350,31 +350,31 @@ One forward-only migration (Phase 1) adds the trigger and backfills existing pla
 
 #### Automated
 
-- [x] 2.1 `composeDigest` unit test names each plant + location
-- [x] 2.2 Lint + type-check pass with new env fields
-- [x] 2.3 Build succeeds with all new secrets unset (graceful degrade)
-- [x] 2.4 ESLint boundary: cross-boundary import of service-client from `src/pages/` fails lint
+- [x] 2.1 `composeDigest` unit test names each plant + location — b017d09
+- [x] 2.2 Lint + type-check pass with new env fields — b017d09
+- [x] 2.3 Build succeeds with all new secrets unset (graceful degrade) — b017d09
+- [x] 2.4 ESLint boundary: cross-boundary import of service-client from `src/pages/` fails lint — b017d09
 
 #### Manual
 
-- [x] 2.5 `sendDigest` to a real inbox delivers a readable digest
-- [x] 2.6 Service-role client reads a row the anon client cannot
+- [x] 2.5 `sendDigest` to a real inbox delivers a readable digest — b017d09
+- [x] 2.6 Service-role client reads a row the anon client cannot — b017d09
 
 ### Phase 3: Cron digest logic
 
 #### Automated
 
-- [ ] 3.1 Due-plant selection excludes snoozed + not-yet-due
-- [ ] 3.2 Fault test: one user's send failure doesn't abort others
-- [ ] 3.3 Zero due plants ⇒ no send for that user
-- [ ] 3.4 Heartbeat-log expectation still satisfied (or updated)
-- [ ] 3.5 Lint passes
+- [x] 3.1 Due-plant selection excludes snoozed + not-yet-due
+- [x] 3.2 Fault test: one user's send failure doesn't abort others
+- [x] 3.3 Zero due plants ⇒ no send for that user
+- [x] 3.4 Heartbeat-log expectation still satisfied (or updated)
+- [x] 3.5 Lint passes
 
 #### Manual
 
-- [ ] 3.6 Two seeded users each get a digest of only their own due plants
-- [ ] 3.7 Snoozed + not-yet-due plants absent from digest
-- [ ] 3.8 Same-day re-run re-sends same content (idempotent-by-query)
+- [x] 3.6 Two seeded users each get a digest of only their own due plants
+- [x] 3.7 Snoozed + not-yet-due plants absent from digest
+- [x] 3.8 Same-day re-run re-sends same content (idempotent-by-query)
 
 ### Phase 4: Care API endpoints
 
