@@ -3,7 +3,7 @@ project: 10xPlantsInventory
 version: 1
 status: draft
 created: 2026-05-25
-updated: 2026-06-20
+updated: 2026-06-21
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -33,7 +33,7 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 | ---- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------- | -------- | --------------------------------------------------------------- |
 | F-01 | magic-link-auth         | (foundation) magic-link sign-in replaces password scaffold; sign-out works                | —             | FR-001, FR-002, FR-003, Access Control                                | done     | [#1](https://github.com/SzymonSwiatek/PlantsInventory/issues/1) |
 | F-02 | domain-schema-with-rls  | (foundation) locations + plants + care-events tables exist with per-user RLS              | —             | NFR per-user isolation, NFR 12-month retention, Access Control        | done     | [#2](https://github.com/SzymonSwiatek/PlantsInventory/issues/2) |
-| F-03 | cron-scheduled-skeleton | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds         | —             | US-02, FR-018, FR-019                                                 | ready    | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
+| F-03 | cron-scheduled-skeleton | (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds         | —             | US-02, FR-018, FR-019                                                 | done     | [#3](https://github.com/SzymonSwiatek/PlantsInventory/issues/3) |
 | S-01 | first-plant-from-photo  | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save     | F-01, F-02    | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | done     | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
 | S-02 | location-management     | rename a location, delete (with non-empty warning), see all locations with plant counts   | F-01, F-02    | FR-005, FR-006, FR-007                                                | done     | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
 | S-03 | plant-management        | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01          | FR-015, FR-016, FR-017                                                | done     | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
@@ -102,7 +102,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Per `context/foundation/infrastructure.md` Risk Register: `@astrojs/cloudflare` adapter regenerates worker output on every build, which silently drops a hand-injected `scheduled()` handler. Foundation must put the custom entry under version control (not a post-build patch) AND include a smoke test, or a future adapter upgrade kills the reminder loop without warning.
-- **Status:** ready
+- **Status:** done
 
 ## Slices
 
@@ -213,3 +213,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-01: A signed-in user creates their first location, taps "Add plant", uploads a photo, sees an AI-suggested species + care profile within ~10 seconds, accepts or edits any field (or replaces the suggestion entirely), and saves the plant into the chosen location. The plant is immediately visible in the location's plant list. The manual-creation fallback works if the AI is unavailable.** — Archived 2026-06-14 → `context/archive/2026-06-08-first-plant-from-photo/`. Lesson: —.
 - **S-02: A signed-in user can rename a location, delete a location (with a warning if it still contains plants), and view a list of all their locations with the number of plants per location.** — Archived 2026-06-19 → `context/archive/2026-06-18-location-management/`. Lesson: —.
 - **S-03: A signed-in user can open a plant's detail screen showing all stored care info and the original AI suggestion, edit any field in place (no separate edit mode), delete the plant, and add a free-text note.** — Archived 2026-06-19 → `context/archive/2026-06-19-plant-management/`. Lesson: —.
+- **F-03: (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds** — Archived 2026-06-21 → `context/archive/2026-06-20-cron-scheduled-skeleton/`. Lesson: —.

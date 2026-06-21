@@ -235,9 +235,9 @@ The only deploy-config change is repointing `main` and adding `triggers.crons`. 
 
 #### Automated
 
-- [x] 2.1 Deploy completes without error (CI deploy green or `wrangler deploy` exits 0)
+- [x] 2.1 Deploy completes without error (CI deploy green or `wrangler deploy` exits 0) — d32fe09
 
 #### Manual
 
-- [x] 2.2 Daily cron trigger listed for the Worker in the Cloudflare dashboard / Cron Triggers view
-- [x] 2.3 A `scheduled.tick` heartbeat appears in Workers Logs after a tick fires
+- [x] 2.2 Daily cron trigger listed for the Worker in the Cloudflare dashboard / Cron Triggers view — d32fe09
+- [x] 2.3 A `scheduled.tick` heartbeat appears in Workers Logs after a tick fires — d32fe09
