@@ -364,33 +364,33 @@ One forward-only migration (Phase 1) adds the trigger and backfills existing pla
 
 #### Automated
 
-- [x] 3.1 Due-plant selection excludes snoozed + not-yet-due
-- [x] 3.2 Fault test: one user's send failure doesn't abort others
-- [x] 3.3 Zero due plants ⇒ no send for that user
-- [x] 3.4 Heartbeat-log expectation still satisfied (or updated)
-- [x] 3.5 Lint passes
+- [x] 3.1 Due-plant selection excludes snoozed + not-yet-due — 9719701
+- [x] 3.2 Fault test: one user's send failure doesn't abort others — 9719701
+- [x] 3.3 Zero due plants ⇒ no send for that user — 9719701
+- [x] 3.4 Heartbeat-log expectation still satisfied (or updated) — 9719701
+- [x] 3.5 Lint passes — 9719701
 
 #### Manual
 
-- [x] 3.6 Two seeded users each get a digest of only their own due plants
-- [x] 3.7 Snoozed + not-yet-due plants absent from digest
-- [x] 3.8 Same-day re-run re-sends same content (idempotent-by-query)
+- [x] 3.6 Two seeded users each get a digest of only their own due plants — 9719701
+- [x] 3.7 Snoozed + not-yet-due plants absent from digest — 9719701
+- [x] 3.8 Same-day re-run re-sends same content (idempotent-by-query) — 9719701
 
 ### Phase 4: Care API endpoints
 
 #### Automated
 
-- [ ] 4.1 Mark-watered inserts care_event + clears snooze; bulk marks all ids
-- [ ] 4.2 Undo restores prior last_watered_at (due follows)
-- [ ] 4.3 Snooze sets water_snooze_until, leaves interval/last_watered untouched
-- [ ] 4.4 401 unauthenticated; cross-user id rejected with no state change
-- [ ] 4.5 Lint passes
+- [x] 4.1 Mark-watered inserts care_event + clears snooze; bulk marks all ids
+- [x] 4.2 Undo restores prior last_watered_at (due follows)
+- [x] 4.3 Snooze sets water_snooze_until, leaves interval/last_watered untouched
+- [x] 4.4 401 unauthenticated; cross-user id rejected with no state change
+- [x] 4.5 Lint passes
 
 #### Manual
 
-- [ ] 4.6 After mark-watered, due advances by interval
-- [ ] 4.7 Undo restores original due date; plant reappears
-- [ ] 4.8 Snooze removes plant from due set until snooze passes
+- [x] 4.6 After mark-watered, due advances by interval
+- [x] 4.7 Undo restores original due date; plant reappears
+- [x] 4.8 Snooze removes plant from due set until snooze passes
 
 ### Phase 5: `/today` page + UI
 
