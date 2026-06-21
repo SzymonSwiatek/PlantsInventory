@@ -221,23 +221,23 @@ The only deploy-config change is repointing `main` and adding `triggers.crons`. 
 
 #### Automated
 
-- [x] 1.1 Build succeeds: `npm run build`
-- [x] 1.2 Generated `dist/server/wrangler.json` contains a non-empty `triggers.crons` after build
-- [x] 1.3 Unit + config-guard tests pass: `npm run test:run`
-- [x] 1.4 Type checking / lint passes: `npm run lint`
+- [x] 1.1 Build succeeds: `npm run build` — 2b5c205
+- [x] 1.2 Generated `dist/server/wrangler.json` contains a non-empty `triggers.crons` after build — 2b5c205
+- [x] 1.3 Unit + config-guard tests pass: `npm run test:run` — 2b5c205
+- [x] 1.4 Type checking / lint passes: `npm run lint` — 2b5c205
 
 #### Manual
 
-- [x] 1.5 `wrangler dev --test-scheduled` + `curl /__scheduled` logs the structured heartbeat
-- [x] 1.6 Normal `fetch` page serving still works (`npm run dev`)
+- [x] 1.5 `wrangler dev --test-scheduled` + `curl /__scheduled` logs the structured heartbeat — 2b5c205
+- [x] 1.6 Normal `fetch` page serving still works (`npm run dev`) — 2b5c205
 
 ### Phase 2: Production cron verification
 
 #### Automated
 
-- [ ] 2.1 Deploy completes without error (CI deploy green or `wrangler deploy` exits 0)
+- [x] 2.1 Deploy completes without error (CI deploy green or `wrangler deploy` exits 0)
 
 #### Manual
 
-- [ ] 2.2 Daily cron trigger listed for the Worker in the Cloudflare dashboard / Cron Triggers view
-- [ ] 2.3 A `scheduled.tick` heartbeat appears in Workers Logs after a tick fires
+- [x] 2.2 Daily cron trigger listed for the Worker in the Cloudflare dashboard / Cron Triggers view
+- [x] 2.3 A `scheduled.tick` heartbeat appears in Workers Logs after a tick fires
