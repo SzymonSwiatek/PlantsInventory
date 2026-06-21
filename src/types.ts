@@ -27,6 +27,14 @@ export type CareEventUpdate = Tables["care_events"]["Update"];
 // Care-event kind enum union ('water' | 'winterize')
 export type CareEventKind = Database["public"]["Enums"]["care_event_kind"];
 
+/** Plant due for watering — used by the /today page and its React island. */
+export interface TodayPlant {
+  id: string;
+  name: string;
+  locationName: string;
+  daysOverdue: number;
+}
+
 /**
  * Shape of the original AI suggestion snapshot stored in `plants.ai_suggestion`.
  * Write-once by convention (set on create by S-01, never overwritten by edits);

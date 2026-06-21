@@ -380,30 +380,30 @@ One forward-only migration (Phase 1) adds the trigger and backfills existing pla
 
 #### Automated
 
-- [x] 4.1 Mark-watered inserts care_event + clears snooze; bulk marks all ids
-- [x] 4.2 Undo restores prior last_watered_at (due follows)
-- [x] 4.3 Snooze sets water_snooze_until, leaves interval/last_watered untouched
-- [x] 4.4 401 unauthenticated; cross-user id rejected with no state change
-- [x] 4.5 Lint passes
+- [x] 4.1 Mark-watered inserts care_event + clears snooze; bulk marks all ids — 260f2e9
+- [x] 4.2 Undo restores prior last_watered_at (due follows) — 260f2e9
+- [x] 4.3 Snooze sets water_snooze_until, leaves interval/last_watered untouched — 260f2e9
+- [x] 4.4 401 unauthenticated; cross-user id rejected with no state change — 260f2e9
+- [x] 4.5 Lint passes — 260f2e9
 
 #### Manual
 
-- [x] 4.6 After mark-watered, due advances by interval
-- [x] 4.7 Undo restores original due date; plant reappears
-- [x] 4.8 Snooze removes plant from due set until snooze passes
+- [x] 4.6 After mark-watered, due advances by interval — 260f2e9
+- [x] 4.7 Undo restores original due date; plant reappears — 260f2e9
+- [x] 4.8 Snooze removes plant from due set until snooze passes — 260f2e9
 
 ### Phase 5: `/today` page + UI
 
 #### Automated
 
-- [ ] 5.1 Lint + type-check pass (incl. react-compiler rule)
-- [ ] 5.2 Build succeeds
-- [ ] 5.3 Component unit tests pass
+- [x] 5.1 Lint + type-check pass (incl. react-compiler rule)
+- [x] 5.2 Build succeeds
+- [x] 5.3 Component unit tests pass
 
 #### Manual
 
-- [ ] 5.4 `/today` lists exactly the due plants across locations; empty state works
-- [ ] 5.5 Mark / Mark-all remove plants immediately; Undo restores within window
-- [ ] 5.6 Snooze removes plant until snooze lapses
-- [ ] 5.7 Unauthenticated `/today` redirects to sign-in
-- [ ] 5.8 Responsive on mobile widths
+- [x] 5.4 `/today` lists exactly the due plants across locations; empty state works
+- [x] 5.5 Mark / Mark-all remove plants immediately; Undo restores within window
+- [x] 5.6 Snooze removes plant until snooze lapses
+- [x] 5.7 Unauthenticated `/today` redirects to sign-in
+- [x] 5.8 Responsive on mobile widths

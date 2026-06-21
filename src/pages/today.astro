@@ -1,0 +1,61 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import TodayList from "@/components/today/TodayList";
+import type { TodayPlant } from "@/types";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+const now = new Date().toISOString();
+const { data: rows } = supabase
+  ? await supabase
+      .from("plants")
+      .select("id, name, next_water_due_at, locations(name)")
+      .not("next_water_due_at", "is", null)
+      .lte("next_water_due_at", now)
+      .or(`water_snooze_until.is.null,water_snooze_until.lte.${now}`)
+      .order("next_water_due_at", { ascending: true })
+  : { data: null };
+
+interface PlantRow {
+  id: string;
+  name: string;
+  next_water_due_at: string | null;
+  locations: { name: string } | null;
+}
+
+const nowMs = Date.now();
+const plants: TodayPlant[] = ((rows ?? []) as PlantRow[]).map((row) => {
+  const dueMs = new Date(row.next_water_due_at ?? now).getTime();
+  const daysOverdue = Math.max(0, Math.floor((nowMs - dueMs) / (1000 * 60 * 60 * 24)));
+  return {
+    id: row.id,
+    name: row.name,
+    locationName: row.locations?.name ?? "Unknown location",
+    daysOverdue,
+  };
+});
+---
+
+<Layout title="Today's Care">
+  <div class="bg-cosmic min-h-screen p-4 text-white">
+    <div class="mx-auto w-full max-w-2xl py-10">
+      <header class="mb-8 flex items-center justify-between gap-4">
+        <div>
+          <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+            Today's care
+          </h1>
+          <p class="mt-1 text-sm text-blue-100/60">Plants due for watering</p>
+        </div>
+        <a
+          href="/dashboard"
+          class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
+        >
+          ← Dashboard
+        </a>
+      </header>
+
+      <TodayList plants={plants} client:load />
+    </div>
+  </div>
+</Layout>
