@@ -19,6 +19,10 @@ export default defineConfig({
       SUPABASE_URL: envField.string({ context: "server", access: "secret", optional: true }),
       SUPABASE_KEY: envField.string({ context: "server", access: "secret", optional: true }),
       AI_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
+      SUPABASE_SERVICE_ROLE_KEY: envField.string({ context: "server", access: "secret", optional: true }),
+      RESEND_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
+      REMINDER_FROM_EMAIL: envField.string({ context: "server", access: "secret", optional: true }),
+      PUBLIC_SITE_URL: envField.string({ context: "server", access: "public", optional: true }),
     },
   },
 });

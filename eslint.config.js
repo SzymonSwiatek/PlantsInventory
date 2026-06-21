@@ -68,6 +68,25 @@ const astroConfig = tseslint.config({
   },
 });
 
+const reminderBoundaryConfig = tseslint.config({
+  files: ["src/pages/**", "src/middleware.ts"],
+  rules: {
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          {
+            group: ["**/reminders/service-client*", "@/lib/reminders/service-client*"],
+            message:
+              "Service-role client must only be imported from src/lib/reminders/**. " +
+              "It bypasses RLS and must never be reachable from a request handler.",
+          },
+        ],
+      },
+    ],
+  },
+});
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   // Generated Supabase types: committed (CI builds without regenerating) but excluded from
@@ -80,4 +99,5 @@ export default tseslint.config(
   ...eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
   eslintPluginPrettier,
+  reminderBoundaryConfig,
 );

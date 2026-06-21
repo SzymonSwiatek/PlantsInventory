@@ -336,29 +336,29 @@ One forward-only migration (Phase 1) adds the trigger and backfills existing pla
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly on a fresh DB (`npx supabase db reset`)
-- [x] 1.2 Type generation + lint pass (`npx astro sync && npm run lint`)
-- [x] 1.3 Existing tests pass (`npm run test:run`)
+- [x] 1.1 Migration applies cleanly on a fresh DB (`npx supabase db reset`) — f754e37
+- [x] 1.2 Type generation + lint pass (`npx astro sync && npm run lint`) — f754e37
+- [x] 1.3 Existing tests pass (`npm run test:run`) — f754e37
 
 #### Manual
 
-- [x] 1.4 Insert with interval, no last_watered ⇒ due ≈ now + interval
-- [x] 1.5 Pre-existing plant with interval has non-NULL due after backfill
-- [x] 1.6 Updating last_watered shifts due; NULL interval clears it
+- [x] 1.4 Insert with interval, no last_watered ⇒ due ≈ now + interval — f754e37
+- [x] 1.5 Pre-existing plant with interval has non-NULL due after backfill — f754e37
+- [x] 1.6 Updating last_watered shifts due; NULL interval clears it — f754e37
 
 ### Phase 2: Email + service-role infrastructure
 
 #### Automated
 
-- [ ] 2.1 `composeDigest` unit test names each plant + location
-- [ ] 2.2 Lint + type-check pass with new env fields
-- [ ] 2.3 Build succeeds with all new secrets unset (graceful degrade)
-- [ ] 2.4 ESLint boundary: cross-boundary import of service-client from `src/pages/` fails lint
+- [x] 2.1 `composeDigest` unit test names each plant + location
+- [x] 2.2 Lint + type-check pass with new env fields
+- [x] 2.3 Build succeeds with all new secrets unset (graceful degrade)
+- [x] 2.4 ESLint boundary: cross-boundary import of service-client from `src/pages/` fails lint
 
 #### Manual
 
-- [ ] 2.5 `sendDigest` to a real inbox delivers a readable digest
-- [ ] 2.6 Service-role client reads a row the anon client cannot
+- [x] 2.5 `sendDigest` to a real inbox delivers a readable digest
+- [x] 2.6 Service-role client reads a row the anon client cannot
 
 ### Phase 3: Cron digest logic
 
