@@ -3,7 +3,7 @@
   "name": "10x-plants-inventory",
   "main": "src/worker.ts",
   "triggers": {
-    "crons": ["0 8 * * *"],
+    "crons": ["0 20 * * *"],
   },
   "compatibility_date": "2026-05-08",
   "compatibility_flags": ["nodejs_compat"],
