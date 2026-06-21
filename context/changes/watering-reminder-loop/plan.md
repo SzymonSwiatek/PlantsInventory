@@ -396,14 +396,14 @@ One forward-only migration (Phase 1) adds the trigger and backfills existing pla
 
 #### Automated
 
-- [x] 5.1 Lint + type-check pass (incl. react-compiler rule)
-- [x] 5.2 Build succeeds
-- [x] 5.3 Component unit tests pass
+- [x] 5.1 Lint + type-check pass (incl. react-compiler rule) — ef4052f
+- [x] 5.2 Build succeeds — ef4052f
+- [x] 5.3 Component unit tests pass — ef4052f
 
 #### Manual
 
-- [x] 5.4 `/today` lists exactly the due plants across locations; empty state works
-- [x] 5.5 Mark / Mark-all remove plants immediately; Undo restores within window
-- [x] 5.6 Snooze removes plant until snooze lapses
-- [x] 5.7 Unauthenticated `/today` redirects to sign-in
-- [x] 5.8 Responsive on mobile widths
+- [x] 5.4 `/today` lists exactly the due plants across locations; empty state works — ef4052f
+- [x] 5.5 Mark / Mark-all remove plants immediately; Undo restores within window — ef4052f
+- [x] 5.6 Snooze removes plant until snooze lapses — ef4052f
+- [x] 5.7 Unauthenticated `/today` redirects to sign-in — ef4052f
+- [x] 5.8 Responsive on mobile widths — ef4052f
