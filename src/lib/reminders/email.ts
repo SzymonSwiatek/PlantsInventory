@@ -7,6 +7,15 @@ export interface DuePlant {
   daysOverdue: number;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function composeDigest(plants: DuePlant[], siteUrl: string): { subject: string; html: string; text: string } {
   const count = plants.length;
   const subject = `${count} plant${count === 1 ? "" : "s"} need watering today`;
@@ -28,7 +37,7 @@ export function composeDigest(plants: DuePlant[], siteUrl: string): { subject: s
         p.daysOverdue > 0
           ? ` <span style="color:#e53e3e">(${p.daysOverdue} day${p.daysOverdue === 1 ? "" : "s"} overdue)</span>`
           : "";
-      return `<li><strong>${p.name}</strong> &mdash; ${p.locationName}${overdue}</li>`;
+      return `<li><strong>${escapeHtml(p.name)}</strong> &mdash; ${escapeHtml(p.locationName)}${overdue}</li>`;
     })
     .join("\n");
 

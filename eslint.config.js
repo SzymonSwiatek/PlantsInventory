@@ -68,24 +68,37 @@ const astroConfig = tseslint.config({
   },
 });
 
-const reminderBoundaryConfig = tseslint.config({
-  files: ["src/pages/**", "src/middleware.ts"],
-  rules: {
-    "no-restricted-imports": [
-      "error",
-      {
-        patterns: [
-          {
-            group: ["**/reminders/service-client*", "@/lib/reminders/service-client*"],
-            message:
-              "Service-role client must only be imported from src/lib/reminders/**. " +
-              "It bypasses RLS and must never be reachable from a request handler.",
-          },
-        ],
-      },
-    ],
+const reminderBoundaryConfig = tseslint.config(
+  {
+    // Forbid importing the RLS-bypassing service client from anywhere in src/ ...
+    files: ["src/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/reminders/service-client*", "@/lib/reminders/service-client*"],
+              message:
+                "Service-role client must only be imported from src/lib/reminders/**. " +
+                "It bypasses RLS and must never be reachable from a request handler.",
+              // Type-only imports (e.g. ReminderEnv in src/worker.ts) are erased at build
+              // time and carry no runtime capability, so they stay allowed.
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
   },
-});
+  {
+    // ... except reminders/ itself, which owns and legitimately uses the service client.
+    files: ["src/lib/reminders/**"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
+);
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),

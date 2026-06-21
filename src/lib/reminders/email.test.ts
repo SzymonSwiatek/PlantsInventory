@@ -51,4 +51,16 @@ describe("composeDigest", () => {
     const { text } = composeDigest([plants[0]], "https://example.com");
     expect(text).not.toContain("overdue");
   });
+
+  it("escapes HTML in user-controlled plant and location names", () => {
+    const malicious: DuePlant[] = [
+      { name: '<img src=x onerror="alert(1)">', locationName: "Den & <b>Patio</b>", daysOverdue: 0 },
+    ];
+    const { html } = composeDigest(malicious, "https://example.com");
+
+    expect(html).not.toContain("<img src=x");
+    expect(html).not.toContain("<b>Patio</b>");
+    expect(html).toContain("&lt;img src=x");
+    expect(html).toContain("Den &amp; &lt;b&gt;Patio&lt;/b&gt;");
+  });
 });

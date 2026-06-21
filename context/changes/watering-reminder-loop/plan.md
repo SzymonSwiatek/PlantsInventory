@@ -380,30 +380,30 @@ One forward-only migration (Phase 1) adds the trigger and backfills existing pla
 
 #### Automated
 
-- [x] 4.1 Mark-watered inserts care_event + clears snooze; bulk marks all ids — 260f2e9
-- [x] 4.2 Undo restores prior last_watered_at (due follows) — 260f2e9
-- [x] 4.3 Snooze sets water_snooze_until, leaves interval/last_watered untouched — 260f2e9
-- [x] 4.4 401 unauthenticated; cross-user id rejected with no state change — 260f2e9
-- [x] 4.5 Lint passes — 260f2e9
+- [x] 4.1 Mark-watered inserts care_event + clears snooze; bulk marks all ids — 1dc84d0
+- [x] 4.2 Undo restores prior last_watered_at (due follows) — 1dc84d0
+- [x] 4.3 Snooze sets water_snooze_until, leaves interval/last_watered untouched — 1dc84d0
+- [x] 4.4 401 unauthenticated; cross-user id rejected with no state change — 1dc84d0
+- [x] 4.5 Lint passes — 1dc84d0
 
 #### Manual
 
-- [x] 4.6 After mark-watered, due advances by interval — 260f2e9
-- [x] 4.7 Undo restores original due date; plant reappears — 260f2e9
-- [x] 4.8 Snooze removes plant from due set until snooze passes — 260f2e9
+- [x] 4.6 After mark-watered, due advances by interval — 1dc84d0
+- [x] 4.7 Undo restores original due date; plant reappears — 1dc84d0
+- [x] 4.8 Snooze removes plant from due set until snooze passes — 1dc84d0
 
 ### Phase 5: `/today` page + UI
 
 #### Automated
 
-- [x] 5.1 Lint + type-check pass (incl. react-compiler rule) — ef4052f
-- [x] 5.2 Build succeeds — ef4052f
-- [x] 5.3 Component unit tests pass — ef4052f
+- [x] 5.1 Lint + type-check pass (incl. react-compiler rule) — 297df22
+- [x] 5.2 Build succeeds — 297df22
+- [x] 5.3 Component unit tests pass — 297df22
 
 #### Manual
 
-- [x] 5.4 `/today` lists exactly the due plants across locations; empty state works — ef4052f
-- [x] 5.5 Mark / Mark-all remove plants immediately; Undo restores within window — ef4052f
-- [x] 5.6 Snooze removes plant until snooze lapses — ef4052f
-- [x] 5.7 Unauthenticated `/today` redirects to sign-in — ef4052f
-- [x] 5.8 Responsive on mobile widths — ef4052f
+- [x] 5.4 `/today` lists exactly the due plants across locations; empty state works — 297df22
+- [x] 5.5 Mark / Mark-all remove plants immediately; Undo restores within window — 297df22
+- [x] 5.6 Snooze removes plant until snooze lapses — 297df22
+- [x] 5.7 Unauthenticated `/today` redirects to sign-in — 297df22
+- [x] 5.8 Responsive on mobile widths — 297df22
