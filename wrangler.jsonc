@@ -1,7 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "10x-plants-inventory",
-  "main": "@astrojs/cloudflare/entrypoints/server",
+  "main": "src/worker.ts",
+  "triggers": {
+    "crons": ["0 8 * * *"],
+  },
   "compatibility_date": "2026-05-08",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
