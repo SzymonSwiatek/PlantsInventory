@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
 import TodayList from "@/components/today/TodayList";
-import type { TodayPlant } from "@/types";
+import type { TodayPlant, TodayWinterPlant } from "@/types";
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
@@ -17,11 +17,25 @@ const { data: rows } = supabase
       .order("next_water_due_at", { ascending: true })
   : { data: null };
 
+const { data: winterRows } = supabase
+  ? await supabase
+      .from("winterization_due_plants")
+      .select("id, name, location_name, winterization_cutoff")
+      .order("this_year_cutoff" as never)
+  : { data: null };
+
 interface PlantRow {
   id: string;
   name: string;
   next_water_due_at: string | null;
   locations: { name: string } | null;
+}
+
+interface WinterPlantRow {
+  id: string;
+  name: string;
+  location_name: string | null;
+  winterization_cutoff: string | null;
 }
 
 const nowMs = Date.now();
@@ -35,6 +49,13 @@ const plants: TodayPlant[] = ((rows ?? []) as PlantRow[]).map((row) => {
     daysOverdue,
   };
 });
+
+const winterPlants: TodayWinterPlant[] = ((winterRows ?? []) as WinterPlantRow[]).map((row) => ({
+  id: row.id,
+  name: row.name,
+  locationName: row.location_name ?? "Unknown location",
+  cutoff: row.winterization_cutoff ?? "",
+}));
 ---
 
 <Layout title="Today's Care">
@@ -55,7 +76,7 @@ const plants: TodayPlant[] = ((rows ?? []) as PlantRow[]).map((row) => {
         </a>
       </header>
 
-      <TodayList plants={plants} client:load />
+      <TodayList plants={plants} winterPlants={winterPlants} client:load />
     </div>
   </div>
 </Layout>

@@ -1,22 +1,25 @@
 import { useState } from "react";
 import { toast, Toaster } from "sonner";
-import { Check, Clock, Droplets, Loader2 } from "lucide-react";
+import { Check, Clock, Droplets, Loader2, Snowflake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { TodayPlant } from "@/types";
-import { sortPlants } from "./sort";
+import type { TodayPlant, TodayWinterPlant } from "@/types";
+import { sortPlants, sortWinterPlants } from "./sort";
 
 interface Props {
   plants: TodayPlant[];
+  winterPlants: TodayWinterPlant[];
 }
 
 const SNOOZE_OPTIONS = [1, 3, 7] as const;
 const UNDO_DURATION_MS = 5000;
 
-export default function TodayList({ plants: initialPlants }: Props) {
+export default function TodayList({ plants: initialPlants, winterPlants: initialWinterPlants }: Props) {
   const [plants, setPlants] = useState<TodayPlant[]>(initialPlants);
+  const [winterPlants, setWinterPlants] = useState<TodayWinterPlant[]>(initialWinterPlants);
   const [snoozePlantId, setSnoozePlantId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [winterLoading, setWinterLoading] = useState(false);
 
   async function markWatered(ids: string[]) {
     if (loading) return;
@@ -86,101 +89,201 @@ export default function TodayList({ plants: initialPlants }: Props) {
     }
   }
 
+  async function markWinterized(ids: string[]) {
+    if (winterLoading) return;
+    setWinterLoading(true);
+
+    const removed = winterPlants.filter((p) => ids.includes(p.id));
+    setWinterPlants((prev) => prev.filter((p) => !ids.includes(p.id)));
+
+    const label = removed.length === 1 ? removed[0].name : `${removed.length} plants`;
+    const toastId = toast.success(`${label} marked as winterized`, {
+      duration: UNDO_DURATION_MS,
+      action: { label: "Undo", onClick: () => void undoWinterize(ids, removed) },
+    });
+
+    try {
+      const res = await fetch("/api/plants/winterize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plantIds: ids }),
+      });
+      if (!res.ok) throw new Error("winterize_failed");
+    } catch {
+      toast.dismiss(toastId);
+      setWinterPlants((prev) => sortWinterPlants([...prev, ...removed]));
+      toast.error("Could not mark as winterized. Please try again.");
+    } finally {
+      setWinterLoading(false);
+    }
+  }
+
+  async function undoWinterize(ids: string[], restored: TodayWinterPlant[]) {
+    try {
+      const res = await fetch("/api/plants/winterize-undo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plantIds: ids }),
+      });
+      if (!res.ok) throw new Error("undo_failed");
+      setWinterPlants((prev) => sortWinterPlants([...prev, ...restored]));
+      toast.success("Action undone");
+    } catch {
+      toast.error("Could not undo. Please refresh the page.");
+    }
+  }
+
+  const bothEmpty = plants.length === 0 && winterPlants.length === 0;
+
   return (
     <>
       <Toaster richColors position="bottom-right" />
 
-      {plants.length === 0 ? (
+      {bothEmpty ? (
         <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-8 text-center text-sm text-blue-100/60">
-          All caught up — nothing needs water today.
+          All caught up — nothing needs attention today.
         </div>
       ) : (
-        <div>
-          {plants.length > 1 && (
-            <div className="mb-4 flex justify-end">
-              <Button
-                onClick={() => void markWatered(plants.map((p) => p.id))}
-                disabled={loading}
-                className="gap-2 rounded-lg border border-white/20 bg-white/10 text-sm text-white hover:bg-white/20"
-                variant="ghost"
-              >
-                {loading ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
-                Mark all watered
-              </Button>
-            </div>
-          )}
+        <div className="space-y-8">
+          {plants.length > 0 && (
+            <section>
+              <h2 className="mb-4 text-sm font-semibold tracking-wider text-blue-100/60 uppercase">Watering</h2>
 
-          <ul className="space-y-3">
-            {plants.map((plant) => (
-              <li
-                key={plant.id}
-                className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur-xl"
-              >
-                <div className="min-w-0 flex-1">
-                  <span className="font-medium">{plant.name}</span>
-                  <span className="ml-2 text-sm text-blue-100/60">{plant.locationName}</span>
-                  {plant.daysOverdue > 0 && (
-                    <span className="ml-2 text-sm text-red-300">{plant.daysOverdue}d overdue</span>
-                  )}
-                </div>
-
-                <div className="flex shrink-0 items-center gap-2">
-                  {snoozePlantId === plant.id ? (
-                    <div className="flex items-center gap-1">
-                      {SNOOZE_OPTIONS.map((days) => (
-                        <Button
-                          key={days}
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => void snooze(plant.id, days)}
-                          disabled={loading}
-                          className={cn(
-                            "rounded-lg border border-white/20 bg-white/5 text-xs text-white hover:bg-white/20",
-                          )}
-                        >
-                          {days}d
-                        </Button>
-                      ))}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setSnoozePlantId(null);
-                        }}
-                        className="text-xs text-blue-100/60 hover:text-white"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setSnoozePlantId(plant.id);
-                      }}
-                      disabled={loading}
-                      className="gap-1.5 rounded-lg border border-white/20 bg-white/5 text-sm text-blue-100/60 hover:text-white"
-                    >
-                      <Clock className="size-4" />
-                      Snooze
-                    </Button>
-                  )}
-
+              {plants.length > 1 && (
+                <div className="mb-4 flex justify-end">
                   <Button
-                    size="sm"
-                    onClick={() => void markWatered([plant.id])}
+                    onClick={() => void markWatered(plants.map((p) => p.id))}
                     disabled={loading}
-                    className="gap-1.5 rounded-lg border border-white/20 bg-white/10 text-sm text-white hover:bg-white/20"
+                    className="gap-2 rounded-lg border border-white/20 bg-white/10 text-sm text-white hover:bg-white/20"
                     variant="ghost"
                   >
-                    {loading ? <Loader2 className="size-4 animate-spin" /> : <Droplets className="size-4" />}
-                    Water
+                    {loading ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                    Mark all watered
                   </Button>
                 </div>
-              </li>
-            ))}
-          </ul>
+              )}
+
+              <ul className="space-y-3">
+                {plants.map((plant) => (
+                  <li
+                    key={plant.id}
+                    className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur-xl"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium">{plant.name}</span>
+                      <span className="ml-2 text-sm text-blue-100/60">{plant.locationName}</span>
+                      {plant.daysOverdue > 0 && (
+                        <span className="ml-2 text-sm text-red-300">{plant.daysOverdue}d overdue</span>
+                      )}
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      {snoozePlantId === plant.id ? (
+                        <div className="flex items-center gap-1">
+                          {SNOOZE_OPTIONS.map((days) => (
+                            <Button
+                              key={days}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => void snooze(plant.id, days)}
+                              disabled={loading}
+                              className={cn(
+                                "rounded-lg border border-white/20 bg-white/5 text-xs text-white hover:bg-white/20",
+                              )}
+                            >
+                              {days}d
+                            </Button>
+                          ))}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSnoozePlantId(null);
+                            }}
+                            className="text-xs text-blue-100/60 hover:text-white"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setSnoozePlantId(plant.id);
+                          }}
+                          disabled={loading}
+                          className="gap-1.5 rounded-lg border border-white/20 bg-white/5 text-sm text-blue-100/60 hover:text-white"
+                        >
+                          <Clock className="size-4" />
+                          Snooze
+                        </Button>
+                      )}
+
+                      <Button
+                        size="sm"
+                        onClick={() => void markWatered([plant.id])}
+                        disabled={loading}
+                        className="gap-1.5 rounded-lg border border-white/20 bg-white/10 text-sm text-white hover:bg-white/20"
+                        variant="ghost"
+                      >
+                        {loading ? <Loader2 className="size-4 animate-spin" /> : <Droplets className="size-4" />}
+                        Water
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {winterPlants.length > 0 && (
+            <section>
+              <h2 className="mb-4 text-sm font-semibold tracking-wider text-blue-100/60 uppercase">
+                Bring indoors or secure before cutoff
+              </h2>
+
+              {winterPlants.length > 1 && (
+                <div className="mb-4 flex justify-end">
+                  <Button
+                    onClick={() => void markWinterized(winterPlants.map((p) => p.id))}
+                    disabled={winterLoading}
+                    className="gap-2 rounded-lg border border-white/20 bg-white/10 text-sm text-white hover:bg-white/20"
+                    variant="ghost"
+                  >
+                    {winterLoading ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                    Mark all winterized
+                  </Button>
+                </div>
+              )}
+
+              <ul className="space-y-3">
+                {winterPlants.map((plant) => (
+                  <li
+                    key={plant.id}
+                    className="flex items-center justify-between gap-4 rounded-2xl border border-blue-300/20 bg-blue-900/20 px-5 py-4 backdrop-blur-xl"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium">{plant.name}</span>
+                      <span className="ml-2 text-sm text-blue-100/60">{plant.locationName}</span>
+                      {plant.cutoff && <span className="ml-2 text-sm text-blue-300">cutoff {plant.cutoff}</span>}
+                    </div>
+
+                    <Button
+                      size="sm"
+                      onClick={() => void markWinterized([plant.id])}
+                      disabled={winterLoading}
+                      className="gap-1.5 rounded-lg border border-blue-300/30 bg-blue-900/30 text-sm text-white hover:bg-blue-800/40"
+                      variant="ghost"
+                    >
+                      {winterLoading ? <Loader2 className="size-4 animate-spin" /> : <Snowflake className="size-4" />}
+                      Winterize
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       )}
     </>

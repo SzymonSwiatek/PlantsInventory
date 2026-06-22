@@ -35,6 +35,14 @@ export interface TodayPlant {
   daysOverdue: number;
 }
 
+/** Plant due for winterization — used by the /today page and its React island. */
+export interface TodayWinterPlant {
+  id: string;
+  name: string;
+  locationName: string;
+  cutoff: string;
+}
+
 /**
  * Shape of the original AI suggestion snapshot stored in `plants.ai_suggestion`.
  * Write-once by convention (set on create by S-01, never overwritten by edits);

@@ -295,28 +295,28 @@ One forward-only migration (Phase 1) adds the view and the partial index — no 
 
 #### Automated
 
-- [x] 3.1 Mark-winterized inserts a `winterize` event + sets `winterized_at`; bulk marks all ids
-- [x] 3.2 Undo restores prior `winterized_at` (or NULL) and removes the event
-- [x] 3.3 401 unauthenticated; cross-user id rejected with no state change
-- [x] 3.4 Lint passes
+- [x] 3.1 Mark-winterized inserts a `winterize` event + sets `winterized_at`; bulk marks all ids — ea4fc73
+- [x] 3.2 Undo restores prior `winterized_at` (or NULL) and removes the event — ea4fc73
+- [x] 3.3 401 unauthenticated; cross-user id rejected with no state change — ea4fc73
+- [x] 3.4 Lint passes — ea4fc73
 
 #### Manual
 
-- [x] 3.5 After mark-winterized, plant absent from `winterization_due_plants`
-- [x] 3.6 Undo restores the plant as due
-- [x] 3.7 "Mark all" winterizes every supplied id in one call
+- [x] 3.5 After mark-winterized, plant absent from `winterization_due_plants` — ea4fc73
+- [x] 3.6 Undo restores the plant as due — ea4fc73
+- [x] 3.7 "Mark all" winterizes every supplied id in one call — ea4fc73
 
 ### Phase 4: `/today` + UI — winterization section
 
 #### Automated
 
-- [ ] 4.1 Lint + type-check pass (incl. react-compiler rule)
-- [ ] 4.2 Build succeeds
-- [ ] 4.3 Component unit tests pass (winter section)
+- [x] 4.1 Lint + type-check pass (incl. react-compiler rule)
+- [x] 4.2 Build succeeds
+- [x] 4.3 Component unit tests pass (winter section)
 
 #### Manual
 
-- [ ] 4.4 `/today` shows a distinct winterization section; watering unaffected; empty state works
-- [ ] 4.5 Mark / Mark-all remove plants immediately; Undo restores within window
-- [ ] 4.6 Winterized plant doesn't reappear until next year's cutoff
-- [ ] 4.7 Responsive on mobile widths
+- [x] 4.4 `/today` shows a distinct winterization section; watering unaffected; empty state works
+- [x] 4.5 Mark / Mark-all remove plants immediately; Undo restores within window
+- [x] 4.6 Winterized plant doesn't reappear until next year's cutoff
+- [x] 4.7 Responsive on mobile widths
