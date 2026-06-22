@@ -310,13 +310,13 @@ One forward-only migration (Phase 1) adds the view and the partial index — no 
 
 #### Automated
 
-- [x] 4.1 Lint + type-check pass (incl. react-compiler rule)
-- [x] 4.2 Build succeeds
-- [x] 4.3 Component unit tests pass (winter section)
+- [x] 4.1 Lint + type-check pass (incl. react-compiler rule) — 50ea3da
+- [x] 4.2 Build succeeds — 50ea3da
+- [x] 4.3 Component unit tests pass (winter section) — 50ea3da
 
 #### Manual
 
-- [x] 4.4 `/today` shows a distinct winterization section; watering unaffected; empty state works
-- [x] 4.5 Mark / Mark-all remove plants immediately; Undo restores within window
-- [x] 4.6 Winterized plant doesn't reappear until next year's cutoff
-- [x] 4.7 Responsive on mobile widths
+- [x] 4.4 `/today` shows a distinct winterization section; watering unaffected; empty state works — 50ea3da
+- [x] 4.5 Mark / Mark-all remove plants immediately; Undo restores within window — 50ea3da
+- [x] 4.6 Winterized plant doesn't reappear until next year's cutoff — 50ea3da
+- [x] 4.7 Responsive on mobile widths — 50ea3da
