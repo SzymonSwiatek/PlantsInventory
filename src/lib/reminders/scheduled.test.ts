@@ -19,7 +19,8 @@ const EMPTY_ENV: ReminderEnv = {
   PUBLIC_SITE_URL: undefined,
 };
 
-function makeQueryBuilder(result: { data: unknown[] | null; error: null }) {
+/** Water query builder: resolves after the .not().not().lte().or() chain. */
+function makeWaterBuilder(result: { data: unknown[] | null; error: null }) {
   const builder = {
     not: vi.fn(),
     lte: vi.fn(),
@@ -28,6 +29,26 @@ function makeQueryBuilder(result: { data: unknown[] | null; error: null }) {
   builder.not.mockReturnValue(builder);
   builder.lte.mockReturnValue(builder);
   return builder;
+}
+
+/** Mock client whose from() returns the right builder for each table. */
+function makeMockClient(
+  waterResult: { data: unknown[] | null; error: null },
+  winterResult: { data: unknown[] | null; error: null },
+  getUserById: ReturnType<typeof vi.fn> = vi
+    .fn()
+    .mockResolvedValue({ data: { user: { email: "test@example.com" } }, error: null }),
+) {
+  const waterBuilder = makeWaterBuilder(waterResult);
+  return {
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === "winterization_due_plants") {
+        return { select: vi.fn().mockResolvedValue(winterResult) };
+      }
+      return { select: vi.fn().mockReturnValue(waterBuilder) };
+    }),
+    auth: { admin: { getUserById } },
+  };
 }
 
 describe("runScheduledTick", () => {
@@ -61,11 +82,7 @@ describe("runScheduledTick", () => {
 
   it("does not call sendDigest when no plants are due (3.3)", async () => {
     const now = new Date("2026-01-15T08:00:00.000Z");
-    const builder = makeQueryBuilder({ data: [], error: null });
-    const mockClient = {
-      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue(builder) }),
-      auth: { admin: { getUserById: vi.fn() } },
-    };
+    const mockClient = makeMockClient({ data: [], error: null }, { data: [], error: null });
     vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
 
     await runScheduledTick(now, EMPTY_ENV);
@@ -73,17 +90,9 @@ describe("runScheduledTick", () => {
     expect(sendDigest).not.toHaveBeenCalled();
   });
 
-  it("sends digest to each user with due plants; excludes users with no due plants (3.1)", async () => {
+  it("sends digest to each user with due water plants; excludes users with no due plants (3.1)", async () => {
     const now = new Date("2026-01-15T08:00:00.000Z");
-    const dueDate = "2026-01-14T00:00:00.000Z"; // yesterday — 1 day overdue
-
-    const builder = makeQueryBuilder({
-      data: [
-        { name: "Monstera", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Living Room" } },
-        { name: "Cactus", user_id: "user-2", next_water_due_at: dueDate, locations: { name: "Office" } },
-      ],
-      error: null,
-    });
+    const dueDate = "2026-01-14T00:00:00.000Z";
 
     const getUserById = vi.fn((userId: string) => {
       const emails: Record<string, string> = {
@@ -93,10 +102,17 @@ describe("runScheduledTick", () => {
       return Promise.resolve({ data: { user: { email: emails[userId] } }, error: null });
     });
 
-    const mockClient = {
-      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue(builder) }),
-      auth: { admin: { getUserById } },
-    };
+    const mockClient = makeMockClient(
+      {
+        data: [
+          { name: "Monstera", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Living Room" } },
+          { name: "Cactus", user_id: "user-2", next_water_due_at: dueDate, locations: { name: "Office" } },
+        ],
+        error: null,
+      },
+      { data: [], error: null },
+      getUserById,
+    );
     vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
 
     await runScheduledTick(now, EMPTY_ENV);
@@ -107,27 +123,83 @@ describe("runScheduledTick", () => {
     expect(sentEmails).toContain("bob@example.com");
   });
 
+  it("sends digest to a winter-only user (no water due) (2.2)", async () => {
+    const now = new Date("2026-01-15T08:00:00.000Z");
+
+    const getUserById = vi.fn().mockResolvedValue({ data: { user: { email: "winter@example.com" } }, error: null });
+
+    const mockClient = makeMockClient(
+      { data: [], error: null },
+      {
+        data: [
+          {
+            name: "Olive Tree",
+            user_id: "user-w",
+            location_name: "Balcony",
+            winterization_cutoff: "2026-10-15",
+          },
+        ],
+        error: null,
+      },
+      getUserById,
+    );
+    vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
+
+    await runScheduledTick(now, EMPTY_ENV);
+
+    expect(sendDigest).toHaveBeenCalledOnce();
+    expect(sendDigest).toHaveBeenCalledWith("winter@example.com", expect.anything(), EMPTY_ENV);
+  });
+
+  it("winter-due rows are grouped per user in the digest (2.2)", async () => {
+    const now = new Date("2026-01-15T08:00:00.000Z");
+
+    const getUserById = vi.fn((userId: string) => {
+      const emails: Record<string, string> = {
+        "user-1": "alice@example.com",
+        "user-2": "bob@example.com",
+      };
+      return Promise.resolve({ data: { user: { email: emails[userId] } }, error: null });
+    });
+
+    const mockClient = makeMockClient(
+      { data: [], error: null },
+      {
+        data: [
+          { name: "Olive Tree", user_id: "user-1", location_name: "Balcony", winterization_cutoff: "2026-10-15" },
+          { name: "Lemon", user_id: "user-2", location_name: "Garden", winterization_cutoff: "2026-11-01" },
+        ],
+        error: null,
+      },
+      getUserById,
+    );
+    vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
+
+    await runScheduledTick(now, EMPTY_ENV);
+
+    expect(sendDigest).toHaveBeenCalledTimes(2);
+  });
+
   it("skips a user whose email lookup fails and continues to the next (partial 3.1)", async () => {
     const now = new Date("2026-01-15T08:00:00.000Z");
     const dueDate = "2026-01-14T00:00:00.000Z";
-
-    const builder = makeQueryBuilder({
-      data: [
-        { name: "Monstera", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Living Room" } },
-        { name: "Cactus", user_id: "user-2", next_water_due_at: dueDate, locations: { name: "Office" } },
-      ],
-      error: null,
-    });
 
     const getUserById = vi.fn((userId: string) => {
       if (userId === "user-1") return Promise.resolve({ data: null, error: { message: "not found" } });
       return Promise.resolve({ data: { user: { email: "bob@example.com" } }, error: null });
     });
 
-    const mockClient = {
-      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue(builder) }),
-      auth: { admin: { getUserById } },
-    };
+    const mockClient = makeMockClient(
+      {
+        data: [
+          { name: "Monstera", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Living Room" } },
+          { name: "Cactus", user_id: "user-2", next_water_due_at: dueDate, locations: { name: "Office" } },
+        ],
+        error: null,
+      },
+      { data: [], error: null },
+      getUserById,
+    );
     vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
@@ -143,19 +215,14 @@ describe("runScheduledTick", () => {
     const now = new Date("2026-01-15T08:00:00.000Z");
     const dueDate = "2026-01-14T00:00:00.000Z";
 
-    const builder = makeQueryBuilder({
-      data: [{ name: "Fern", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Hallway" } }],
-      error: null,
-    });
-
-    const mockClient = {
-      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue(builder) }),
-      auth: {
-        admin: {
-          getUserById: vi.fn().mockResolvedValue({ data: { user: { email: "alice@example.com" } }, error: null }),
-        },
+    const mockClient = makeMockClient(
+      {
+        data: [{ name: "Fern", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Hallway" } }],
+        error: null,
       },
-    };
+      { data: [], error: null },
+      vi.fn().mockResolvedValue({ data: { user: { email: "alice@example.com" } }, error: null }),
+    );
     vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
 
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);

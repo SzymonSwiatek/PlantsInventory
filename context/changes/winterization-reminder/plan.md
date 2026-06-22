@@ -265,31 +265,31 @@ One forward-only migration (Phase 1) adds the view and the partial index — no 
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly on a fresh DB (`npx supabase db reset`)
-- [x] 1.2 Type generation + lint pass (`npx astro sync && npm run lint`)
-- [x] 1.3 Existing tests pass (`npm run test:run`)
+- [x] 1.1 Migration applies cleanly on a fresh DB (`npx supabase db reset`) — 4dd18ba
+- [x] 1.2 Type generation + lint pass (`npx astro sync && npm run lint`) — 4dd18ba
+- [x] 1.3 Existing tests pass (`npm run test:run`) — 4dd18ba
 
 #### Manual
 
-- [x] 1.4 Plant with cutoff month/day = today appears in the view
-- [x] 1.5 Winterized-this-season absent; winterized-last-season present
-- [x] 1.6 Cutoff >30 days past is absent (tail window holds)
-- [x] 1.7 Session client (not service-role) returns the owner's rows via the view (GRANT in effect); a second user sees only own rows (RLS)
+- [x] 1.4 Plant with cutoff month/day = today appears in the view — 4dd18ba
+- [x] 1.5 Winterized-this-season absent; winterized-last-season present — 4dd18ba
+- [x] 1.6 Cutoff >30 days past is absent (tail window holds) — 4dd18ba
+- [x] 1.7 Session client (not service-role) returns the owner's rows via the view (GRANT in effect); a second user sees only own rows (RLS) — 4dd18ba
 
 ### Phase 2: Cron digest — winterization section
 
 #### Automated
 
-- [ ] 2.1 `composeDigest` winter-only / water-only / combined produce correct sections + subject + heading
-- [ ] 2.2 Tick groups winter-due by user; winter-only user is in the send set
-- [ ] 2.3 Fault test: one user's send failure doesn't abort others
-- [ ] 2.4 Lint passes
+- [x] 2.1 `composeDigest` winter-only / water-only / combined produce correct sections + subject + heading
+- [x] 2.2 Tick groups winter-due by user; winter-only user is in the send set
+- [x] 2.3 Fault test: one user's send failure doesn't abort others
+- [x] 2.4 Lint passes
 
 #### Manual
 
-- [ ] 2.5 Two seeded users each get a digest naming only their own winter-due plants
-- [ ] 2.6 Winter-only user (no water due) still receives an email
-- [ ] 2.7 Plant winterized this season absent from next tick's digest
+- [x] 2.5 Two seeded users each get a digest naming only their own winter-due plants
+- [x] 2.6 Winter-only user (no water due) still receives an email
+- [x] 2.7 Plant winterized this season absent from next tick's digest
 
 ### Phase 3: Care API — winterize endpoints
 

@@ -24,7 +24,7 @@ describe("runScheduledTick — per-user fault isolation (3.2)", () => {
     const now = new Date("2026-01-15T08:00:00.000Z");
     const dueDate = "2026-01-14T00:00:00.000Z";
 
-    const builder = {
+    const waterBuilder = {
       not: vi.fn(),
       lte: vi.fn(),
       or: vi.fn().mockResolvedValue({
@@ -35,8 +35,8 @@ describe("runScheduledTick — per-user fault isolation (3.2)", () => {
         error: null,
       }),
     };
-    builder.not.mockReturnValue(builder);
-    builder.lte.mockReturnValue(builder);
+    waterBuilder.not.mockReturnValue(waterBuilder);
+    waterBuilder.lte.mockReturnValue(waterBuilder);
 
     const getUserById = vi.fn((userId: string) => {
       const emails: Record<string, string> = { "user-1": "alice@example.com", "user-2": "bob@example.com" };
@@ -44,7 +44,12 @@ describe("runScheduledTick — per-user fault isolation (3.2)", () => {
     });
 
     const mockClient = {
-      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue(builder) }),
+      from: vi.fn().mockImplementation((table: string) => {
+        if (table === "winterization_due_plants") {
+          return { select: vi.fn().mockResolvedValue({ data: [], error: null }) };
+        }
+        return { select: vi.fn().mockReturnValue(waterBuilder) };
+      }),
       auth: { admin: { getUserById } },
     };
     vi.mocked(createServiceClient).mockReturnValue(mockClient as never);

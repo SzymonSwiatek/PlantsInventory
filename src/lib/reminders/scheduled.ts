@@ -1,7 +1,12 @@
 import { composeDigest, sendDigest } from "./email";
-import type { DuePlant } from "./email";
+import type { DuePlant, DueWinterPlant } from "./email";
 import { createServiceClient } from "./service-client";
 import type { ReminderEnv } from "./service-client";
+
+interface UserBucket {
+  water: DuePlant[];
+  winter: DueWinterPlant[];
+}
 
 export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<void> {
   console.log({ event: "scheduled.tick", ts: now.toISOString() });
@@ -14,7 +19,7 @@ export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<voi
 
   const siteUrl = env.PUBLIC_SITE_URL ?? "";
 
-  const { data: rows, error } = await supabase
+  const { data: waterRows, error: waterError } = await supabase
     .from("plants")
     .select("name, user_id, next_water_due_at, locations(name)")
     .not("watering_interval_days", "is", null)
@@ -22,37 +27,60 @@ export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<voi
     .lte("next_water_due_at", now.toISOString())
     .or(`water_snooze_until.is.null,water_snooze_until.lte.${now.toISOString()}`);
 
-  if (error) {
-    console.error({ event: "scheduled.query_error", err: error.message });
+  if (waterError) {
+    console.error({ event: "scheduled.query_error", query: "water", err: waterError.message });
     return;
   }
 
-  // Group by user_id
-  const byUser = new Map<string, DuePlant[]>();
-  for (const row of rows) {
+  const { data: winterRows, error: winterError } = await supabase
+    .from("winterization_due_plants")
+    .select("name, user_id, location_name, winterization_cutoff");
+
+  if (winterError) {
+    console.error({ event: "scheduled.query_error", query: "winter", err: winterError.message });
+    return;
+  }
+
+  // Build combined per-user map
+  const byUser = new Map<string, UserBucket>();
+
+  const getBucket = (userId: string): UserBucket => {
+    let bucket = byUser.get(userId);
+    if (!bucket) {
+      bucket = { water: [], winter: [] };
+      byUser.set(userId, bucket);
+    }
+    return bucket;
+  };
+
+  for (const row of waterRows) {
     const loc = row.locations as { name: string } | null;
     const locationName = loc?.name ?? "Unknown";
     const daysOverdue = row.next_water_due_at
       ? Math.max(0, Math.floor((now.getTime() - new Date(row.next_water_due_at).getTime()) / 86_400_000))
       : 0;
-    const plant: DuePlant = { name: row.name, locationName, daysOverdue };
-    const bucket = byUser.get(row.user_id);
-    if (bucket) {
-      bucket.push(plant);
-    } else {
-      byUser.set(row.user_id, [plant]);
-    }
+    getBucket(row.user_id).water.push({ name: row.name, locationName, daysOverdue });
+  }
+
+  for (const row of winterRows) {
+    if (!row.user_id) continue;
+    const cutoff = row.winterization_cutoff ?? "";
+    getBucket(row.user_id).winter.push({
+      name: row.name ?? "",
+      locationName: row.location_name ?? "Unknown",
+      cutoff,
+    });
   }
 
   let emailsSent = 0;
-  for (const [userId, plants] of byUser) {
+  for (const [userId, bucket] of byUser) {
     const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
     if (userError || !userData.user.email) {
       console.error({ event: "scheduled.user_lookup_error", userId, err: userError?.message ?? "no_email" });
       continue;
     }
 
-    const digest = composeDigest(plants, siteUrl);
+    const digest = composeDigest({ water: bucket.water, winter: bucket.winter }, siteUrl);
     try {
       await sendDigest(userData.user.email, digest, env);
       emailsSent++;
@@ -61,5 +89,11 @@ export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<voi
     }
   }
 
-  console.log({ event: "scheduled.summary", total: rows.length, emails_sent: emailsSent });
+  console.log({
+    event: "scheduled.summary",
+    water_due: waterRows.length,
+    winter_due: winterRows.length,
+    total: waterRows.length + winterRows.length,
+    emails_sent: emailsSent,
+  });
 }

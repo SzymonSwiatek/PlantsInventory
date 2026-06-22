@@ -7,6 +7,17 @@ export interface DuePlant {
   daysOverdue: number;
 }
 
+export interface DueWinterPlant {
+  name: string;
+  locationName: string;
+  cutoff: string;
+}
+
+export interface DigestInput {
+  water: DuePlant[];
+  winter: DueWinterPlant[];
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -16,22 +27,46 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-export function composeDigest(plants: DuePlant[], siteUrl: string): { subject: string; html: string; text: string } {
-  const count = plants.length;
-  const subject = `${count} plant${count === 1 ? "" : "s"} need watering today`;
+export function composeDigest(input: DigestInput, siteUrl: string): { subject: string; html: string; text: string } {
+  const { water, winter } = input;
+  const hasWater = water.length > 0;
+  const hasWinter = winter.length > 0;
+
+  let subject: string;
+  if (hasWater && hasWinter) {
+    subject = `${water.length} plant${water.length === 1 ? "" : "s"} need watering and ${winter.length} plant${winter.length === 1 ? "" : "s"} need winterizing today`;
+  } else if (hasWater) {
+    const count = water.length;
+    subject = `${count} plant${count === 1 ? "" : "s"} need watering today`;
+  } else {
+    const count = winter.length;
+    subject = `${count} plant${count === 1 ? "" : "s"} need winterizing today`;
+  }
 
   const todayLink = siteUrl ? `${siteUrl}/today` : "/today";
 
-  const plantLines = plants
+  // Watering section (text)
+  const waterLines = water
     .map((p) => {
       const overdue = p.daysOverdue > 0 ? ` (${p.daysOverdue} day${p.daysOverdue === 1 ? "" : "s"} overdue)` : "";
       return `• ${p.name} — ${p.locationName}${overdue}`;
     })
     .join("\n");
 
-  const text = `${subject}\n\n${plantLines}\n\nOpen your plant list: ${todayLink}`;
+  // Winterization section (text)
+  const winterLines = winter.map((p) => `• ${p.name} — ${p.locationName} (cutoff: ${p.cutoff})`).join("\n");
 
-  const plantHtmlLines = plants
+  let text = subject;
+  if (hasWater) {
+    text += `\n\nNeeds watering:\n${waterLines}`;
+  }
+  if (hasWinter) {
+    text += `\n\nBring indoors or secure before cutoff:\n${winterLines}`;
+  }
+  text += `\n\nOpen your plant list: ${todayLink}`;
+
+  // Watering section (HTML)
+  const waterHtmlLines = water
     .map((p) => {
       const overdue =
         p.daysOverdue > 0
@@ -41,11 +76,26 @@ export function composeDigest(plants: DuePlant[], siteUrl: string): { subject: s
     })
     .join("\n");
 
+  // Winterization section (HTML)
+  const winterHtmlLines = winter
+    .map(
+      (p) =>
+        `<li><strong>${escapeHtml(p.name)}</strong> &mdash; ${escapeHtml(p.locationName)} <span style="color:#718096">(cutoff: ${escapeHtml(p.cutoff)})</span></li>`,
+    )
+    .join("\n");
+
+  let bodyHtml = "";
+  if (hasWater) {
+    bodyHtml += `\n  <h3>Needs watering</h3>\n  <ul>${waterHtmlLines}</ul>`;
+  }
+  if (hasWinter) {
+    bodyHtml += `\n  <h3>Bring indoors or secure before cutoff</h3>\n  <ul>${winterHtmlLines}</ul>`;
+  }
+
   const html = `<!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-  <h2>${subject}</h2>
-  <ul>${plantHtmlLines}</ul>
+  <h2>${escapeHtml(subject)}</h2>${bodyHtml}
   <p><a href="${todayLink}">Open your plant list</a></p>
 </body>
 </html>`;
