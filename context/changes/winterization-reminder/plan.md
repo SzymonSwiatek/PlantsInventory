@@ -280,31 +280,31 @@ One forward-only migration (Phase 1) adds the view and the partial index — no 
 
 #### Automated
 
-- [x] 2.1 `composeDigest` winter-only / water-only / combined produce correct sections + subject + heading
-- [x] 2.2 Tick groups winter-due by user; winter-only user is in the send set
-- [x] 2.3 Fault test: one user's send failure doesn't abort others
-- [x] 2.4 Lint passes
+- [x] 2.1 `composeDigest` winter-only / water-only / combined produce correct sections + subject + heading — 8654fe6
+- [x] 2.2 Tick groups winter-due by user; winter-only user is in the send set — 8654fe6
+- [x] 2.3 Fault test: one user's send failure doesn't abort others — 8654fe6
+- [x] 2.4 Lint passes — 8654fe6
 
 #### Manual
 
-- [x] 2.5 Two seeded users each get a digest naming only their own winter-due plants
-- [x] 2.6 Winter-only user (no water due) still receives an email
-- [x] 2.7 Plant winterized this season absent from next tick's digest
+- [x] 2.5 Two seeded users each get a digest naming only their own winter-due plants — 8654fe6
+- [x] 2.6 Winter-only user (no water due) still receives an email — 8654fe6
+- [x] 2.7 Plant winterized this season absent from next tick's digest — 8654fe6
 
 ### Phase 3: Care API — winterize endpoints
 
 #### Automated
 
-- [ ] 3.1 Mark-winterized inserts a `winterize` event + sets `winterized_at`; bulk marks all ids
-- [ ] 3.2 Undo restores prior `winterized_at` (or NULL) and removes the event
-- [ ] 3.3 401 unauthenticated; cross-user id rejected with no state change
-- [ ] 3.4 Lint passes
+- [x] 3.1 Mark-winterized inserts a `winterize` event + sets `winterized_at`; bulk marks all ids
+- [x] 3.2 Undo restores prior `winterized_at` (or NULL) and removes the event
+- [x] 3.3 401 unauthenticated; cross-user id rejected with no state change
+- [x] 3.4 Lint passes
 
 #### Manual
 
-- [ ] 3.5 After mark-winterized, plant absent from `winterization_due_plants`
-- [ ] 3.6 Undo restores the plant as due
-- [ ] 3.7 "Mark all" winterizes every supplied id in one call
+- [x] 3.5 After mark-winterized, plant absent from `winterization_due_plants`
+- [x] 3.6 Undo restores the plant as due
+- [x] 3.7 "Mark all" winterizes every supplied id in one call
 
 ### Phase 4: `/today` + UI — winterization section
 
