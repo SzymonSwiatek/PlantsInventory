@@ -67,6 +67,13 @@ export type Database = {
             referencedRelation: "plants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "care_events_plant_id_fkey"
+            columns: ["plant_id"]
+            isOneToOne: false
+            referencedRelation: "winterization_due_plants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       locations: {
@@ -166,7 +173,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      winterization_due_plants: {
+        Row: {
+          id: string | null
+          location_id: string | null
+          location_name: string | null
+          name: string | null
+          this_year_cutoff: string | null
+          user_id: string | null
+          winterization_cutoff: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plants_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
