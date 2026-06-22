@@ -213,3 +213,15 @@ create policy "care_events_update_own" on care_events
 create policy "care_events_delete_own" on care_events
   for delete to authenticated
   using ((select auth.uid()) = user_id);
+
+-- ============================================================================
+-- Grants
+-- ============================================================================
+-- PostgREST requires table-level privileges in addition to RLS policies.
+-- Supabase cloud handles this via system migrations; local dev needs explicit
+-- grants here so `npx supabase db reset` produces a fully functional stack
+-- without manual post-reset patching.
+-- `anon` is intentionally excluded — every route requires sign-in.
+
+grant select, insert, update, delete on table locations, plants, care_events
+  to authenticated, service_role;

@@ -54,11 +54,10 @@ where
     or p.winterized_at < c.this_year_cutoff
   );
 
--- Grant SELECT explicitly — this is the repo's first view, so unlike tables it
--- does not inherit default privileges. Without this grant a session client gets
--- "permission denied for view", which today.astro would silently swallow as an
--- empty section.
-grant select on winterization_due_plants to authenticated, anon;
+-- Grant SELECT explicitly — views do not inherit default table privileges.
+-- `service_role` is included so the cron's service-role client can query the
+-- view without RLS bypassing the underlying table grants requirement.
+grant select on winterization_due_plants to authenticated, anon, service_role;
 
 -- Partial index for the cron scan and /today list: limits the scan to plants
 -- that have a winterization cutoff set.
