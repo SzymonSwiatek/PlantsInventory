@@ -1,10 +1,10 @@
 ---
 change_id: ai-suggested-badge-only-on-unchanged
 title: Show the AI-suggested indicator only on fields the user hasn't changed
-status: impl_reviewed
+status: archived
 created: 2026-06-23
 updated: 2026-06-23
-archived_at: null
+archived_at: 2026-06-23T12:53:08Z
 ---
 
 ## Notes
