@@ -166,16 +166,16 @@ None — no data or schema changes.
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `npm run test:run`
-- [x] 1.2 Type checking / lint passes: `npm run lint`
+- [x] 1.1 Unit tests pass: `npm run test:run` — ce497a1
+- [x] 1.2 Type checking / lint passes: `npm run lint` — ce497a1
 
 ### Phase 2: Gate the indicator in the UI
 
 #### Automated
 
-- [ ] 2.1 Type checking + lint passes (incl. react-compiler rule): `npm run lint`
-- [ ] 2.2 Unit tests still pass: `npm run test:run`
-- [ ] 2.3 Production build succeeds: `npm run build`
+- [x] 2.1 Type checking + lint passes (incl. react-compiler rule): `npm run lint`
+- [x] 2.2 Unit tests still pass: `npm run test:run`
+- [x] 2.3 Production build succeeds: `npm run build`
 
 #### Manual
 

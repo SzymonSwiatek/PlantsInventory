@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
-type FieldKind = "text" | "multiline" | "number" | "date" | "select";
+import { aiValueUnchanged, type FieldKind } from "@/lib/ai-suggestion";
 
 interface Option {
   id: string;
@@ -23,6 +22,7 @@ interface Props {
   value: string | number | null;
   options?: Option[];
   aiHint?: string | null;
+  aiValue?: string | number | null;
   onSaved?: (newValue: string | number | null) => void;
 }
 
@@ -40,7 +40,17 @@ function formatDisplay(kind: FieldKind, value: string | number | null, options?:
   return String(value);
 }
 
-export default function EditableField({ plantId, field, label, kind, value, options, aiHint, onSaved }: Props) {
+export default function EditableField({
+  plantId,
+  field,
+  label,
+  kind,
+  value,
+  options,
+  aiHint,
+  aiValue,
+  onSaved,
+}: Props) {
   const [localValue, setLocalValue] = useState<string | number | null>(value);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -254,7 +264,11 @@ export default function EditableField({ plantId, field, label, kind, value, opti
           ) : (
             <p className="text-blue-100/40 italic">—</p>
           )}
-          {aiHint && <p className="mt-1 text-xs text-blue-100/40 italic">AI suggested: {aiHint}</p>}
+          {aiHint && aiValueUnchanged(kind, localValue, aiValue ?? null) && (
+            <span className="mt-1 inline-block rounded-full border border-blue-300/20 bg-blue-300/10 px-2 py-0.5 text-xs text-blue-300/60">
+              AI suggested
+            </span>
+          )}
         </div>
       )}
     </div>

@@ -209,6 +209,7 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
           kind="text"
           value={plant.species}
           aiHint={ai?.species}
+          aiValue={ai?.species ?? null}
         />
         <EditableField
           plantId={plant.id}
@@ -217,6 +218,7 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
           kind="multiline"
           value={plant.description}
           aiHint={ai?.description}
+          aiValue={ai?.description ?? null}
         />
         <EditableField
           plantId={plant.id}
@@ -225,6 +227,7 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
           kind="text"
           value={plant.sunlight}
           aiHint={ai?.sunlight}
+          aiValue={ai?.sunlight ?? null}
         />
         <EditableField
           plantId={plant.id}
@@ -233,6 +236,7 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
           kind="number"
           value={plant.watering_interval_days}
           aiHint={aiWateringHint}
+          aiValue={ai?.watering_interval_days ?? null}
         />
         <EditableField
           plantId={plant.id}
@@ -241,6 +245,7 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
           kind="date"
           value={plant.winterization_cutoff}
           aiHint={ai?.winterization_cutoff}
+          aiValue={ai?.winterization_cutoff ?? null}
         />
         <EditableField plantId={plant.id} field="note" label="Note" kind="multiline" value={plant.note} />
         <EditableField
