@@ -1,7 +1,7 @@
 ---
 change_id: camera-button-mobile-capture
 title: Add camera capture button for mobile photo input
-status: implemented
+status: impl_reviewed
 created: 2026-06-23
 updated: 2026-06-23
 archived_at: null

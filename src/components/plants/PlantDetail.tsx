@@ -193,8 +193,8 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
             uploadStatus === "uploading" ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:text-blue-200",
           )}
         >
-          <Camera className="size-4" />
-          Take photo
+          {uploadStatus === "uploading" ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
+          {uploadStatus === "uploading" ? "Uploading…" : "Take photo"}
         </label>
         <input
           id="replace-photo-camera"
