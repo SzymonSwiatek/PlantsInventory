@@ -9,13 +9,22 @@ const email = Astro.url.searchParams.get("email") ?? "your email";
     <div
       class="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl"
     >
+      <div class="mb-6 flex flex-col items-center gap-3">
+        <span
+          class="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-3xl shadow-lg"
+          aria-hidden="true"
+        >
+          🌱
+        </span>
+        <span class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-xl font-bold text-transparent">
+          Plants Inventory
+        </span>
+      </div>
       <div class="mb-4 text-5xl">📧</div>
-      <h1 class="mb-3 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-2xl font-bold text-transparent">
-        Check your email
-      </h1>
+      <h1 class="mb-3 text-2xl font-bold text-white">Check your email</h1>
       <p class="mb-6 text-blue-100/80">
-        We sent a sign-in link to <span class="font-medium text-white">{email}</span>. Click it from this device to
-        finish signing in.
+        We sent a magic link to <span class="font-medium text-white">{email}</span>. Click it from this device to finish
+        signing in.
       </p>
       <a href="/auth/signin" class="text-sm text-purple-300 hover:underline"> Back to sign in </a>
     </div>
