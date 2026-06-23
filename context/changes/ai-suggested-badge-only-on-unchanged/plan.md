@@ -173,14 +173,14 @@ None — no data or schema changes.
 
 #### Automated
 
-- [x] 2.1 Type checking + lint passes (incl. react-compiler rule): `npm run lint`
-- [x] 2.2 Unit tests still pass: `npm run test:run`
-- [x] 2.3 Production build succeeds: `npm run build`
+- [x] 2.1 Type checking + lint passes (incl. react-compiler rule): `npm run lint` — 34c6328
+- [x] 2.2 Unit tests still pass: `npm run test:run` — 34c6328
+- [x] 2.3 Production build succeeds: `npm run build` — 34c6328
 
 #### Manual
 
-- [ ] 2.4 AI-backed fields show the line when value matches the snapshot
-- [ ] 2.5 Inline-editing a field away hides its line immediately (no reload)
-- [ ] 2.6 Editing back to the exact AI value re-shows the line
-- [ ] 2.7 Clearing an AI-suggested field hides its line
-- [ ] 2.8 name/note/location never show an AI line; no inline-edit regressions
+- [x] 2.4 AI-backed fields show the line when value matches the snapshot — 34c6328
+- [x] 2.5 Inline-editing a field away hides its line immediately (no reload) — 34c6328
+- [x] 2.6 Editing back to the exact AI value re-shows the line — 34c6328
+- [x] 2.7 Clearing an AI-suggested field hides its line — 34c6328
+- [x] 2.8 name/note/location never show an AI line; no inline-edit regressions — 34c6328

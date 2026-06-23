@@ -1,7 +1,7 @@
 ---
 change_id: ai-suggested-badge-only-on-unchanged
 title: Show the AI-suggested indicator only on fields the user hasn't changed
-status: implementing
+status: implemented
 created: 2026-06-23
 updated: 2026-06-23
 archived_at: null
