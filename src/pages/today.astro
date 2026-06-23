@@ -7,7 +7,7 @@ import type { TodayPlant, TodayWinterPlant } from "@/types";
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 const now = new Date().toISOString();
-const { data: rows } = supabase
+const { data: rows, error: waterError } = supabase
   ? await supabase
       .from("plants")
       .select("id, name, next_water_due_at, locations(name)")
@@ -15,14 +15,18 @@ const { data: rows } = supabase
       .lte("next_water_due_at", now)
       .or(`water_snooze_until.is.null,water_snooze_until.lte.${now}`)
       .order("next_water_due_at", { ascending: true })
-  : { data: null };
+  : { data: null, error: null };
 
-const { data: winterRows } = supabase
+const { data: winterRows, error: winterError } = supabase
   ? await supabase
       .from("winterization_due_plants")
-      .select("id, name, location_name, winterization_cutoff")
-      .order("this_year_cutoff" as never)
-  : { data: null };
+      .select("id, name, location_name, winterization_cutoff, this_year_cutoff")
+      .order("this_year_cutoff", { ascending: true })
+  : { data: null, error: null };
+
+// A failed query must not be conflated with "nothing due" — surface a degraded
+// banner instead of silently rendering the empty state.
+const loadError = Boolean(waterError ?? winterError);
 
 interface PlantRow {
   id: string;
@@ -36,6 +40,7 @@ interface WinterPlantRow {
   name: string;
   location_name: string | null;
   winterization_cutoff: string | null;
+  this_year_cutoff: string | null;
 }
 
 const nowMs = Date.now();
@@ -75,6 +80,17 @@ const winterPlants: TodayWinterPlant[] = ((winterRows ?? []) as WinterPlantRow[]
           ← Dashboard
         </a>
       </header>
+
+      {
+        loadError && (
+          <div
+            role="alert"
+            class="mb-6 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100"
+          >
+            We couldn't load some of your reminders right now. This list may be incomplete — please refresh in a moment.
+          </div>
+        )
+      }
 
       <TodayList plants={plants} winterPlants={winterPlants} client:load />
     </div>

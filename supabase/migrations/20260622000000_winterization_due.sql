@@ -57,7 +57,9 @@ where
 -- Grant SELECT explicitly — views do not inherit default table privileges.
 -- `service_role` is included so the cron's service-role client can query the
 -- view without RLS bypassing the underlying table grants requirement.
-grant select on winterization_due_plants to authenticated, anon, service_role;
+-- `anon` is intentionally excluded — every route requires sign-in (matches the
+-- base-table grants in 20260608171954_core_domain_schema.sql).
+grant select on winterization_due_plants to authenticated, service_role;
 
 -- Partial index for the cron scan and /today list: limits the scan to plants
 -- that have a winterization cutoff set.
