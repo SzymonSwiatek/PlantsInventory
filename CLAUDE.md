@@ -59,6 +59,7 @@ Astro 6 SSR app with React 19 islands, Tailwind 4, Supabase auth, and shadcn/ui.
 - The Cloudflare project name in `wrangler.jsonc` and the `name` in `package.json` are still `10x-astro-starter` (unchanged from the starter template).
 - `context/archive/` is immutable — never write there. `context/foundation/` holds the PRD, tech-stack, and shaping notes that drive this project.
 - `CLAUDE.md.scaffold` is the original starter's rules file, kept for reference; the guidance in this section supersedes it.
+- **AI-suggested fields are untrusted text.** `species`, `description`, `sunlight` (and any other free-text field returned by `/api/plants/suggest`) originate from the vision model and can carry attacker-controlled content via prompt injection in an uploaded photo. They are safe today only because React/Astro escape text by default — never render them with `set:html` / `dangerouslySetInnerHTML`, and sanitize first if you ever must.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
