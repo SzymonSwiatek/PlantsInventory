@@ -164,12 +164,12 @@ None — no data or schema changes.
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Type checking + build passes: `npm run build`
-- [x] 2.3 Tests pass: `npm run test:run`
+- [x] 2.1 Linting passes: `npm run lint` — 783e111
+- [x] 2.2 Type checking + build passes: `npm run build` — 783e111
+- [x] 2.3 Tests pass: `npm run test:run` — 783e111
 
 #### Manual
 
-- [x] 2.4 Mobile "Take photo" opens rear camera and replaces the photo
-- [x] 2.5 Button disabled during in-flight upload, matching existing picker
-- [x] 2.6 Desktop "Take photo" degrades to file dialog, no console errors
+- [x] 2.4 Mobile "Take photo" opens rear camera and replaces the photo — 783e111
+- [x] 2.5 Button disabled during in-flight upload, matching existing picker — 783e111
+- [x] 2.6 Desktop "Take photo" degrades to file dialog, no console errors — 783e111
