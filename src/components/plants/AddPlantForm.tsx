@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { NumberStepper } from "@/components/ui/number-stepper";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -408,17 +409,7 @@ export default function AddPlantForm({ locationId }: Props) {
 
               <div className="space-y-2">
                 <Label htmlFor="watering">Watering interval (days)</Label>
-                <Input
-                  id="watering"
-                  type="number"
-                  min={1}
-                  inputMode="numeric"
-                  value={wateringDays}
-                  onChange={(e) => {
-                    setWateringDays(e.target.value);
-                  }}
-                  placeholder="e.g. 7"
-                />
+                <NumberStepper id="watering" value={wateringDays} onChange={setWateringDays} placeholder="e.g. 7" />
               </div>
 
               <div className="space-y-2">

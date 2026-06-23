@@ -162,21 +162,21 @@ None — purely additive UI; no data or schema changes.
 
 #### Automated
 
-- [x] 1.1 Type checking passes (`npx astro sync && npm run lint`)
-- [x] 1.2 Unit tests pass (`npm run test:run`)
-- [x] 1.3 Helper unit tests cover empty/at-min/normal/non-numeric cases
+- [x] 1.1 Type checking passes (`npx astro sync && npm run lint`) — 6ccb09b
+- [x] 1.2 Unit tests pass (`npm run test:run`) — 6ccb09b
+- [x] 1.3 Helper unit tests cover empty/at-min/normal/non-numeric cases — 6ccb09b
 
 ### Phase 2: Wire NumberStepper into both sites
 
 #### Automated
 
-- [ ] 2.1 Type checking passes (`npx astro sync && npm run lint`)
-- [ ] 2.2 Unit tests pass (`npm run test:run`)
-- [ ] 2.3 Build succeeds (`npm run build`)
+- [x] 2.1 Type checking passes (`npx astro sync && npm run lint`)
+- [x] 2.2 Unit tests pass (`npm run test:run`)
+- [x] 2.3 Build succeeds (`npm run build`)
 
 #### Manual
 
-- [ ] 2.4 Add-plant form: +/− behavior, disable at 1, empty→1, typing, save all correct
-- [ ] 2.5 Plant detail: steppers adjust draft, Enter saves / Escape cancels, value persists
-- [ ] 2.6 Both sites visually correct; buttons don't prematurely submit the add form
-- [ ] 2.7 No regression in "Every N days" display or "AI suggested" badge
+- [x] 2.4 Add-plant form: +/− behavior, disable at 1, empty→1, typing, save all correct
+- [x] 2.5 Plant detail: steppers adjust draft, Enter saves / Escape cancels, value persists
+- [x] 2.6 Both sites visually correct; buttons don't prematurely submit the add form
+- [x] 2.7 No regression in "Every N days" display or "AI suggested" badge

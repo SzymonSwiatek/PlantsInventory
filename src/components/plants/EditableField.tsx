@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { NumberStepper } from "@/components/ui/number-stepper";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -168,20 +169,15 @@ export default function EditableField({
             />
           )}
           {kind === "number" && (
-            <Input
-              type="number"
-              min={1}
-              inputMode="numeric"
+            <NumberStepper
               value={draft}
+              onChange={setDraft}
               autoFocus
-              onChange={(e) => {
-                setDraft(e.target.value);
-              }}
+              inputClassName="border-white/20 bg-white/10 text-white placeholder:text-blue-100/40"
               onKeyDown={(e) => {
                 if (e.key === "Enter") void handleSave();
                 if (e.key === "Escape") cancelEdit();
               }}
-              className="border-white/20 bg-white/10 text-white placeholder:text-blue-100/40"
             />
           )}
           {kind === "date" && (
