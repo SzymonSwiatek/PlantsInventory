@@ -3,7 +3,7 @@ project: 10xPlantsInventory
 version: 1
 status: draft
 created: 2026-05-25
-updated: 2026-06-21
+updated: 2026-06-23
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -37,7 +37,7 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 | S-01 | first-plant-from-photo  | sign in, create a location, upload a photo, get AI care suggestion, accept/edit, save     | F-01, F-02    | US-01, FR-004, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014 | done     | [#4](https://github.com/SzymonSwiatek/PlantsInventory/issues/4) |
 | S-02 | location-management     | rename a location, delete (with non-empty warning), see all locations with plant counts   | F-01, F-02    | FR-005, FR-006, FR-007                                                | done     | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
 | S-03 | plant-management        | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01          | FR-015, FR-016, FR-017                                                | done     | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
-| S-04 | watering-reminder-loop  | see today's care list, receive a watering reminder, mark watered (bulk too), snooze       | F-03, S-01    | US-02, US-03, FR-018, FR-020, FR-021, FR-022                          | proposed | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) |
+| S-04 | watering-reminder-loop  | see today's care list, receive a watering reminder, mark watered (bulk too), snooze       | F-03, S-01    | US-02, US-03, FR-018, FR-020, FR-021, FR-022                          | done     | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) |
 | S-05 | winterization-reminder  | receive a reminder when a winterization cutoff approaches; mark winterized                | F-03, S-01    | US-02, US-03, FR-019, FR-020                                          | proposed | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) |
 
 ## Streams
@@ -156,7 +156,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
   - PRD Open Question 1: notification delivery channel (email / web push / in-app / combination) — Owner: user, before tech-stack selection (already past, default applies). Block: no — defaults to email-only per PRD; needs email provider key (Resend / Postmark / etc.) chosen at `/10x-plan` time.
   - PRD Open Question 3: reminder cap / batching rules (one daily digest per user vs one notification per plant vs threshold-based) — Owner: user, by PRD finalization. Block: no — defaults to one daily digest per user listing all plants needing care.
 - **Risk:** Highest moving-part count in the roadmap — cron tick + DB read of "what needs care today" + email provider call + UI state for mark-done + undo window + snooze deferral + the bulk action. Defer any one of these to a follow-up slice and the loop doesn't close — the Success Criterion #3 requires reminder → care-marked-done within the first 2 weeks of use. Under main_goal=speed, default both Open Questions instead of waiting for them to resolve.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: Winterization reminder
 
@@ -214,3 +214,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-02: A signed-in user can rename a location, delete a location (with a warning if it still contains plants), and view a list of all their locations with the number of plants per location.** — Archived 2026-06-19 → `context/archive/2026-06-18-location-management/`. Lesson: —.
 - **S-03: A signed-in user can open a plant's detail screen showing all stored care info and the original AI suggestion, edit any field in place (no separate edit mode), delete the plant, and add a free-text note.** — Archived 2026-06-19 → `context/archive/2026-06-19-plant-management/`. Lesson: —.
 - **F-03: (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds** — Archived 2026-06-21 → `context/archive/2026-06-20-cron-scheduled-skeleton/`. Lesson: —.
+- **S-04: A signed-in user opens the app and sees today's care list aggregated across all their locations (FR-021); when a plant's watering interval has elapsed, the user receives a reminder identifying the specific plant(s); the user marks the plant(s) watered — single or bulk "mark all watered" — which resets the interval and removes them from today's care list; the user can snooze a reminder one or more days when care can't happen today.** — Archived 2026-06-23 → `context/archive/2026-06-21-watering-reminder-loop/`. Lesson: —.

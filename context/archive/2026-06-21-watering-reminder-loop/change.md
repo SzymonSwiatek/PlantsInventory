@@ -1,10 +1,10 @@
 ---
 change_id: watering-reminder-loop
 title: Watering reminder loop — cron, mark-done (incl. bulk), snooze, today list
-status: impl_reviewed
+status: archived
 created: 2026-06-21
-updated: 2026-06-21
-archived_at: null
+updated: 2026-06-23
+archived_at: 2026-06-23T09:59:03Z
 ---
 
 ## Notes
