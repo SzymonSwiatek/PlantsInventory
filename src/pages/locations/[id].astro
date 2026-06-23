@@ -7,7 +7,7 @@ import type { Location, Plant } from "@/types";
 const id = Astro.params.id;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 
-type PlantCard = Pick<Plant, "id" | "name" | "photo_path"> & { photoUrl: string | null };
+type PlantCard = Pick<Plant, "id" | "name" | "photo_path" | "watering_interval_days"> & { photoUrl: string | null };
 
 // RLS-scoped: a foreign or unknown id simply returns no row → render the 404 state.
 let location: Pick<Location, "id" | "name"> | null = null;
@@ -20,7 +20,7 @@ if (id && supabase) {
   if (location) {
     const { data: rows } = await supabase
       .from("plants")
-      .select("id, name, photo_path")
+      .select("id, name, photo_path, watering_interval_days")
       .eq("location_id", id)
       .order("created_at", { ascending: false });
     const safeRows = rows ?? [];
@@ -78,7 +78,13 @@ if (!location) {
                     )}
                     <div class="min-w-0">
                       <p class="truncate font-medium">{plant.name}</p>
-                      <p class="text-sm text-blue-100/50">Not scheduled yet</p>
+                      <p class="text-sm text-blue-100/50">
+                        {plant.watering_interval_days === null
+                          ? "Not scheduled yet"
+                          : plant.watering_interval_days === 1
+                            ? "Water every day"
+                            : `Water every ${plant.watering_interval_days} days`}
+                      </p>
                     </div>
                   </a>
                 </li>
