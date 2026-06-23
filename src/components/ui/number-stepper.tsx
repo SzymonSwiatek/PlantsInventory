@@ -33,7 +33,7 @@ function NumberStepper({
   onKeyDown,
 }: NumberStepperProps) {
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div data-slot="number-stepper" className={cn("flex items-center gap-1", className)}>
       <Button
         type="button"
         variant="ghost"
