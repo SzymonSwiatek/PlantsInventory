@@ -151,6 +151,10 @@ Negligible — one pure comparison per AI-backed field on render (five fields). 
 
 None — no data or schema changes.
 
+## Addenda
+
+- **2026-06-23 — Indicator redesigned from text line to pill badge** (supersedes the "No visual redesign" guardrail in *What We're NOT Doing*). During implementation the gated indicator was rendered as a small pill badge reading just **"AI suggested"** (`EditableField.tsx:267-270`) instead of the planned italic `AI suggested: {value}` text line. Rationale: because the badge only renders when the field's live value still equals the AI value, the field already displays that value — repeating it in the indicator was redundant, so the value text was dropped. Gating logic is unchanged from the plan (live `localValue` + `aiValueUnchanged`, all five AI-backed fields). Confirmed via impl-review (`reviews/impl-review.md`, F1 → Fix A).
+
 ## References
 
 - Indicator render site: `src/components/plants/EditableField.tsx:257`
