@@ -150,26 +150,26 @@ None — no data or schema changes.
 
 #### Automated
 
-- [x] 1.1 Linting passes: `npm run lint`
-- [x] 1.2 Type checking + build passes: `npm run build`
-- [x] 1.3 Tests pass: `npm run test:run`
+- [x] 1.1 Linting passes: `npm run lint` — aae490a
+- [x] 1.2 Type checking + build passes: `npm run build` — aae490a
+- [x] 1.3 Tests pass: `npm run test:run` — aae490a
 
 #### Manual
 
-- [x] 1.4 Mobile "Take photo" opens rear camera and runs upload + AI suggestion
-- [x] 1.5 Existing gallery picker still opens gallery, unaffected
-- [x] 1.6 Desktop "Take photo" degrades to file dialog, no console errors
+- [x] 1.4 Mobile "Take photo" opens rear camera and runs upload + AI suggestion — aae490a
+- [x] 1.5 Existing gallery picker still opens gallery, unaffected — aae490a
+- [x] 1.6 Desktop "Take photo" degrades to file dialog, no console errors — aae490a
 
 ### Phase 2: Replace-photo flow camera button
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Type checking + build passes: `npm run build`
-- [ ] 2.3 Tests pass: `npm run test:run`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Type checking + build passes: `npm run build`
+- [x] 2.3 Tests pass: `npm run test:run`
 
 #### Manual
 
-- [ ] 2.4 Mobile "Take photo" opens rear camera and replaces the photo
-- [ ] 2.5 Button disabled during in-flight upload, matching existing picker
-- [ ] 2.6 Desktop "Take photo" degrades to file dialog, no console errors
+- [x] 2.4 Mobile "Take photo" opens rear camera and replaces the photo
+- [x] 2.5 Button disabled during in-flight upload, matching existing picker
+- [x] 2.6 Desktop "Take photo" degrades to file dialog, no console errors

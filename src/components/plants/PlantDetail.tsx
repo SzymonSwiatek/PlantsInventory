@@ -1,5 +1,5 @@
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
-import { AlertCircle, ImagePlus, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import { AlertCircle, Camera, ImagePlus, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -186,6 +186,25 @@ export default function PlantDetail({ plant, locations, photoUrl }: Props) {
             disabled={uploadStatus === "uploading"}
           />
         </label>
+        <label
+          htmlFor="replace-photo-camera"
+          className={cn(
+            "mt-2 flex w-fit items-center gap-1.5 text-sm text-blue-300",
+            uploadStatus === "uploading" ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:text-blue-200",
+          )}
+        >
+          <Camera className="size-4" />
+          Take photo
+        </label>
+        <input
+          id="replace-photo-camera"
+          type="file"
+          accept={ALLOWED_TYPES}
+          capture="environment"
+          className="hidden"
+          onChange={handlePhotoChange}
+          disabled={uploadStatus === "uploading"}
+        />
         {uploadStatus === "uploaded" && <p className="mt-1 text-xs text-emerald-400">Photo updated.</p>}
         {uploadStatus === "failed" && (
           <Alert variant="destructive" className="mt-2 py-2">
