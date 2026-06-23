@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AlertCircle, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { AlertCircle, Camera, ImagePlus, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import type { AiSuggestion } from "@/types";
 import { downscaleToBase64 } from "@/lib/image";
 import { cn } from "@/lib/utils";
@@ -291,6 +291,26 @@ export default function AddPlantForm({ locationId }: Props) {
                 onChange={handlePhotoChange}
               />
             </label>
+
+            <label
+              htmlFor="photo-camera"
+              className={cn(
+                "flex cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors",
+                "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+              )}
+            >
+              <Camera className="size-4" />
+              Take photo
+            </label>
+            <input
+              id="photo-camera"
+              name="photo-camera"
+              type="file"
+              accept={ALLOWED_TYPES}
+              capture="environment"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
 
             {uploadStatus === "uploading" && (
               <p className="text-muted-foreground flex items-center gap-2 text-xs">
