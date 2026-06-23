@@ -38,7 +38,7 @@ Hobbyist plant owners keep dozens of plants across two or more physical location
 | S-02 | location-management     | rename a location, delete (with non-empty warning), see all locations with plant counts   | F-01, F-02    | FR-005, FR-006, FR-007                                                | done     | [#5](https://github.com/SzymonSwiatek/PlantsInventory/issues/5) |
 | S-03 | plant-management        | open plant detail (editable in place), edit any field, delete plant, add a free-text note | S-01          | FR-015, FR-016, FR-017                                                | done     | [#6](https://github.com/SzymonSwiatek/PlantsInventory/issues/6) |
 | S-04 | watering-reminder-loop  | see today's care list, receive a watering reminder, mark watered (bulk too), snooze       | F-03, S-01    | US-02, US-03, FR-018, FR-020, FR-021, FR-022                          | done     | [#7](https://github.com/SzymonSwiatek/PlantsInventory/issues/7) |
-| S-05 | winterization-reminder  | receive a reminder when a winterization cutoff approaches; mark winterized                | F-03, S-01    | US-02, US-03, FR-019, FR-020                                          | proposed | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) |
+| S-05 | winterization-reminder  | receive a reminder when a winterization cutoff approaches; mark winterized                | F-03, S-01    | US-02, US-03, FR-019, FR-020                                          | done     | [#8](https://github.com/SzymonSwiatek/PlantsInventory/issues/8) |
 
 ## Streams
 
@@ -169,7 +169,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:**
   - Same as S-04: notification channel (Open Question 1, default email-only) and batching rules (Open Question 3, default daily digest).
 - **Risk:** Winterization is seasonal — testing requires either fake-clock infrastructure or shipping near the actual winterization window for one of the user's own plants, neither of which fits cleanly into a 3-week speed budget. This is the first slice to defer or simplify if the watering loop alone has consumed the time budget; a stub that only emits a single reminder on a single hard-coded cutoff date may be acceptable as a v1 surface.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -215,3 +215,4 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **S-03: A signed-in user can open a plant's detail screen showing all stored care info and the original AI suggestion, edit any field in place (no separate edit mode), delete the plant, and add a free-text note.** — Archived 2026-06-19 → `context/archive/2026-06-19-plant-management/`. Lesson: —.
 - **F-03: (foundation) Worker `scheduled()` handler runs on cron; survives adapter rebuilds** — Archived 2026-06-21 → `context/archive/2026-06-20-cron-scheduled-skeleton/`. Lesson: —.
 - **S-04: A signed-in user opens the app and sees today's care list aggregated across all their locations (FR-021); when a plant's watering interval has elapsed, the user receives a reminder identifying the specific plant(s); the user marks the plant(s) watered — single or bulk "mark all watered" — which resets the interval and removes them from today's care list; the user can snooze a reminder one or more days when care can't happen today.** — Archived 2026-06-23 → `context/archive/2026-06-21-watering-reminder-loop/`. Lesson: —.
+- **S-05: A signed-in user receives a reminder when a plant's winterization cutoff is approaching (fired once per winterization window per plant, not periodically); marking the plant winterized resets the seasonal flag and removes it from any active winterization list.** — Archived 2026-06-23 → `context/archive/2026-06-21-winterization-reminder/`. Lesson: —.
