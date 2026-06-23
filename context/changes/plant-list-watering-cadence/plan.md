@@ -105,12 +105,12 @@ Carry `watering_interval_days` from the query through to the card and render it 
 
 #### Automated
 
-- [x] 1.1 Type checking / lint passes: `npm run lint`
-- [x] 1.2 Production build succeeds: `npm run build`
+- [x] 1.1 Type checking / lint passes: `npm run lint` — d838714
+- [x] 1.2 Production build succeeds: `npm run build` — d838714
 
 #### Manual
 
-- [ ] 1.3 Plant with interval > 1 shows "Water every {N} days"
-- [ ] 1.4 Plant with interval === 1 shows "Water every day"
-- [ ] 1.5 Plant with interval === null shows "Not scheduled yet"
-- [ ] 1.6 No visual regression in card layout or empty-location state
+- [x] 1.3 Plant with interval > 1 shows "Water every {N} days" — d838714
+- [x] 1.4 Plant with interval === 1 shows "Water every day" — d838714
+- [x] 1.5 Plant with interval === null shows "Not scheduled yet" — d838714
+- [x] 1.6 No visual regression in card layout or empty-location state — d838714
