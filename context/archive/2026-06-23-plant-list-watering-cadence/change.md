@@ -1,10 +1,10 @@
 ---
 change_id: plant-list-watering-cadence
 title: Show watering cadence in the location plant list instead of the stale "Not scheduled yet" placeholder
-status: implemented
+status: archived
 created: 2026-06-23
-updated: 2026-06-23
-archived_at: null
+updated: 2026-06-24
+archived_at: 2026-06-24T21:09:15Z
 ---
 
 ## Notes
