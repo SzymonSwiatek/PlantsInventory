@@ -1,0 +1,39 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import ReminderToggle from "@/components/settings/ReminderToggle";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+const { data: prefRow } = supabase
+  ? await supabase.from("user_preferences").select("reminders_enabled").maybeSingle()
+  : { data: null };
+
+const remindersEnabled = prefRow?.reminders_enabled ?? true;
+---
+
+<Layout title="Settings">
+  <div class="bg-cosmic min-h-screen p-4 text-white">
+    <div class="mx-auto w-full max-w-2xl py-10">
+      <header class="mb-8 flex items-center justify-between gap-4">
+        <div>
+          <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+            Settings
+          </h1>
+          <p class="mt-1 text-sm text-blue-100/60">Manage your notification preferences</p>
+        </div>
+        <a
+          href="/dashboard"
+          class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
+        >
+          ← Dashboard
+        </a>
+      </header>
+
+      <section class="rounded-2xl border border-white/10 bg-white/5 px-6 py-5">
+        <h2 class="mb-4 text-sm font-semibold tracking-wider text-blue-100/60 uppercase">Reminders</h2>
+        <ReminderToggle remindersEnabled={remindersEnabled} client:load />
+      </section>
+    </div>
+  </div>
+</Layout>

@@ -384,13 +384,13 @@ Additive only — new table, no backfill, no changes to existing tables. Existin
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes
-- [x] 3.2 `npx astro sync` passes
-- [x] 3.3 One-click POST not 403'd by CSRF (curl verify; config + per-route origin checks applied if needed)
-- [x] 3.4 `unsubscribe-token.test.ts` sign/verify + tamper cases pass
-- [x] 3.5 `email.test.ts` link/header presence-and-absence cases pass
-- [x] 3.6 `unsubscribe.test.ts` GET/POST/bad-token/secret-unset cases pass
-- [x] 3.7 `npm run test:run` passes
+- [x] 3.1 `npm run lint` passes — 85d086c
+- [x] 3.2 `npx astro sync` passes — 85d086c
+- [x] 3.3 One-click POST not 403'd by CSRF (curl verify; config + per-route origin checks applied if needed) — 85d086c
+- [x] 3.4 `unsubscribe-token.test.ts` sign/verify + tamper cases pass — 85d086c
+- [x] 3.5 `email.test.ts` link/header presence-and-absence cases pass — 85d086c
+- [x] 3.6 `unsubscribe.test.ts` GET/POST/bad-token/secret-unset cases pass — 85d086c
+- [x] 3.7 `npm run test:run` passes — 85d086c
 
 #### Manual
 
@@ -401,11 +401,11 @@ Additive only — new table, no backfill, no changes to existing tables. Existin
 
 #### Automated
 
-- [ ] 4.1 `npm run lint` passes
-- [ ] 4.2 `npx astro sync` passes
-- [ ] 4.3 `preferences.test.ts` authed upsert + unauth-rejection cases pass
-- [ ] 4.4 `npm run test:run` passes
-- [ ] 4.5 `npm run build` succeeds
+- [x] 4.1 `npm run lint` passes
+- [x] 4.2 `npx astro sync` passes
+- [x] 4.3 `preferences.test.ts` authed upsert + unauth-rejection cases pass
+- [x] 4.4 `npm run test:run` passes
+- [x] 4.5 `npm run build` succeeds
 
 #### Manual
 
