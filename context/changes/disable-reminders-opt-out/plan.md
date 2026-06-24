@@ -409,6 +409,6 @@ Additive only — new table, no backfill, no changes to existing tables. Existin
 
 #### Manual
 
-- [ ] 4.6 `/settings` redirects to sign-in when logged out
-- [ ] 4.7 Toggle round-trips and persists across reload
-- [ ] 4.8 Re-enable after email unsubscribe restores reminders next tick
+- [x] 4.6 `/settings` redirects to sign-in when logged out
+- [x] 4.7 Toggle round-trips and persists across reload
+- [x] 4.8 Re-enable after email unsubscribe restores reminders next tick

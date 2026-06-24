@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import type { PlantUpdate } from "@/types";
-import { json, requireUser, UUID_RE, CLIENT_ERROR_CODES } from "@/lib/api";
+import { json, requireUser, requireSameOrigin, UUID_RE, CLIENT_ERROR_CODES } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
 import { removePhotos } from "@/lib/storage";
 
@@ -18,6 +18,9 @@ const WHITELIST = new Set([
 ]);
 
 export const PATCH: APIRoute = async (context) => {
+  const originErr = requireSameOrigin(context.request);
+  if (originErr) return originErr;
+
   const user = requireUser(context);
   if (user instanceof Response) {
     return user;
@@ -133,6 +136,9 @@ export const PATCH: APIRoute = async (context) => {
 };
 
 export const DELETE: APIRoute = async (context) => {
+  const originErr = requireSameOrigin(context.request);
+  if (originErr) return originErr;
+
   const user = requireUser(context);
   if (user instanceof Response) {
     return user;

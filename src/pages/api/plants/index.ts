@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import type { Json } from "@/db/database.types";
 import type { PlantInsert } from "@/types";
-import { json, requireUser, UUID_RE, CLIENT_ERROR_CODES } from "@/lib/api";
+import { json, requireUser, requireSameOrigin, UUID_RE, CLIENT_ERROR_CODES } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
 import { normalizeSuggestion } from "@/lib/ai/suggest";
 
@@ -18,6 +18,9 @@ import { normalizeSuggestion } from "@/lib/ai/suggest";
  */
 
 export const POST: APIRoute = async (context) => {
+  const originErr = requireSameOrigin(context.request);
+  if (originErr) return originErr;
+
   const user = requireUser(context);
   if (user instanceof Response) {
     return user;

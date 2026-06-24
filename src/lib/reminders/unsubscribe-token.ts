@@ -26,11 +26,13 @@ export async function verifyUnsubscribeToken(userId: string, token: string, secr
   const padded = token.replace(/-/g, "+").replace(/_/g, "/");
   const padLen = (4 - (padded.length % 4)) % 4;
   const b64 = padded + "=".repeat(padLen);
-  let bytes: Uint8Array;
+  let signature: ArrayBuffer;
   try {
-    bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    // Decode to a freshly-allocated ArrayBuffer-backed view; `.buffer` is then a
+    // plain ArrayBuffer (not ArrayBufferLike), which is what verify's BufferSource wants.
+    signature = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer;
   } catch {
     return false;
   }
-  return crypto.subtle.verify("HMAC", key, bytes, ENC.encode(userId));
+  return crypto.subtle.verify("HMAC", key, signature, ENC.encode(userId));
 }

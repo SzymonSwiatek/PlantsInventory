@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { AI_API_KEY } from "astro:env/server";
-import { json, requireUser } from "@/lib/api";
+import { json, requireUser, requireSameOrigin } from "@/lib/api";
 import { requestSuggestion } from "@/lib/ai/suggest";
 
 /**
@@ -26,6 +26,9 @@ const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
 
 export const POST: APIRoute = async (context) => {
+  const originErr = requireSameOrigin(context.request);
+  if (originErr) return originErr;
+
   const user = requireUser(context);
   if (user instanceof Response) {
     return user;
