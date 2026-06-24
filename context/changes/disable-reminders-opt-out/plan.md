@@ -357,28 +357,28 @@ Additive only — new table, no backfill, no changes to existing tables. Existin
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly (`npx supabase db reset`)
-- [x] 1.2 `npx astro sync` passes
-- [x] 1.3 `npm run lint` passes
-- [x] 1.4 `npm run test:run` passes (existing suite)
+- [x] 1.1 Migration applies cleanly (`npx supabase db reset`) — 1a6f57c
+- [x] 1.2 `npx astro sync` passes — 1a6f57c
+- [x] 1.3 `npm run lint` passes — 1a6f57c
+- [x] 1.4 `npm run test:run` passes (existing suite) — 1a6f57c
 
 #### Manual
 
-- [x] 1.5 RLS sanity check — user sees only their own row
-- [x] 1.6 New user has no preferences row (default-by-absence)
+- [x] 1.5 RLS sanity check — user sees only their own row — 1a6f57c
+- [x] 1.6 New user has no preferences row (default-by-absence) — 1a6f57c
 
 ### Phase 2: Cron Opt-Out Filter
 
 #### Automated
 
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `scheduled.test.ts` skips opted-out user, emails no-row user
-- [ ] 2.3 `scheduled.fault.test.ts` skips tick on preferences-query error
-- [ ] 2.4 `npm run test:run` passes
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `scheduled.test.ts` skips opted-out user, emails no-row user
+- [x] 2.3 `scheduled.fault.test.ts` skips tick on preferences-query error
+- [x] 2.4 `npm run test:run` passes
 
 #### Manual
 
-- [ ] 2.5 Local tick dry-run skips opted-out user; summary shows `opted_out`
+- [x] 2.5 Local tick dry-run skips opted-out user; summary shows `opted_out`
 
 ### Phase 3: Email Unsubscribe Link
 

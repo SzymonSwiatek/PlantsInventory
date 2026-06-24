@@ -48,6 +48,9 @@ describe("runScheduledTick — per-user fault isolation (3.2)", () => {
         if (table === "winterization_due_plants") {
           return { select: vi.fn().mockResolvedValue({ data: [], error: null }) };
         }
+        if (table === "user_preferences") {
+          return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: [], error: null }) }) };
+        }
         return { select: vi.fn().mockReturnValue(waterBuilder) };
       }),
       auth: { admin: { getUserById } },
@@ -72,5 +75,51 @@ describe("runScheduledTick — per-user fault isolation (3.2)", () => {
 
     errorSpy.mockRestore();
     logSpy.mockRestore();
+  });
+
+  it("sends nothing when user_preferences query fails (2.3)", async () => {
+    const now = new Date("2026-01-15T08:00:00.000Z");
+    const dueDate = "2026-01-14T00:00:00.000Z";
+
+    const waterBuilder = {
+      not: vi.fn(),
+      lte: vi.fn(),
+      or: vi.fn().mockResolvedValue({
+        data: [{ name: "Monstera", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Room" } }],
+        error: null,
+      }),
+    };
+    waterBuilder.not.mockReturnValue(waterBuilder);
+    waterBuilder.lte.mockReturnValue(waterBuilder);
+
+    const mockClient = {
+      from: vi.fn().mockImplementation((table: string) => {
+        if (table === "winterization_due_plants") {
+          return { select: vi.fn().mockResolvedValue({ data: [], error: null }) };
+        }
+        if (table === "user_preferences") {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ data: null, error: { message: "db_error" } }),
+            }),
+          };
+        }
+        return { select: vi.fn().mockReturnValue(waterBuilder) };
+      }),
+      auth: { admin: { getUserById: vi.fn() } },
+    };
+    vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
+    vi.mocked(sendDigest).mockReset();
+
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await runScheduledTick(now, ENV);
+
+    expect(sendDigest).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ event: "scheduled.query_error", query: "preferences" }),
+    );
+
+    errorSpy.mockRestore();
   });
 });

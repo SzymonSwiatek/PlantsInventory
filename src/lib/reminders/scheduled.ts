@@ -41,6 +41,18 @@ export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<voi
     return;
   }
 
+  const { data: prefRows, error: prefError } = await supabase
+    .from("user_preferences")
+    .select("user_id")
+    .eq("reminders_enabled", false);
+
+  if (prefError) {
+    console.error({ event: "scheduled.query_error", query: "preferences", err: prefError.message });
+    return;
+  }
+
+  const optedOut = new Set(prefRows.map((r) => r.user_id));
+
   // Build combined per-user map
   const byUser = new Map<string, UserBucket>();
 
@@ -74,6 +86,8 @@ export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<voi
 
   let emailsSent = 0;
   for (const [userId, bucket] of byUser) {
+    if (optedOut.has(userId)) continue;
+
     const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
     if (userError || !userData.user.email) {
       console.error({ event: "scheduled.user_lookup_error", userId, err: userError?.message ?? "no_email" });
@@ -94,6 +108,7 @@ export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<voi
     water_due: waterRows.length,
     winter_due: winterRows.length,
     total: waterRows.length + winterRows.length,
+    opted_out: optedOut.size,
     emails_sent: emailsSent,
   });
 }

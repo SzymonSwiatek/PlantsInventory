@@ -38,12 +38,16 @@ function makeMockClient(
   getUserById: ReturnType<typeof vi.fn> = vi
     .fn()
     .mockResolvedValue({ data: { user: { email: "test@example.com" } }, error: null }),
+  prefsResult: { data: { user_id: string }[] | null; error: null } = { data: [], error: null },
 ) {
   const waterBuilder = makeWaterBuilder(waterResult);
   return {
     from: vi.fn().mockImplementation((table: string) => {
       if (table === "winterization_due_plants") {
         return { select: vi.fn().mockResolvedValue(winterResult) };
+      }
+      if (table === "user_preferences") {
+        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue(prefsResult) }) };
       }
       return { select: vi.fn().mockReturnValue(waterBuilder) };
     }),
@@ -232,6 +236,62 @@ describe("runScheduledTick", () => {
     expect(logSpy).toHaveBeenCalledWith(
       expect.objectContaining({ event: "scheduled.summary", total: 1, emails_sent: 1 }),
     );
+
+    logSpy.mockRestore();
+  });
+
+  it("skips opted-out user but emails user with no preferences row (2.2)", async () => {
+    const now = new Date("2026-01-15T08:00:00.000Z");
+    const dueDate = "2026-01-14T00:00:00.000Z";
+
+    const getUserById = vi.fn((userId: string) => {
+      const emails: Record<string, string> = {
+        "user-opted-out": "optout@example.com",
+        "user-enabled": "enabled@example.com",
+      };
+      return Promise.resolve({ data: { user: { email: emails[userId] } }, error: null });
+    });
+
+    const mockClient = makeMockClient(
+      {
+        data: [
+          { name: "Plant A", user_id: "user-opted-out", next_water_due_at: dueDate, locations: { name: "Room" } },
+          { name: "Plant B", user_id: "user-enabled", next_water_due_at: dueDate, locations: { name: "Room" } },
+        ],
+        error: null,
+      },
+      { data: [], error: null },
+      getUserById,
+      { data: [{ user_id: "user-opted-out" }], error: null },
+    );
+    vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
+
+    await runScheduledTick(now, EMPTY_ENV);
+
+    expect(sendDigest).toHaveBeenCalledOnce();
+    expect(sendDigest).toHaveBeenCalledWith("enabled@example.com", expect.anything(), EMPTY_ENV);
+  });
+
+  it("includes opted_out count in scheduled.summary log (2.2)", async () => {
+    const now = new Date("2026-01-15T08:00:00.000Z");
+    const dueDate = "2026-01-14T00:00:00.000Z";
+
+    const mockClient = makeMockClient(
+      {
+        data: [{ name: "Fern", user_id: "user-1", next_water_due_at: dueDate, locations: { name: "Hall" } }],
+        error: null,
+      },
+      { data: [], error: null },
+      vi.fn().mockResolvedValue({ data: { user: { email: "alice@example.com" } }, error: null }),
+      { data: [{ user_id: "user-skipped" }], error: null },
+    );
+    vi.mocked(createServiceClient).mockReturnValue(mockClient as never);
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+    await runScheduledTick(now, EMPTY_ENV);
+
+    expect(logSpy).toHaveBeenCalledWith(expect.objectContaining({ event: "scheduled.summary", opted_out: 1 }));
 
     logSpy.mockRestore();
   });
