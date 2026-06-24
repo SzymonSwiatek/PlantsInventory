@@ -1,7 +1,7 @@
 ---
 change_id: disable-reminders-opt-out
 title: Let users disable watering/winterization reminder emails
-status: implementing
+status: implemented
 created: 2026-06-24
 updated: 2026-06-24
 archived_at: null

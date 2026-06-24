@@ -401,11 +401,11 @@ Additive only — new table, no backfill, no changes to existing tables. Existin
 
 #### Automated
 
-- [x] 4.1 `npm run lint` passes
-- [x] 4.2 `npx astro sync` passes
-- [x] 4.3 `preferences.test.ts` authed upsert + unauth-rejection cases pass
-- [x] 4.4 `npm run test:run` passes
-- [x] 4.5 `npm run build` succeeds
+- [x] 4.1 `npm run lint` passes — f6d3263
+- [x] 4.2 `npx astro sync` passes — f6d3263
+- [x] 4.3 `preferences.test.ts` authed upsert + unauth-rejection cases pass — f6d3263
+- [x] 4.4 `npm run test:run` passes — f6d3263
+- [x] 4.5 `npm run build` succeeds — f6d3263
 
 #### Manual
 
