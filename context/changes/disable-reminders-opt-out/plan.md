@@ -371,26 +371,26 @@ Additive only — new table, no backfill, no changes to existing tables. Existin
 
 #### Automated
 
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `scheduled.test.ts` skips opted-out user, emails no-row user
-- [x] 2.3 `scheduled.fault.test.ts` skips tick on preferences-query error
-- [x] 2.4 `npm run test:run` passes
+- [x] 2.1 `npm run lint` passes — a264c19
+- [x] 2.2 `scheduled.test.ts` skips opted-out user, emails no-row user — a264c19
+- [x] 2.3 `scheduled.fault.test.ts` skips tick on preferences-query error — a264c19
+- [x] 2.4 `npm run test:run` passes — a264c19
 
 #### Manual
 
-- [x] 2.5 Local tick dry-run skips opted-out user; summary shows `opted_out`
+- [x] 2.5 Local tick dry-run skips opted-out user; summary shows `opted_out` — a264c19
 
 ### Phase 3: Email Unsubscribe Link
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes
-- [ ] 3.2 `npx astro sync` passes
-- [ ] 3.3 One-click POST not 403'd by CSRF (curl verify; config + per-route origin checks applied if needed)
-- [ ] 3.4 `unsubscribe-token.test.ts` sign/verify + tamper cases pass
-- [ ] 3.5 `email.test.ts` link/header presence-and-absence cases pass
-- [ ] 3.6 `unsubscribe.test.ts` GET/POST/bad-token/secret-unset cases pass
-- [ ] 3.7 `npm run test:run` passes
+- [x] 3.1 `npm run lint` passes
+- [x] 3.2 `npx astro sync` passes
+- [x] 3.3 One-click POST not 403'd by CSRF (curl verify; config + per-route origin checks applied if needed)
+- [x] 3.4 `unsubscribe-token.test.ts` sign/verify + tamper cases pass
+- [x] 3.5 `email.test.ts` link/header presence-and-absence cases pass
+- [x] 3.6 `unsubscribe.test.ts` GET/POST/bad-token/secret-unset cases pass
+- [x] 3.7 `npm run test:run` passes
 
 #### Manual
 

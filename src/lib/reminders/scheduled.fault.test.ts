@@ -17,6 +17,7 @@ const ENV: ReminderEnv = {
   RESEND_API_KEY: "resend-key",
   REMINDER_FROM_EMAIL: "from@test.com",
   PUBLIC_SITE_URL: "https://example.com",
+  REMINDER_UNSUBSCRIBE_SECRET: undefined,
 };
 
 describe("runScheduledTick — per-user fault isolation (3.2)", () => {

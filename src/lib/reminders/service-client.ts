@@ -7,6 +7,7 @@ export interface ReminderEnv {
   RESEND_API_KEY: string | undefined;
   REMINDER_FROM_EMAIL: string | undefined;
   PUBLIC_SITE_URL: string | undefined;
+  REMINDER_UNSUBSCRIBE_SECRET: string | undefined;
 }
 
 export function createServiceClient(env: ReminderEnv) {

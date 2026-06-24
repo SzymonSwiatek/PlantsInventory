@@ -1,7 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { composeDigest } from "./email";
+vi.mock("resend");
+
+import { composeDigest, sendDigest } from "./email";
 import type { DuePlant, DueWinterPlant } from "./email";
+import type { ReminderEnv } from "./service-client";
 
 const waterPlants: DuePlant[] = [
   { name: "Monstera", locationName: "Living Room", daysOverdue: 0 },
@@ -116,6 +119,66 @@ describe("composeDigest — winter-only", () => {
     const { text, html } = composeDigest({ water: [], winter: winterPlants }, "https://example.com");
     expect(text).not.toContain("watering");
     expect(html).not.toContain("watering");
+  });
+});
+
+describe("composeDigest — unsubscribe link", () => {
+  it("includes the unsubscribe URL in text and html when provided", () => {
+    const url = "https://myapp.com/api/reminders/unsubscribe?u=user-1&t=token123";
+    const { text, html } = composeDigest({ water: waterPlants, winter: [] }, "https://myapp.com", url);
+    expect(text).toContain(url);
+    expect(text).toContain("Unsubscribe from these reminders");
+    expect(html).toContain(url);
+    expect(html).toContain("Unsubscribe from these reminders");
+  });
+
+  it("omits unsubscribe content when no URL is provided", () => {
+    const { text, html } = composeDigest({ water: waterPlants, winter: [] }, "https://myapp.com");
+    expect(text).not.toContain("Unsubscribe");
+    expect(html).not.toContain("Unsubscribe");
+  });
+});
+
+describe("sendDigest — List-Unsubscribe headers", () => {
+  const ENV: ReminderEnv = {
+    SUPABASE_URL: undefined,
+    SUPABASE_SERVICE_ROLE_KEY: undefined,
+    RESEND_API_KEY: "resend-key",
+    REMINDER_FROM_EMAIL: "from@example.com",
+    PUBLIC_SITE_URL: undefined,
+    REMINDER_UNSUBSCRIBE_SECRET: undefined,
+  };
+
+  // sendFn is replaced in beforeEach so each test gets a fresh spy
+  let sendFn: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    sendFn = vi.fn().mockResolvedValue({ error: null });
+    const { Resend } = await import("resend");
+    vi.mocked(Resend).mockImplementation(
+      () => ({ emails: { send: sendFn } }) as unknown as InstanceType<typeof import("resend").Resend>,
+    );
+  });
+
+  it("passes List-Unsubscribe headers to Resend when unsubscribeUrl is provided", async () => {
+    const url = "https://myapp.com/api/reminders/unsubscribe?u=user-1&t=token";
+    const digest = composeDigest({ water: waterPlants, winter: [] }, "https://myapp.com", url);
+    await sendDigest("to@example.com", digest, ENV, url);
+    expect(sendFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: {
+          "List-Unsubscribe": `<${url}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
+      }),
+    );
+  });
+
+  it("omits headers when no unsubscribeUrl is provided", async () => {
+    const digest = composeDigest({ water: waterPlants, winter: [] }, "https://myapp.com");
+    await sendDigest("to@example.com", digest, ENV);
+    const callArg = sendFn.mock.calls[0]?.[0] as Record<string, unknown> | undefined;
+    expect(callArg?.headers).toBeUndefined();
   });
 });
 

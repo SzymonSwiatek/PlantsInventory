@@ -27,7 +27,11 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-export function composeDigest(input: DigestInput, siteUrl: string): { subject: string; html: string; text: string } {
+export function composeDigest(
+  input: DigestInput,
+  siteUrl: string,
+  unsubscribeUrl?: string,
+): { subject: string; html: string; text: string } {
   const { water, winter } = input;
   const hasWater = water.length > 0;
   const hasWinter = winter.length > 0;
@@ -64,6 +68,9 @@ export function composeDigest(input: DigestInput, siteUrl: string): { subject: s
     text += `\n\nBring indoors or secure before cutoff:\n${winterLines}`;
   }
   text += `\n\nOpen your plant list: ${todayLink}`;
+  if (unsubscribeUrl) {
+    text += `\n\nUnsubscribe from these reminders: ${unsubscribeUrl}`;
+  }
 
   // Watering section (HTML)
   const waterHtmlLines = water
@@ -92,11 +99,15 @@ export function composeDigest(input: DigestInput, siteUrl: string): { subject: s
     bodyHtml += `\n  <h3>Bring indoors or secure before cutoff</h3>\n  <ul>${winterHtmlLines}</ul>`;
   }
 
+  const unsubscribeFooter = unsubscribeUrl
+    ? `\n  <p style="font-size:12px;color:#718096"><a href="${unsubscribeUrl}">Unsubscribe from these reminders</a></p>`
+    : "";
+
   const html = `<!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
   <h2>${escapeHtml(subject)}</h2>${bodyHtml}
-  <p><a href="${todayLink}">Open your plant list</a></p>
+  <p><a href="${todayLink}">Open your plant list</a></p>${unsubscribeFooter}
 </body>
 </html>`;
 
@@ -107,6 +118,7 @@ export async function sendDigest(
   to: string,
   digest: ReturnType<typeof composeDigest>,
   env: ReminderEnv,
+  unsubscribeUrl?: string,
 ): Promise<void> {
   if (!env.RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY is not set");
@@ -122,6 +134,14 @@ export async function sendDigest(
     subject: digest.subject,
     html: digest.html,
     text: digest.text,
+    ...(unsubscribeUrl
+      ? {
+          headers: {
+            "List-Unsubscribe": `<${unsubscribeUrl}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          },
+        }
+      : {}),
   });
 
   if (error) {

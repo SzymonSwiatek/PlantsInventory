@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { requireSameOrigin } from "@/lib/api";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -8,6 +9,9 @@ import { createClient } from "@/lib/supabase";
  * endpoints. `/api/*` is outside the middleware guard, so self-guard here.
  */
 export const POST: APIRoute = async (context) => {
+  const originErr = requireSameOrigin(context.request);
+  if (originErr) return originErr;
+
   if (!context.locals.user) {
     return context.redirect("/auth/signin");
   }

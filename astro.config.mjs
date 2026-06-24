@@ -14,6 +14,10 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   adapter: cloudflare(),
+  // checkOrigin is disabled globally so that RFC 8058 one-click unsubscribe POSTs
+  // (which come from mail providers with no Origin header) are not 403'd. The
+  // session-mutation routes compensate with explicit same-origin checks in api.ts.
+  security: { checkOrigin: false },
   env: {
     schema: {
       SUPABASE_URL: envField.string({ context: "server", access: "secret", optional: true }),
@@ -23,6 +27,7 @@ export default defineConfig({
       RESEND_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
       REMINDER_FROM_EMAIL: envField.string({ context: "server", access: "secret", optional: true }),
       PUBLIC_SITE_URL: envField.string({ context: "server", access: "public", optional: true }),
+      REMINDER_UNSUBSCRIBE_SECRET: envField.string({ context: "server", access: "secret", optional: true }),
     },
   },
 });

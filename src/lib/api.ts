@@ -36,3 +36,29 @@ export function requireUser(context: APIContext): User | Response {
   }
   return user;
 }
+
+/**
+ * Guard against cross-origin mutation requests. Returns a 403 Response when the
+ * `Origin` header is present but does not match the request host; returns `null`
+ * when same-origin or when Origin is absent (non-browser / same-origin requests
+ * often omit it). Call this at the top of every session-mutation route now that
+ * Astro's global `security.checkOrigin` is disabled (it blocked the RFC 8058
+ * one-click unsubscribe POST).
+ *
+ *   const originErr = requireSameOrigin(context.request);
+ *   if (originErr) return originErr;
+ */
+export function requireSameOrigin(request: Request): Response | null {
+  const origin = request.headers.get("Origin");
+  if (!origin) return null;
+  try {
+    const reqHost = new URL(request.url).host;
+    const originHost = new URL(origin).host;
+    if (originHost !== reqHost) {
+      return json({ error: "forbidden" }, 403);
+    }
+  } catch {
+    return json({ error: "forbidden" }, 403);
+  }
+  return null;
+}

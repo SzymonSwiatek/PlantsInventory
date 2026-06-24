@@ -17,6 +17,7 @@ const EMPTY_ENV: ReminderEnv = {
   RESEND_API_KEY: undefined,
   REMINDER_FROM_EMAIL: undefined,
   PUBLIC_SITE_URL: undefined,
+  REMINDER_UNSUBSCRIBE_SECRET: undefined,
 };
 
 /** Water query builder: resolves after the .not().not().lte().or() chain. */
@@ -152,7 +153,7 @@ describe("runScheduledTick", () => {
     await runScheduledTick(now, EMPTY_ENV);
 
     expect(sendDigest).toHaveBeenCalledOnce();
-    expect(sendDigest).toHaveBeenCalledWith("winter@example.com", expect.anything(), EMPTY_ENV);
+    expect(sendDigest).toHaveBeenCalledWith("winter@example.com", expect.anything(), EMPTY_ENV, undefined);
   });
 
   it("winter-due rows are grouped per user in the digest (2.2)", async () => {
@@ -210,7 +211,7 @@ describe("runScheduledTick", () => {
     await runScheduledTick(now, EMPTY_ENV);
 
     expect(sendDigest).toHaveBeenCalledOnce();
-    expect(sendDigest).toHaveBeenCalledWith("bob@example.com", expect.anything(), EMPTY_ENV);
+    expect(sendDigest).toHaveBeenCalledWith("bob@example.com", expect.anything(), EMPTY_ENV, undefined);
 
     vi.restoreAllMocks();
   });
@@ -269,7 +270,7 @@ describe("runScheduledTick", () => {
     await runScheduledTick(now, EMPTY_ENV);
 
     expect(sendDigest).toHaveBeenCalledOnce();
-    expect(sendDigest).toHaveBeenCalledWith("enabled@example.com", expect.anything(), EMPTY_ENV);
+    expect(sendDigest).toHaveBeenCalledWith("enabled@example.com", expect.anything(), EMPTY_ENV, undefined);
   });
 
   it("includes opted_out count in scheduled.summary log (2.2)", async () => {

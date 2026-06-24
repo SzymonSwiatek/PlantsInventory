@@ -2,6 +2,7 @@ import { composeDigest, sendDigest } from "./email";
 import type { DuePlant, DueWinterPlant } from "./email";
 import { createServiceClient } from "./service-client";
 import type { ReminderEnv } from "./service-client";
+import { signUnsubscribeToken } from "./unsubscribe-token";
 
 interface UserBucket {
   water: DuePlant[];
@@ -94,9 +95,15 @@ export async function runScheduledTick(now: Date, env: ReminderEnv): Promise<voi
       continue;
     }
 
-    const digest = composeDigest({ water: bucket.water, winter: bucket.winter }, siteUrl);
+    let unsubscribeUrl: string | undefined;
+    if (env.REMINDER_UNSUBSCRIBE_SECRET && siteUrl) {
+      const token = await signUnsubscribeToken(userId, env.REMINDER_UNSUBSCRIBE_SECRET);
+      unsubscribeUrl = `${siteUrl}/api/reminders/unsubscribe?u=${encodeURIComponent(userId)}&t=${encodeURIComponent(token)}`;
+    }
+
+    const digest = composeDigest({ water: bucket.water, winter: bucket.winter }, siteUrl, unsubscribeUrl);
     try {
-      await sendDigest(userData.user.email, digest, env);
+      await sendDigest(userData.user.email, digest, env, unsubscribeUrl);
       emailsSent++;
     } catch (err: unknown) {
       console.error({ event: "scheduled.email_error", userId, err: String(err) });
