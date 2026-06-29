@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import NavBar from "@/components/NavBar.astro";
 import { createClient } from "@/lib/supabase";
 import LocationActions from "@/components/locations/LocationActions";
 
@@ -13,37 +14,14 @@ const { data: locations } = supabase
 ---
 
 <Layout title="Dashboard">
-  <div class="bg-cosmic min-h-screen p-4 text-white">
+  <div class="bg-cosmic min-h-screen px-4 pt-4 pb-24 text-white sm:p-4">
     <div class="mx-auto w-full max-w-2xl py-10">
-      <header class="mb-8 flex items-center justify-between gap-4">
-        <div>
-          <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-            Your locations
-          </h1>
-          <p class="mt-1 text-sm text-blue-100/60">{user?.email}</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <a
-            href="/today"
-            class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
-          >
-            Today's care
-          </a>
-          <a
-            href="/settings"
-            class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
-          >
-            Settings
-          </a>
-          <form method="POST" action="/api/auth/signout">
-            <button
-              type="submit"
-              class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
-            >
-              Sign out
-            </button>
-          </form>
-        </div>
+      <NavBar active="dashboard" />
+      <header class="mb-8">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+          Your locations
+        </h1>
+        <p class="mt-1 text-sm text-blue-100/60">{user?.email}</p>
       </header>
 
       {

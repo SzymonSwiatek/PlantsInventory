@@ -1,0 +1,198 @@
+---
+interface BackLink {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  /** Highlights the matching tab. Hierarchical pages (a location/plant) use "dashboard". */
+  active?: "dashboard" | "today" | "settings";
+  /** Up-a-level link. Renders as the left item on desktop and the first bottom-bar tile on mobile. */
+  back?: BackLink;
+}
+
+const { active, back } = Astro.props;
+const { user } = Astro.locals;
+
+const navItems = [
+  { key: "dashboard", href: "/dashboard", label: "Locations" },
+  { key: "today", href: "/today", label: "Today" },
+  { key: "settings", href: "/settings", label: "Settings" },
+] as const;
+---
+
+{/* Top region: nav links on desktop, Sign out on every size. */}
+<div class="mb-8 flex items-center justify-between gap-4">
+  {
+    back ? (
+      <a
+        href={back.href}
+        class="hidden items-center gap-1.5 text-sm text-blue-100/60 transition-colors hover:text-blue-100 sm:flex"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-4 w-4"
+          aria-hidden="true"
+        >
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+        {back.label}
+      </a>
+    ) : (
+      <span class="hidden sm:block" aria-hidden="true" />
+    )
+  }
+
+  <div class="ml-auto flex items-center gap-2">
+    <nav class="hidden items-center gap-2 sm:flex" aria-label="Primary">
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            aria-current={active === item.key ? "page" : undefined}
+            class:list={[
+              "rounded-lg border px-4 py-2 text-sm transition-colors",
+              active === item.key
+                ? "border-white/30 bg-white/20 text-white"
+                : "border-white/20 bg-white/10 text-white/80 hover:bg-white/20",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    {
+      user && (
+        <form method="POST" action="/api/auth/signout">
+          <button
+            type="submit"
+            class="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/20"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-4 w-4"
+              aria-hidden="true"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" x2="9" y1="12" y2="12" />
+            </svg>
+            Sign out
+          </button>
+        </form>
+      )
+    }
+  </div>
+</div>
+
+{/* Mobile-only bottom tab bar. Sits flush with the page's #0a0e1a gradient foot. */}
+<nav
+  class="fixed inset-x-0 bottom-0 z-40 flex border-t border-white/10 bg-[#0a0e1a]/95 backdrop-blur-xl sm:hidden"
+  aria-label="Primary"
+>
+  {
+    back && (
+      <a
+        href={back.href}
+        class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] text-blue-100/60 transition-colors hover:text-blue-100"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-5 w-5"
+          aria-hidden="true"
+        >
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+        Back
+      </a>
+    )
+  }
+  {
+    navItems.map((item) => (
+      <a
+        href={item.href}
+        aria-current={active === item.key ? "page" : undefined}
+        class:list={[
+          "flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] transition-colors",
+          active === item.key ? "text-purple-200" : "text-blue-100/60 hover:text-blue-100",
+        ]}
+      >
+        {item.key === "dashboard" && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-5 w-5"
+            aria-hidden="true"
+          >
+            <rect width="7" height="7" x="3" y="3" rx="1" />
+            <rect width="7" height="7" x="14" y="3" rx="1" />
+            <rect width="7" height="7" x="14" y="14" rx="1" />
+            <rect width="7" height="7" x="3" y="14" rx="1" />
+          </svg>
+        )}
+        {item.key === "today" && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-5 w-5"
+            aria-hidden="true"
+          >
+            <path d="M8 2v4" />
+            <path d="M16 2v4" />
+            <rect width="18" height="18" x="3" y="4" rx="2" />
+            <path d="M3 10h18" />
+          </svg>
+        )}
+        {item.key === "settings" && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-5 w-5"
+            aria-hidden="true"
+          >
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        )}
+        {item.label}
+      </a>
+    ))
+  }
+</nav>

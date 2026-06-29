@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import NavBar from "@/components/NavBar.astro";
 import { createClient } from "@/lib/supabase";
 import TodayList from "@/components/today/TodayList";
 import type { TodayPlant, TodayWinterPlant } from "@/types";
@@ -64,21 +65,14 @@ const winterPlants: TodayWinterPlant[] = ((winterRows ?? []) as WinterPlantRow[]
 ---
 
 <Layout title="Today's Care">
-  <div class="bg-cosmic min-h-screen p-4 text-white">
+  <div class="bg-cosmic min-h-screen px-4 pt-4 pb-24 text-white sm:p-4">
     <div class="mx-auto w-full max-w-2xl py-10">
-      <header class="mb-8 flex items-center justify-between gap-4">
-        <div>
-          <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-            Today's care
-          </h1>
-          <p class="mt-1 text-sm text-blue-100/60">Plants due for watering</p>
-        </div>
-        <a
-          href="/dashboard"
-          class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
-        >
-          ← Dashboard
-        </a>
+      <NavBar active="today" />
+      <header class="mb-8">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+          Today's care
+        </h1>
+        <p class="mt-1 text-sm text-blue-100/60">Plants due for watering</p>
       </header>
 
       {
