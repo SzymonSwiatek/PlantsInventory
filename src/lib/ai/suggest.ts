@@ -19,14 +19,22 @@ import type { AiSuggestion } from "@/types";
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-const PROMPT =
-  "You are a botanist assistant for a houseplant care app. Identify the plant in this photo " +
-  "and return its care profile as JSON. Fields: `species` (common name, or best guess), " +
-  "`description` (one or two short sentences), `sunlight` (a short phrase, e.g. 'bright indirect light'), " +
-  "`watering_interval_days` (typical days between waterings, a positive integer), and " +
-  "`winterization_cutoff` (the month/day each year after which the plant should be brought indoors or " +
-  "protected, as an ISO 'YYYY-MM-DD' date for the upcoming season, or null if it does not apply). " +
-  "Use null for any field you cannot determine. Do not guess wildly — null is better than a bad value.";
+/** Build the prompt, anchoring the upcoming-season date math to today's date. */
+function buildPrompt(today: string): string {
+  return (
+    "Jesteś asystentem-botanikiem w aplikacji do pielęgnacji roślin domowych. Rozpoznaj roślinę na " +
+    "zdjęciu i zwróć jej profil pielęgnacji jako JSON. Odpowiadaj wyłącznie po polsku. " +
+    `Dzisiejsza data to ${today} — użyj jej jako punktu odniesienia przy wyznaczaniu nadchodzącego sezonu. ` +
+    "Pola: " +
+    "`species` (nazwa potoczna lub najlepsze przypuszczenie), " +
+    "`description` (jedno lub dwa krótkie zdania skupione na tym, jak podlewać i jak dbać o roślinę), " +
+    "`sunlight` (krótkie określenie, np. 'jasne, rozproszone światło'), " +
+    "`watering_interval_days` (typowa liczba dni między podlewaniami, dodatnia liczba całkowita), oraz " +
+    "`winterization_cutoff` (data 'YYYY-MM-DD' w nadchodzącym sezonie, po której roślinę należy wnieść " +
+    "do środka lub zabezpieczyć, albo null jeśli nie dotyczy). " +
+    "Użyj null dla każdego pola, którego nie potrafisz ustalić. Nie zgaduj na siłę — null jest lepszy niż błędna wartość."
+  );
+}
 
 /**
  * Gemini `responseSchema` (OpenAPI-3 subset, uppercase type names). Every
@@ -62,10 +70,11 @@ export async function requestSuggestion(
   mimeType: string,
   signal: AbortSignal,
 ): Promise<AiSuggestion> {
+  const today = new Date().toISOString().slice(0, 10);
   const requestBody = JSON.stringify({
     contents: [
       {
-        parts: [{ text: PROMPT }, { inlineData: { mimeType, data: base64 } }],
+        parts: [{ text: buildPrompt(today) }, { inlineData: { mimeType, data: base64 } }],
       },
     ],
     generationConfig: {
