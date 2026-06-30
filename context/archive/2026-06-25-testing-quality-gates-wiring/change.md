@@ -1,10 +1,10 @@
 ---
 change_id: testing-quality-gates-wiring
 title: Wire the test step into CI and lock unit + integration as a required gate
-status: impl_reviewed
+status: archived
 created: 2026-06-25
 updated: 2026-06-30
-archived_at: null
+archived_at: 2026-06-30T17:22:51Z
 ---
 
 ## Notes
