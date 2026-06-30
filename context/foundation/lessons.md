@@ -1,5 +1,7 @@
 # Lessons Learned
 
+<!-- p3-gate-docs-only: throwaway comment for gate-check 3.4 — will be removed -->
+
 > Append-only register of recurring rules and patterns. Re-read at start by /10x-frame, /10x-research, /10x-plan, /10x-plan-review, /10x-implement, /10x-impl-review.
 
 ## CSRF guards on session-mutation routes after disabling global checkOrigin
