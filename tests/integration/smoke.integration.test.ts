@@ -18,10 +18,6 @@ describe("integration harness smoke", () => {
     await Promise.all([deleteTestUser(userA), deleteTestUser(userB)]);
   });
 
-  it("INTENTIONALLY BROKEN FOR CI GATE CHECK 1.6", () => {
-    expect("integration").toBe("BROKEN");
-  });
-
   it("mints two distinct sessions that each resolve to their own user", async () => {
     const { data: a, error: aError } = await userA.client.auth.getUser(userA.session.access_token);
     const { data: b, error: bError } = await userB.client.auth.getUser(userB.session.access_token);
