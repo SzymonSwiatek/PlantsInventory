@@ -18,7 +18,7 @@ interface E2eContext {
 }
 
 // Banner copy is asserted verbatim from AddPlantForm.tsx — the degrade signal.
-const FALLBACK_BANNER = "Your photo is saved — just fill in the details below yourself.";
+const FALLBACK_BANNER = "INTENTIONAL_BREAK_p3-gate — this text never appears";
 
 test("add-plant degrades to manual entry with the photo preserved when AI is unavailable", async ({ page }) => {
   // Seeded by global-setup (read at test time — the file only exists after setup).
