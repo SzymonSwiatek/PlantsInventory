@@ -1,0 +1,21 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import NavBar from "@/components/NavBar.astro";
+import ChatPanel from "@/components/chat/ChatPanel";
+---
+
+<Layout title="Ask AI — Plant Disease Diagnosis">
+  <div class="bg-cosmic min-h-screen px-4 pt-4 pb-24 text-white sm:p-4">
+    <div class="mx-auto w-full max-w-2xl py-10">
+      <NavBar active="ask" />
+      <header class="mb-8">
+        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+          Diagnoza AI
+        </h1>
+        <p class="mt-1 text-sm text-blue-100/60">Sfotografuj roślinę i zapytaj AI o diagnozę choroby lub problemu</p>
+      </header>
+
+      <ChatPanel client:load />
+    </div>
+  </div>
+</Layout>

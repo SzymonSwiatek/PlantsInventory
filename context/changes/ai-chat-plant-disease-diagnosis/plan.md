@@ -378,26 +378,26 @@ None — no schema or data changes (ephemeral, no DB).
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npx astro sync && npm run lint`
-- [x] 1.2 Unit tests pass: `npm run test:run`
-- [x] 1.3 New fault tests cover missing-key, upstream-error, empty-candidate/MAX_TOKENS, bad-MIME, oversize, over-turn-cap
-- [x] 1.4 Production build succeeds: `npm run build`
+- [x] 1.1 Type checking passes: `npx astro sync && npm run lint` — dec09e6
+- [x] 1.2 Unit tests pass: `npm run test:run` — dec09e6
+- [x] 1.3 New fault tests cover missing-key, upstream-error, empty-candidate/MAX_TOKENS, bad-MIME, oversize, over-turn-cap — dec09e6
+- [x] 1.4 Production build succeeds: `npm run build` — dec09e6
 
 #### Manual
 
-- [x] 1.5 `POST /api/diagnose` with photo + question returns `{ status: "ok", reply }` in Polish
-- [x] 1.6 Follow-up text-only turn (full transcript resent) returns a coherent reply
-- [x] 1.7 With `AI_API_KEY` unset, endpoint returns `ai_unavailable` at HTTP 200 (no crash)
-- [x] 1.8 Replies are visibly length-bounded (`maxOutputTokens` in effect)
+- [x] 1.5 `POST /api/diagnose` with photo + question returns `{ status: "ok", reply }` in Polish — dec09e6
+- [x] 1.6 Follow-up text-only turn (full transcript resent) returns a coherent reply — dec09e6
+- [x] 1.7 With `AI_API_KEY` unset, endpoint returns `ai_unavailable` at HTTP 200 (no crash) — dec09e6
+- [x] 1.8 Replies are visibly length-bounded (`maxOutputTokens` in effect) — dec09e6
 
 ### Phase 2: Frontend — ChatPanel island, /ask page, nav
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npx astro sync && npm run lint`
-- [ ] 2.2 Unit tests pass: `npm run test:run`
-- [ ] 2.3 Production build succeeds: `npm run build`
-- [ ] 2.4 No `set:html`/`dangerouslySetInnerHTML` introduced (grep clean)
+- [x] 2.1 Type checking passes: `npx astro sync && npm run lint`
+- [x] 2.2 Unit tests pass: `npm run test:run`
+- [x] 2.3 Production build succeeds: `npm run build`
+- [x] 2.4 No `set:html`/`dangerouslySetInnerHTML` introduced (grep clean)
 
 #### Manual
 
