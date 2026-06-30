@@ -91,7 +91,7 @@ export default function ChatPanel() {
       const downscaled = await downscaleToBase64(file);
       setImage(downscaled);
     } catch {
-      toast.error("Nie udało się przetworzyć zdjęcia.");
+      toast.error("Couldn't process the image.");
       setPhotoPreview(null);
       setImage(null);
     }
@@ -137,12 +137,12 @@ export default function ChatPanel() {
       } else {
         setMessages(nextMessages.slice(0, -1));
         setDraft(userMessage.content);
-        toast.error("AI jest niedostępne. Spróbuj ponownie za chwilę.");
+        toast.error("AI is unavailable. Please try again in a moment.");
       }
     } catch {
       setMessages(nextMessages.slice(0, -1));
       setDraft(userMessage.content);
-      toast.error("Błąd połączenia. Sprawdź internet i spróbuj ponownie.");
+      toast.error("Connection error. Check your internet and try again.");
     } finally {
       clearTimeout(timer);
       sendingRef.current = false;
@@ -163,7 +163,7 @@ export default function ChatPanel() {
   const canSend = hasImage && draft.trim().length > 0 && sendStatus === "idle" && !atTurnCap;
   const lastMessage = messages.at(-1);
   const liveAnnouncement = pendingReply
-    ? "Generowanie odpowiedzi…"
+    ? "Generating response…"
     : lastMessage?.role === "model"
       ? lastMessage.content
       : "";
@@ -189,16 +189,16 @@ export default function ChatPanel() {
           {photoPreview ? (
             <img
               src={photoPreview}
-              alt="Wybrane zdjęcie rośliny"
+              alt="Selected plant photo"
               className="h-32 w-32 rounded-lg object-cover shadow-sm"
             />
           ) : (
             <>
               <ImagePlus className="size-6" />
-              <span>Dodaj zdjęcie rośliny (PNG, JPEG lub WebP)</span>
+              <span>Add a plant photo (PNG, JPEG, or WebP)</span>
             </>
           )}
-          {photoPreview && <span className="text-primary text-xs font-medium">Zmień zdjęcie</span>}
+          {photoPreview && <span className="text-primary text-xs font-medium">Change photo</span>}
           <input id="chat-photo" type="file" accept={ALLOWED_TYPES} className="hidden" onChange={handlePhotoChange} />
         </label>
 
@@ -210,7 +210,7 @@ export default function ChatPanel() {
           )}
         >
           <Camera className="size-4" />
-          Zrób zdjęcie
+          Take a photo
         </label>
         <input
           id="chat-photo-camera"
@@ -252,7 +252,7 @@ export default function ChatPanel() {
       {/* Turn cap notice */}
       {atTurnCap && (
         <p className="text-center text-xs text-amber-300/80">
-          Osiągnięto limit konwersacji. Odśwież stronę, aby rozpocząć nową.
+          Conversation limit reached. Refresh the page to start a new one.
         </p>
       )}
 
@@ -260,7 +260,7 @@ export default function ChatPanel() {
       <div className="flex items-end gap-2">
         <Textarea
           ref={textareaRef}
-          placeholder={!hasImage ? "Najpierw dodaj zdjęcie rośliny…" : "Opisz objawy lub zadaj pytanie…"}
+          placeholder={!hasImage ? "Add a plant photo first…" : "Describe the symptoms or ask a question…"}
           value={draft}
           onChange={(e) => {
             setDraft(e.target.value);
@@ -275,7 +275,7 @@ export default function ChatPanel() {
           size="icon"
           onClick={() => void handleSend()}
           disabled={!canSend}
-          aria-label="Wyślij wiadomość"
+          aria-label="Send message"
           className="mb-0.5 shrink-0"
         >
           {sendStatus === "sending" ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
@@ -283,7 +283,7 @@ export default function ChatPanel() {
       </div>
 
       {!hasImage && messages.length === 0 && (
-        <p className="text-center text-xs text-blue-100/50">Dodaj zdjęcie rośliny, aby rozpocząć diagnozę AI</p>
+        <p className="text-center text-xs text-blue-100/50">Add a plant photo to start the AI diagnosis</p>
       )}
     </div>
   );
