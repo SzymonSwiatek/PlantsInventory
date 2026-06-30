@@ -252,17 +252,17 @@ This change has no unit/integration tests of its own — it *is* the test-wiring
 
 #### Automated
 
-- [x] 1.1 Workflow YAML is valid and parses (actionlint / GitHub accepts the push)
-- [x] 1.2 `npm run test:run` passes locally
-- [x] 1.3 `npm run test:integration` passes locally against running Supabase
-- [ ] 1.4 On a test PR, `ci` runs the unit step and `integration` runs the suite — both report status checks
+- [x] 1.1 Workflow YAML is valid and parses (actionlint / GitHub accepts the push) — 40b88d4
+- [x] 1.2 `npm run test:run` passes locally — 40b88d4
+- [x] 1.3 `npm run test:integration` passes locally against running Supabase — 40b88d4
+- [x] 1.4 On a test PR, `ci` runs the unit step and `integration` runs the suite — both report status checks
 
 #### Manual
 
-- [ ] 1.5 A test PR breaking a unit assertion turns the `ci` check red
-- [ ] 1.6 A test PR breaking an integration assertion turns the `integration` check red
-- [ ] 1.7 The `integration` job cold-starts Supabase within acceptable wall-clock (note cold-pull duration)
-- [ ] 1.8 A push to `main` with a red integration run does NOT trigger `deploy`
+- [x] 1.5 A test PR breaking a unit assertion turns the `ci` check red
+- [x] 1.6 A test PR breaking an integration assertion turns the `integration` check red
+- [x] 1.7 The `integration` job cold-starts Supabase within acceptable wall-clock (note cold-pull duration)
+- [x] 1.8 A push to `main` with a red integration run does NOT trigger `deploy`
 
 ### Phase 2: Non-blocking e2e job
 
