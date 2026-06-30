@@ -279,10 +279,10 @@ This change has no unit/integration tests of its own — it *is* the test-wiring
 
 #### Automated
 
-- [x] 3.1 `gh api …/branches/main/protection` returns 200 and lists `ci` + `integration` as required checks
+- [x] 3.1 `gh api …/branches/main/protection` returns 200 and lists `ci` + `integration` as required checks — 44010f0
 
 #### Manual
 
-- [x] 3.2 A PR with a red `ci` or `integration` check shows a blocked merge button
-- [x] 3.3 A PR with required checks green and a red non-required `e2e` CAN be merged
-- [x] 3.4 A docs-only PR still runs `ci` + `integration` and is mergeable (no deadlock)
+- [x] 3.2 A PR with a red `ci` or `integration` check shows a blocked merge button — 44010f0
+- [x] 3.3 A PR with required checks green and a red non-required `e2e` CAN be merged — 44010f0
+- [x] 3.4 A docs-only PR still runs `ci` + `integration` and is mergeable (no deadlock) — 44010f0
