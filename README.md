@@ -1,16 +1,18 @@
 # 10xPlantsInventory
 
-An AI-vision plant cataloging app. Photograph your plants across multiple locations — home, office, garden plot — and an AI provider suggests the species and care details from the photo. The app then turns that catalog into actionable care work, scheduling watering and winterization reminders so plants don't get forgotten.
+An AI-vision plant cataloging app. Photograph your plants across multiple locations — home, office, garden plot — and an AI provider suggests the species and care details from the photo. The app then turns that catalog into actionable care work, scheduling watering and winterization reminders so plants don't get forgotten. You can also ask the AI to diagnose a sick plant from a photo.
 
 Built as a ~3-week MVP. See [`context/foundation/prd.md`](context/foundation/prd.md) for the full product spec.
 
 ## Features
 
 - **AI-assisted cataloging** — snap a photo, get a suggested species and care profile (watering cadence, sunlight, winterization) you can accept or edit before saving.
+- **AI plant diagnosis** — a multi-turn chat that diagnoses a sick plant from a photo (`/ask`), with per-conversation cost ceilings on the AI provider.
 - **Multi-location organization** — group plants by physical location and browse each location's collection.
 - **Photo storage** — plant photos are uploaded to Supabase Storage via signed upload URLs.
 - **Care reminders** — a daily scheduled worker computes which plants are due for watering or winterization and emails reminders.
 - **Quick care actions** — mark a plant watered or winterized (with undo), or snooze a reminder, straight from the daily view.
+- **Reminder preferences** — toggle reminder emails on or off in settings, with a signed one-click unsubscribe link in every email.
 - **Passwordless auth** — magic-link sign-in via Supabase OTP (no passwords).
 
 ## Tech Stack
@@ -81,13 +83,15 @@ npm run dev
 .
 ├── src/
 │ ├── layouts/ # Astro layouts
-│ ├── pages/ # Astro pages + routes
-│ │ ├── api/ # API endpoints (auth, locations, plants, AI suggest, care actions)
+│ ├── pages/ # Astro pages + routes (today, settings, ask, dashboard, ...)
+│ │ ├── api/ # API endpoints (auth, locations, plants, AI suggest/diagnose, care actions, reminders, preferences)
 │ │ ├── auth/ # Magic-link sign-in flow
 │ │ ├── locations/ # Location detail + add-plant pages
 │ │ └── plants/ # Plant detail page
 │ ├── components/ # UI components (Astro & React islands) + shadcn/ui in ui/
 │ ├── lib/ # Services & helpers (supabase, ai, reminders, storage, image, utils)
+│ ├── db/ # Generated Supabase database types
+│ ├── styles/ # Global Tailwind CSS
 │ ├── middleware.ts # Resolves the user, guards PROTECTED_ROUTES
 │ ├── worker.ts # Cloudflare Worker entry (HTTP + scheduled handler)
 │ ├── types.ts # Shared types / DTOs
@@ -110,6 +114,7 @@ Environment variables are declared in `astro.config.mjs` via Astro's `astro:env`
 | `AI_API_KEY`                | AI suggestions   | API key for the AI vision provider (Google Gemini)          |
 | `RESEND_API_KEY`            | Reminder emails  | Resend API key for sending transactional emails             |
 | `REMINDER_FROM_EMAIL`       | Reminder emails  | Verified `from` address for reminder emails                 |
+| `REMINDER_UNSUBSCRIBE_SECRET` | Reminder emails | Secret for signing email unsubscribe links (`openssl rand -hex 32`) |
 | `PUBLIC_SITE_URL`           | Email links      | Public base URL used to build links in reminder emails      |
 
 ### Supabase setup
@@ -150,6 +155,8 @@ Route protection lives in `src/middleware.ts`: unauthenticated requests to any p
 ## Reminders
 
 A Cloudflare cron trigger (`wrangler.jsonc`, daily at 18:00 UTC) invokes the Worker's scheduled handler, which computes plants due for watering or winterization and sends reminder emails via Resend. The scheduling logic lives in `src/lib/reminders/`.
+
+Users can disable reminder emails from the settings page (`/api/preferences`), and every email carries a signed one-click unsubscribe link verified at `/api/reminders/unsubscribe` (signed with `REMINDER_UNSUBSCRIBE_SECRET`).
 
 ## Deployment
 
