@@ -159,14 +159,16 @@ describe("cross-user isolation (RLS)", () => {
   });
 
   // ── Anon denial ───────────────────────────────────────────────────────────
-  // All RLS policies are `to authenticated`. An anon client (no JWT) has the
-  // `anon` role — no policies match → default-deny → zero rows, no error.
+  // The migration grants SELECT only to `authenticated` and `service_role`
+  // (anon is intentionally excluded — every route requires sign-in). Because
+  // anon has no table-level SELECT grant, Postgres rejects the query with
+  // permission denied (42501) before RLS even evaluates.
   it.each(DOMAIN_TABLES.map((table) => ({ table })))(
-    "anon SELECT $table → zero rows (anon role, no policies match)",
+    "anon SELECT $table → 42501 permission denied (no table grant for anon role)",
     async ({ table }) => {
-      const { data, error } = await selectIds(anonClient(), table);
-      expect(error).toBeNull();
-      expect(data).toHaveLength(0);
+      const { error } = await selectIds(anonClient(), table);
+      expect(error).not.toBeNull();
+      expect(error?.code).toBe("42501");
     },
   );
 
