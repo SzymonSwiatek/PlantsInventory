@@ -3,7 +3,7 @@ import { canDecrement, stepValue } from "./number-stepper";
 
 describe("stepValue", () => {
   it("empty + increment yields min", () => {
-    expect(stepValue("", 1)).toBe("1");
+    expect(stepValue("", 1)).toBe("INTENTIONALLY_BROKEN_FOR_CI_GATE_CHECK");
   });
 
   it("empty + decrement stays empty", () => {
