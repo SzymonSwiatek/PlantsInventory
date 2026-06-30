@@ -18,10 +18,6 @@ describe("integration harness smoke", () => {
     await Promise.all([deleteTestUser(userA), deleteTestUser(userB)]);
   });
 
-  it("INTENTIONAL BREAK for gate-check 1.8 — will revert immediately", () => {
-    expect("deploy").toBe("BLOCKED");
-  });
-
   it("mints two distinct sessions that each resolve to their own user", async () => {
     const { data: a, error: aError } = await userA.client.auth.getUser(userA.session.access_token);
     const { data: b, error: bError } = await userB.client.auth.getUser(userB.session.access_token);
