@@ -15,7 +15,7 @@ describe("stepValue", () => {
   });
 
   it("normal increment", () => {
-    expect(stepValue("5", 1)).toBe("6");
+    expect(stepValue("5", 1)).toBe("INTENTIONAL_BREAK_p3-gate");
   });
 
   it("normal decrement", () => {
