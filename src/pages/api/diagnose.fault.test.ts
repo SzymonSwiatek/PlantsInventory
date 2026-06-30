@@ -7,7 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Covers the security + degrade contract for /api/diagnose:
 //   - missing AI_API_KEY short-circuit → ai_unavailable (no fetch)
 //   - requireSameOrigin fires before requireUser (CSRF ordering)
-//   - input validation gates: bad MIME → 415, oversized image → 413, over-turn-cap → 400
+//   - input validation gates: bad MIME → 415, oversized image → 413,
+//     over-turn-cap → 400, over-content-length → 400
 //   - provider fault paths: upstream error, empty-candidate/MAX_TOKENS → ai_unavailable at 200
 //
 // Module mocks are registered per-describe via vi.doMock + vi.resetModules so
@@ -132,6 +133,17 @@ describe("/api/diagnose — input validation", () => {
     const res = await POST(fakeContext(body));
     expect(res.status).toBe(400);
     expect(await res.json()).toMatchObject({ error: "turn_limit_exceeded" });
+  });
+
+  it("returns 400 content_too_long when a message exceeds MAX_CONTENT_CHARS (12 000)", async () => {
+    const { POST } = await import("./diagnose");
+    const body = JSON.stringify({
+      messages: [{ role: "user", content: "A".repeat(12_001) }],
+      image: { base64: "aGVsbG8=", mimeType: "image/png" },
+    });
+    const res = await POST(fakeContext(body));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: "content_too_long" });
   });
 });
 

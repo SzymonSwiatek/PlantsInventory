@@ -1,9 +1,10 @@
 ---
 change_id: ai-chat-plant-disease-diagnosis
 title: AI chat for plant disease diagnosis ("Ask AI" with photo upload/capture)
-status: implementing
+status: impl_reviewed
 created: 2026-06-30
 updated: 2026-06-30
+manual_verified: 2026-06-30
 archived_at: null
 ---
 

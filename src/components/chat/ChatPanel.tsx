@@ -29,10 +29,20 @@ const aiComponents: Components = {
   li({ children }) {
     return <li className="leading-snug">{children}</li>;
   },
+  // Untrusted model output: render links as inert text (no navigable href →
+  // no phishing) and drop images entirely (no src → no zero-click beacon).
+  a({ children }) {
+    return <span className="underline decoration-dotted">{children}</span>;
+  },
+  img() {
+    return null;
+  },
 };
 
 const ALLOWED_TYPES = "image/png,image/jpeg,image/webp";
-const MAX_TURNS = 10;
+// Server ceiling is 10 TOTAL messages (user + model). The client sends the
+// full history each turn, so block once we'd exceed that on the next post.
+const MAX_MESSAGES = 10;
 const REQUEST_TIMEOUT_MS = 35_000;
 
 type SendStatus = "idle" | "sending";
@@ -52,6 +62,7 @@ export default function ChatPanel() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewUrlRef = useRef<string | null>(null);
+  const sendingRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -93,7 +104,8 @@ export default function ChatPanel() {
   }
 
   async function handleSend() {
-    if (!image || !draft.trim() || sendStatus === "sending" || atTurnCap) return;
+    if (!image || !draft.trim() || sendStatus === "sending" || sendingRef.current || atTurnCap) return;
+    sendingRef.current = true;
 
     const userMessage: DiagnosisMessage = { role: "user", content: draft.trim() };
     const nextMessages = [...messages, userMessage];
@@ -124,13 +136,16 @@ export default function ChatPanel() {
         setMessages((prev) => [...prev, { role: "model", content: data.reply }]);
       } else {
         setMessages(nextMessages.slice(0, -1));
+        setDraft(userMessage.content);
         toast.error("AI jest niedostępne. Spróbuj ponownie za chwilę.");
       }
     } catch {
       setMessages(nextMessages.slice(0, -1));
+      setDraft(userMessage.content);
       toast.error("Błąd połączenia. Sprawdź internet i spróbuj ponownie.");
     } finally {
       clearTimeout(timer);
+      sendingRef.current = false;
       setPendingReply(false);
       setSendStatus("idle");
     }
@@ -143,13 +158,24 @@ export default function ChatPanel() {
     }
   }
 
-  const atTurnCap = messages.filter((m) => m.role === "user").length >= MAX_TURNS;
+  const atTurnCap = messages.length >= MAX_MESSAGES;
   const hasImage = image !== null;
   const canSend = hasImage && draft.trim().length > 0 && sendStatus === "idle" && !atTurnCap;
+  const lastMessage = messages.at(-1);
+  const liveAnnouncement = pendingReply
+    ? "Generowanie odpowiedzi…"
+    : lastMessage?.role === "model"
+      ? lastMessage.content
+      : "";
 
   return (
     <div className="flex flex-col gap-4">
       <Toaster richColors position="bottom-right" />
+
+      {/* Scoped live region: announces only the pending state + newest reply */}
+      <div aria-live="polite" className="sr-only">
+        {liveAnnouncement}
+      </div>
 
       {/* Photo picker / preview */}
       <div className="space-y-2">
@@ -199,7 +225,7 @@ export default function ChatPanel() {
       {/* Transcript */}
       {(messages.length > 0 || pendingReply) && (
         <ScrollArea className="h-80 rounded-lg border border-white/10 bg-white/5 p-4">
-          <div className="flex flex-col gap-3" aria-live="polite">
+          <div className="flex flex-col gap-3">
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -226,7 +252,7 @@ export default function ChatPanel() {
       {/* Turn cap notice */}
       {atTurnCap && (
         <p className="text-center text-xs text-amber-300/80">
-          Osiągnięto limit konwersacji ({MAX_TURNS} tur). Odśwież stronę, aby rozpocząć nową.
+          Osiągnięto limit konwersacji. Odśwież stronę, aby rozpocząć nową.
         </p>
       )}
 

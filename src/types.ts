@@ -66,4 +66,7 @@ export interface DiagnosisMessage {
   content: string;
 }
 
-export type DiagnosisResponse = { status: "ok"; reply: string } | { status: "ai_unavailable" };
+export type DiagnosisResponse =
+  | { status: "ok"; reply: string }
+  | { status: "ai_unavailable" }
+  | { status: "error"; error: string };

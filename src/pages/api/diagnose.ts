@@ -25,6 +25,9 @@ import type { DiagnosisMessage } from "@/types";
 
 const AI_TIMEOUT_MS = 30_000;
 const MAX_TURNS = 10;
+// Per-message content cap: comfortably holds a max-length model reply
+// (~2500 tokens) while blocking multi-MB text abuse on the paid call.
+const MAX_CONTENT_CHARS = 12_000;
 
 export const POST: APIRoute = async (context) => {
   const originErr = requireSameOrigin(context.request);
@@ -61,6 +64,9 @@ export const POST: APIRoute = async (context) => {
   for (const msg of rawMessages) {
     if (!isRecord(msg) || (msg.role !== "user" && msg.role !== "model") || typeof msg.content !== "string") {
       return json({ status: "error", error: "invalid_message" }, 400);
+    }
+    if (msg.content.length > MAX_CONTENT_CHARS) {
+      return json({ status: "error", error: "content_too_long" }, 400);
     }
     messages.push({ role: msg.role, content: msg.content });
   }

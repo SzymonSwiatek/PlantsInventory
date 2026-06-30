@@ -401,11 +401,11 @@ None — no schema or data changes (ephemeral, no DB).
 
 #### Manual
 
-- [ ] 2.5 "Ask AI" works in desktop top nav and mobile bottom bar (with icon)
-- [ ] 2.6 Unauthenticated visit to `/ask` redirects to `/auth/signin`
-- [ ] 2.7 Pick-existing and camera-capture both produce a preview and enable first send
-- [ ] 2.8 First turn (photo + question) renders a Polish reply; "thinking" Skeleton shows while pending
-- [ ] 2.9 Follow-up text turns work; transcript scrolls to newest
-- [ ] 2.10 Composer is disabled at the turn cap
-- [ ] 2.11 AI-unavailable shows a sonner error toast and rolls back the pending message (no crash)
-- [ ] 2.12 Page refresh clears the conversation (ephemeral confirmed)
+- [x] 2.5 "Ask AI" works in desktop top nav and mobile bottom bar (with icon) — f6c6b18
+- [x] 2.6 Unauthenticated visit to `/ask` redirects to `/auth/signin` — f6c6b18
+- [x] 2.7 Pick-existing and camera-capture both produce a preview and enable first send — f6c6b18
+- [x] 2.8 First turn (photo + question) renders a Polish reply; "thinking" Skeleton shows while pending — f6c6b18
+- [x] 2.9 Follow-up text turns work; transcript scrolls to newest — f6c6b18
+- [x] 2.10 Composer is disabled at the turn cap — f6c6b18
+- [x] 2.11 AI-unavailable shows a sonner error toast and rolls back the pending message (no crash) — f6c6b18
+- [x] 2.12 Page refresh clears the conversation (ephemeral confirmed) — f6c6b18
