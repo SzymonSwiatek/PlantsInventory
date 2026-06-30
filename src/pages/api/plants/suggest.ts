@@ -2,6 +2,13 @@ import type { APIRoute } from "astro";
 import { AI_API_KEY } from "astro:env/server";
 import { json, requireUser, requireSameOrigin } from "@/lib/api";
 import { requestSuggestion } from "@/lib/ai/suggest";
+import {
+  ALLOWED_MIME_TYPES,
+  MAX_IMAGE_BYTES,
+  readString,
+  isLikelyBase64,
+  decodedByteLength,
+} from "@/lib/ai/image-guards";
 
 /**
  * First JSON endpoint of the slice: receive a browser-downscaled base64 image,
@@ -14,16 +21,6 @@ import { requestSuggestion } from "@/lib/ai/suggest";
  */
 
 const AI_TIMEOUT_MS = 12_000;
-
-// Gemini inline-data vision formats we accept. The client downscaler always
-// emits `image/jpeg`; the rest cover direct/native uploads without widening the
-// surface to arbitrary `mimeType` strings forwarded to the paid provider.
-const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-// Decoded-byte cap on the inline image. The browser downscale (longest edge
-// 1024px, JPEG q0.8) yields well under 1 MB; 7 MB is a generous ceiling that
-// still blocks abuse and stays clear of Gemini's ~20 MB inline request limit.
-const MAX_IMAGE_BYTES = 7 * 1024 * 1024;
 
 export const POST: APIRoute = async (context) => {
   const originErr = requireSameOrigin(context.request);
@@ -78,22 +75,3 @@ export const POST: APIRoute = async (context) => {
     clearTimeout(timer);
   }
 };
-
-function readString(body: unknown, key: string): string | null {
-  if (typeof body === "object" && body !== null && key in body) {
-    const value = (body as Record<string, unknown>)[key];
-    return typeof value === "string" && value.length > 0 ? value : null;
-  }
-  return null;
-}
-
-/** Cheap shape check: standard base64 alphabet with optional `=` padding. */
-function isLikelyBase64(value: string): boolean {
-  return /^[A-Za-z0-9+/]+={0,2}$/.test(value);
-}
-
-/** Decoded byte length of a base64 string, derived from its length + padding. */
-function decodedByteLength(base64: string): number {
-  const padding = base64.endsWith("==") ? 2 : base64.endsWith("=") ? 1 : 0;
-  return Math.floor((base64.length * 3) / 4) - padding;
-}

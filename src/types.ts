@@ -56,3 +56,14 @@ export interface AiSuggestion {
   watering_interval_days: number | null;
   winterization_cutoff: string | null;
 }
+
+// ── AI chat / disease diagnosis ───────────────────────────────────────────────
+
+export type DiagnosisRole = "user" | "model";
+
+export interface DiagnosisMessage {
+  role: DiagnosisRole;
+  content: string;
+}
+
+export type DiagnosisResponse = { status: "ok"; reply: string } | { status: "ai_unavailable" };
