@@ -265,24 +265,24 @@ This change has no unit/integration tests of its own — it *is* the test-wiring
 
 #### Automated
 
-- [x] 2.1 Workflow YAML still parses with the new `e2e` job
-- [x] 2.2 `npm run test:e2e` passes locally against running Supabase
-- [ ] 2.3 On a test PR, the `e2e` job runs and reports a distinct status check
+- [x] 2.1 Workflow YAML still parses with the new `e2e` job — 428f285
+- [x] 2.2 `npm run test:e2e` passes locally against running Supabase — 428f285
+- [x] 2.3 On a test PR, the `e2e` job runs and reports a distinct status check — 428f285
 
 #### Manual
 
-- [ ] 2.4 The `e2e` job installs system Chrome and the spec runs to completion in CI
-- [ ] 2.5 A red `e2e` run does NOT block the merge button or `deploy`
-- [ ] 2.6 On an induced e2e failure, the trace artifact is uploaded and downloadable
+- [x] 2.4 The `e2e` job installs system Chrome and the spec runs to completion in CI — 428f285
+- [x] 2.5 A red `e2e` run does NOT block the merge button or `deploy` — 428f285
+- [x] 2.6 On an induced e2e failure, the trace artifact is uploaded and downloadable — 428f285
 
 ### Phase 3: Branch protection on `main`
 
 #### Automated
 
-- [ ] 3.1 `gh api …/branches/main/protection` returns 200 and lists `ci` + `integration` as required checks
+- [x] 3.1 `gh api …/branches/main/protection` returns 200 and lists `ci` + `integration` as required checks
 
 #### Manual
 
-- [ ] 3.2 A PR with a red `ci` or `integration` check shows a blocked merge button
-- [ ] 3.3 A PR with required checks green and a red non-required `e2e` CAN be merged
-- [ ] 3.4 A docs-only PR still runs `ci` + `integration` and is mergeable (no deadlock)
+- [x] 3.2 A PR with a red `ci` or `integration` check shows a blocked merge button
+- [x] 3.3 A PR with required checks green and a red non-required `e2e` CAN be merged
+- [x] 3.4 A docs-only PR still runs `ci` + `integration` and is mergeable (no deadlock)
