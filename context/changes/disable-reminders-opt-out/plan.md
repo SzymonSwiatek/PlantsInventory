@@ -73,6 +73,7 @@ Create the `user_preferences` table with per-user RLS and grants, then regenerat
 **Intent**: Add a per-user preferences table holding the reminders on/off flag, with RLS and grants matching the established core-domain convention, so a row is never live without its policies.
 
 **Contract**:
+
 - Table `user_preferences`: `user_id uuid primary key default auth.uid() references auth.users(id) on delete cascade`, `reminders_enabled boolean not null default true`, `created_at timestamptz not null default now()`, `updated_at timestamptz not null default now()`.
 - `updated_at` maintained by the existing `set_updated_at()` trigger function (reuse — do not redefine): `create trigger user_preferences_set_updated_at before update on user_preferences for each row execute function set_updated_at();`.
 - `alter table user_preferences enable row level security;`
@@ -121,6 +122,7 @@ Teach `runScheduledTick` to skip users who have opted out, fetched once per tick
 **Intent**: After assembling the per-user bucket map (or before iterating it to send), query the set of opted-out user IDs and skip them, so opted-out users get no email and incur no `auth.admin.getUserById` call.
 
 **Contract**:
+
 - New query after the water/winter scans: `supabase.from("user_preferences").select("user_id").eq("reminders_enabled", false)`. On error: `console.error({ event: "scheduled.query_error", query: "preferences", err })` and `return` (skip the tick — fail closed, matching existing behavior).
 - Build `const optedOut = new Set(prefRows.map(r => r.user_id))`.
 - In the send loop (`for (const [userId, bucket] of byUser)`), `if (optedOut.has(userId)) continue;` before the email lookup.
@@ -158,13 +160,17 @@ Add a stateless HMAC token utility, surface an unsubscribe link + `List-Unsubscr
 **Intent**: Sign and verify a per-user unsubscribe token with Web Crypto HMAC-SHA256, usable from both the cron (sign) and the route (verify).
 
 **Contract**:
+
 - `signUnsubscribeToken(userId: string, secret: string): Promise<string>` → base64url of `HMAC-SHA256(userId, secret)`.
 - `verifyUnsubscribeToken(userId: string, token: string, secret: string): Promise<boolean>` → constant-time verification via `crypto.subtle.verify`.
 - Uses `crypto.subtle.importKey("raw", ...)` + `sign`/`verify`; no Node `crypto`. Snippet (token contract other code depends on):
   ```ts
   const key = await crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"],
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"],
   );
   ```
 
@@ -175,6 +181,7 @@ Add a stateless HMAC token utility, surface an unsubscribe link + `List-Unsubscr
 **Intent**: Declare the new signing secret for both the route (astro:env) and the cron (Worker env).
 
 **Contract**:
+
 - `astro.config.mjs` `env.schema`: add `REMINDER_UNSUBSCRIBE_SECRET: envField.string({ context: "server", access: "secret", optional: true })`.
 - `service-client.ts` `ReminderEnv`: add `REMINDER_UNSUBSCRIBE_SECRET: string | undefined;`.
 - Document the new var in `.env.example` (and note `.dev.vars` for the local Worker runtime).
@@ -186,6 +193,7 @@ Add a stateless HMAC token utility, surface an unsubscribe link + `List-Unsubscr
 **Intent**: Add a per-recipient unsubscribe link to the digest footer (html + text) and set the `List-Unsubscribe` / `List-Unsubscribe-Post` headers; degrade to no-link/no-header when the secret is unset.
 
 **Contract**:
+
 - `composeDigest` (or `sendDigest`) gains the unsubscribe URL. Cleanest: compute the URL in `scheduled.ts` (it has `userId`, `siteUrl`, and `env.REMINDER_UNSUBSCRIBE_SECRET`), pass it into `composeDigest`/`sendDigest` as an optional `unsubscribeUrl?: string`. When present, append a footer line ("Unsubscribe from these reminders: <url>" / `<a>` in html) and pass headers to Resend; when absent (secret unset, or no `siteUrl`), omit both.
 - `sendDigest` passes `headers: { "List-Unsubscribe": "<url>", "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" }` to `resend.emails.send` only when `unsubscribeUrl` is set. The `List-Unsubscribe` value must be the POST endpoint wrapped in angle brackets.
 - `scheduled.ts`: when `env.REMINDER_UNSUBSCRIBE_SECRET` and `siteUrl` are set, `signUnsubscribeToken(userId, secret)` and build `${siteUrl}/api/reminders/unsubscribe?u=${userId}&t=${token}`; otherwise pass `undefined`.
@@ -197,6 +205,7 @@ Add a stateless HMAC token utility, surface an unsubscribe link + `List-Unsubscr
 **Intent**: Flip `reminders_enabled = false` for the token-identified user without requiring a login; serve a confirmation page for human GETs and a silent 200 for one-click POSTs.
 
 **Contract**:
+
 - Reads `REMINDER_UNSUBSCRIBE_SECRET` + `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` via `astro:env/server`. If the secret is unset → respond `404`/`400` (degrade; no unsubscribe path when unconfigured).
 - Parse `u` and `t` from the query (POST also accepts them from the query per the link). `verifyUnsubscribeToken(u, t, secret)`; on failure → `400`.
 - Build a service-role client (reuse `createServiceClient` shape or `createClient` with the service key) and `upsert({ user_id: u, reminders_enabled: false })` on conflict `user_id`.
@@ -211,6 +220,7 @@ Add a stateless HMAC token utility, surface an unsubscribe link + `List-Unsubscr
 **Intent**: Ensure Astro's default `checkOrigin` guard does not silently 403 the RFC 8058 one-click POST, without weakening CSRF protection on the existing mutation routes.
 
 **Contract**:
+
 - Before writing the route, verify behavior: with `npm run dev` running, `curl -X POST 'http://localhost:4321/api/reminders/unsubscribe?u=<id>&t=<token>' -H 'Content-Type: application/x-www-form-urlencoded' --data 'List-Unsubscribe=One-Click'` (no `Origin` header). A `403` confirms `checkOrigin` blocks it.
 - If blocked: set `security: { checkOrigin: false }` in `astro.config.mjs`, and add an explicit same-origin check (compare `Origin` host to the request host; reject mismatch) to the existing session-mutation routes that relied on the global guard — `src/pages/api/plants/{water,snooze,winterize,water-undo,winterize-undo}.ts`, `src/pages/api/locations.ts`, `src/pages/api/locations/[id].ts`. The new unsubscribe route (token-authed) and `/api/preferences` (RLS-authed) intentionally skip this.
 - If the curl shows the POST is **not** blocked (checkOrigin doesn't fire on this endpoint in Astro 6.3), no config change is needed — record the result and proceed.
@@ -259,6 +269,7 @@ Add a protected `/settings` page with a reminders on/off toggle backed by a sess
 **Intent**: Read and write the current user's `reminders_enabled` flag under RLS, driven by the settings island.
 
 **Contract**:
+
 - `POST` handler: `createClient(context.request.headers, context.cookies)`; null-check → `503`/redirect-style error consistent with existing routes. Read `{ remindersEnabled: boolean }` from JSON body.
 - `upsert({ user_id: user.id, reminders_enabled })` on conflict `user_id` via the session client (RLS enforces ownership; `user_id` defaults to `auth.uid()` but pass it explicitly to satisfy upsert conflict target). Return `200` JSON `{ remindersEnabled }`.
 - (Read path: the `/settings` page loads the current value server-side; a dedicated GET is optional — prefer loading in the page.)
@@ -394,8 +405,8 @@ Additive only — new table, no backfill, no changes to existing tables. Existin
 
 #### Manual
 
-- [ ] 3.8 Digest email shows unsubscribe link + native one-click affordance
-- [ ] 3.9 Clicking link flips flag; next tick skips the user
+- [x] 3.8 Digest email shows unsubscribe link + native one-click affordance
+- [x] 3.9 Clicking link flips flag; next tick skips the user
 
 ### Phase 4: In-App Settings Toggle
 
