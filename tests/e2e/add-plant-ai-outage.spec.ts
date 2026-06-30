@@ -30,7 +30,7 @@ test("add-plant degrades to manual entry with the photo preserved when AI is una
   await expect(page.getByRole("heading", { name: "Add a plant" })).toBeVisible();
 
   // Selecting a photo kicks off parallel upload + AI suggest.
-  await page.getByLabel("Photo").setInputFiles("tests/e2e/fixtures/plant.png");
+  await page.getByLabel("Photo", { exact: true }).setInputFiles("tests/e2e/fixtures/plant.png");
 
   // Degrade signal: AI is down, so the manual-fallback banner appears.
   await expect(page.getByText(FALLBACK_BANNER)).toBeVisible();

@@ -255,21 +255,18 @@ This change has no unit/integration tests of its own — it *is* the test-wiring
 - [x] 1.1 Workflow YAML is valid and parses (actionlint / GitHub accepts the push) — 40b88d4
 - [x] 1.2 `npm run test:run` passes locally — 40b88d4
 - [x] 1.3 `npm run test:integration` passes locally against running Supabase — 40b88d4
-- [x] 1.4 On a test PR, `ci` runs the unit step and `integration` runs the suite — both report status checks
-
-#### Manual
-
-- [x] 1.5 A test PR breaking a unit assertion turns the `ci` check red
-- [x] 1.6 A test PR breaking an integration assertion turns the `integration` check red
-- [x] 1.7 The `integration` job cold-starts Supabase within acceptable wall-clock (note cold-pull duration)
-- [x] 1.8 A push to `main` with a red integration run does NOT trigger `deploy`
+- [x] 1.4 On a test PR, `ci` runs the unit step and `integration` runs the suite — both report status checks — d2433e1
+- [x] 1.5 A test PR breaking a unit assertion turns the `ci` check red — d2433e1
+- [x] 1.6 A test PR breaking an integration assertion turns the `integration` check red — d2433e1
+- [x] 1.7 The `integration` job cold-starts Supabase within acceptable wall-clock (note cold-pull duration) — d2433e1
+- [x] 1.8 A push to `main` with a red integration run does NOT trigger `deploy` — d2433e1
 
 ### Phase 2: Non-blocking e2e job
 
 #### Automated
 
-- [ ] 2.1 Workflow YAML still parses with the new `e2e` job
-- [ ] 2.2 `npm run test:e2e` passes locally against running Supabase
+- [x] 2.1 Workflow YAML still parses with the new `e2e` job
+- [x] 2.2 `npm run test:e2e` passes locally against running Supabase
 - [ ] 2.3 On a test PR, the `e2e` job runs and reports a distinct status check
 
 #### Manual

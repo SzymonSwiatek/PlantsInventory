@@ -42,6 +42,29 @@ jobs:
       - run: npx supabase start
       - run: npm run test:integration
 
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v2
+      - run: npx supabase start
+      - run: npx playwright install --with-deps chrome
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
   deploy:
     needs: [ci, integration]
     if: github.event_name == 'push'
